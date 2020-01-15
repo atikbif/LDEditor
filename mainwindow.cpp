@@ -1,0 +1,939 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
+
+#include <QGraphicsGridLayout>
+#include <QGraphicsWidget>
+#include <QGraphicsView>
+#include <QScreen>
+#include <QThread>
+#include <QComboBox>
+#include <QTreeWidget>
+
+#include <QDebug>
+
+#include "opencontact.h"
+#include "closedcontact.h"
+#include "plustwoinputs.h"
+#include "multipletwoinputs.h"
+#include "greaterelement.h"
+#include "lesselement.h"
+#include "greaterorequal.h"
+#include "lessorequal.h"
+#include "equalelement.h"
+#include "notequalelement.h"
+#include "variable.h"
+#include "constvar.h"
+#include "relay.h"
+#include "relayenabled.h"
+#include "minuselement.h"
+#include "divideelement.h"
+#include "rstrigger.h"
+#include "srtrigger.h"
+#include "delayon.h"
+#include "delayoff.h"
+#include "commentelement.h"
+#include "notelement.h"
+#include "libraryelement.h"
+#include "elementlibrary.h"
+
+#include <QScrollBar>
+#include <QLineEdit>
+#include <QMessageBox>
+
+#include "plcvarcontainer.h"
+#include "dialogvarconfig.h"
+
+#include "serialize.h"
+#include <QFileDialog>
+#include <QPrintPreviewDialog>
+#include <QPrintDialog>
+#include "SourceBuilder/connectionfinder.h"
+#include "SourceBuilder/compiler.h"
+
+#include <QDateTime>
+#include <QPushButton>
+#include <QTimer>
+#include "Checker/ldchecker.h"
+#include "plcfinder.h"
+#include "SourceBuilder/plcparams.h"
+#include "SourceBuilder/finder.h"
+#include "Dialogs/dialogprojectconfig.h"
+
+#include "portconfig.h"
+
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+
+    auto *horToolBar = new QToolBar(this);
+    addToolBar(Qt::ToolBarArea::TopToolBarArea,horToolBar);
+
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+
+    page.column_count = 10;
+    page.row_count = 49;
+    page.cell_width = round(screenGeometry.width()*0.95/qreal(page.column_count+2));
+    page.cell_height = round(page.cell_width/3);
+    while(static_cast<int>(page.cell_height)%4) page.cell_height++;
+    while(static_cast<int>(page.cell_width)%4) page.cell_width++;
+
+    for(int i=0;i<page_count;i++) {
+        auto *sc = new LDScene(page);
+        auto *st = new CmdStack(sc);
+        sc->setStack(st);
+        sc->setCopyBuf(new CopyBufItem(page.cell_width,page.cell_height));
+        sc->empty_page();
+        prPages.push_back(std::make_pair(sc,st));
+    }
+
+
+    scene = prPages[0].first;
+
+
+    ui->graphicsView->setMouseTracking(true);
+    ui->graphicsView->setScene(scene);
+
+    connect(ui->graphicsView->horizontalScrollBar(),&QScrollBar::valueChanged,scene,[this](){scene->update(scene->sceneRect());});
+    connect(ui->graphicsView->verticalScrollBar(),&QScrollBar::valueChanged,scene,[this](){scene->update(scene->sceneRect());});
+
+    connect(ui->graphicsView->verticalScrollBar(),&QScrollBar::actionTriggered,scene,[this](int value){
+        if(value==QAbstractSlider::SliderMove) {
+            if(ui->graphicsView->verticalScrollBar()->minimum()==ui->graphicsView->verticalScrollBar()->value()) {
+                if(otherPage==0) {
+                    otherPage=12;
+                    if(page_num) {
+                        page_num--;
+                        pageNumWidget->setValue(static_cast<int>(page_num+1));
+                    }
+                }else otherPage--;
+            }else if(ui->graphicsView->verticalScrollBar()->maximum()==ui->graphicsView->verticalScrollBar()->value()) {
+                if(otherPage==0) {
+                    otherPage=12;
+                    if(page_num<prPages.size()-1) {
+                        page_num++;
+                        pageNumWidget->setValue(static_cast<int>(page_num+1));
+                    }
+                }else otherPage--;
+            }
+
+        }
+    });
+
+
+    setWindowState(Qt::WindowMaximized);
+
+    stack = prPages[0].second;
+
+    ui->toolBar->setAllowedAreas(Qt::ToolBarArea::LeftToolBarArea);
+    ui->toolBar->addAction(QIcon(":/images/arrow.png"),"указатель",[this](){scene->setInsertElement(nullptr);});
+    ui->toolBar->addAction(QIcon(":/images/line.png"),"Соединения",[this](){scene->setLineInsertMode();});
+    ui->toolBar->addAction(QIcon(":/images/comment.png"),"Комментарий",[this](){auto *item = new CommentElement(page.cell_width,page.cell_height,scene->getColumnCount());scene->setInsertElement(item);});
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QIcon(":/images/open_contact_icon.png"),"разомкнутый контакт",[this](){auto *contact = new OpenContact(page.cell_width,page.cell_height);scene->setInsertElement(contact);});
+    ui->toolBar->addAction(QIcon(":/images/closed_contact_icon.png"),"замкнутый контакт",[this](){auto *contact = new ClosedContact(page.cell_width,page.cell_height);scene->setInsertElement(contact);});
+    ui->toolBar->addAction(QIcon(":/images/variable_icon.svg"),"переменная",[this](){auto *item = new Variable(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/const_var_icon.svg"),"константа",[this](){auto *item = new ConstVar(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/rele_icon.svg"),"реле",[this](){auto *item = new Relay(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/rele_enable_icon.svg"),"реле с разрешением",[this](){auto *item = new RelayEnabled(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/not_icon.svg"),"NOT",[this](){auto *item = new NotElement(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction("RS",[this](){auto *item = new RSTrigger(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction("SR",[this](){auto *item = new SRTrigger(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/delayOnIcon.svg"),"Delay ON",[this](){auto *item = new DelayOn(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/delayOffIcon.svg"),"Delay OFF",[this](){auto *item = new DelayOff(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QIcon(":/images/add.png"),"Сложение",[this](){auto *plus = new PlusTwoInputs(page.cell_width,page.cell_height);scene->setInsertElement(plus);});
+    ui->toolBar->addAction(QIcon(":/images/minus.png"),"Вычитание",[this](){auto *item = new MinusElement(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/multiple.png"),"Умножение",[this](){auto *item = new MultipleTwoInputs(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction(QIcon(":/images/divide.png"),"Деление",[this](){auto *item = new DivideElement(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QIcon(":/images/greater.png"),"Больше",[this](){auto *el = new GreaterElement(page.cell_width,page.cell_height);scene->setInsertElement(el);});
+    ui->toolBar->addAction(QIcon(":/images/less.png"),"Больше",[this](){auto *el = new LessElement(page.cell_width,page.cell_height);scene->setInsertElement(el);});
+    ui->toolBar->addAction(QIcon(":/images/greater_or_equal.png"),"Больше или равно",[this](){auto *el = new GreaterOrEqual(page.cell_width,page.cell_height);scene->setInsertElement(el);});
+    ui->toolBar->addAction(QIcon(":/images/less_or_equal.png"),"Меньше или равно",[this](){auto *el = new LessOrEqual(page.cell_width,page.cell_height);scene->setInsertElement(el);});
+    ui->toolBar->addAction(QIcon(":/images/equal.png"),"равенство",[this](){auto *el = new EqualElement(page.cell_width,page.cell_height);scene->setInsertElement(el);});
+    ui->toolBar->addAction(QIcon(":/images/not_equal.png"),"неравенство",[this](){auto *el = new NotEqualElement(page.cell_width,page.cell_height);scene->setInsertElement(el);});
+    ui->toolBar->addSeparator();
+
+
+    horToolBar->addAction(QIcon(":/images/open.png"),"Открыть",this,&MainWindow::openProject);
+    horToolBar->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
+    horToolBar->addSeparator();
+
+    horToolBar->addAction(QIcon(":/images/undo.png"),"Отменить",[this](){stack->undo();});
+    horToolBar->addAction(QIcon(":/images/redo.png"),"Повторить",[this](){stack->redo();});
+    horToolBar->addSeparator();
+
+    horToolBar->addAction(QIcon(":/images/zoom_in.png"),"Приблизить",[this](){if(zoomLevel<3) {zoomLevel++;ui->graphicsView->scale(1.25,1.25);this->update();}});
+    horToolBar->addAction(QIcon(":/images/zoom_out.png"),"Отдалить",[this](){if(zoomLevel>-5) {zoomLevel--;ui->graphicsView->scale(0.8,0.8);this->update();}});
+
+
+    horToolBar->addSeparator();
+    horToolBar->addAction(QIcon(":/images/variable.png"),"Конфигурация переменных",[this](){auto *dialog = new DialogVarConfig();if(dialog->exec()==QDialog::Accepted) prChanged=true;delete dialog;});
+    horToolBar->addSeparator();
+    horToolBar->addAction(QIcon(":/images/compile.png"),"Собрать проект",this,&MainWindow::build);
+
+    horToolBar->addSeparator();
+    horToolBar->addAction(QIcon(":/images/program_flash.png"),"Загрузить программу в ПЛК",[this](){
+        QString binFileName = prDir  + "prog.bin";
+        if(QFile::exists(binFileName)){
+            portConfig portConf;
+            portConf.netAddress = netAddr;
+            portConf.baudrate = baudrate;
+            portConf.parity = parity;
+            portConf.stopBits = stopBits;
+            PLCFinder *finder=new PLCFinder("",portConf,binFileName);Q_UNUSED(finder)
+        }else {
+            QString info = "Необходимо скомпилировать проект.\nНе найден бинарный файл программы:\n" + binFileName;
+            QMessageBox::information(this,tr("Сообщение"),tr(info.toStdString().c_str()));
+        }
+    });
+    horToolBar->addSeparator();
+
+    pageNumWidget = new QSpinBox(this);
+    pageNumWidget->setValue(1);
+    pageNumWidget->setMinimum(1);
+    pageNumWidget->setMaximum(page_count);
+    connect(pageNumWidget,QOverload<int>::of(&QSpinBox::valueChanged),[this](int value){
+        page_num = static_cast<std::size_t>(value)-1;
+        scene = prPages.at(page_num).first;
+        stack = prPages.at(page_num).second;
+        ui->graphicsView->setScene(scene);
+        ui->graphicsView->ensureVisible(0,0,10,10);
+        this->update();
+    });
+    horToolBar->addWidget(new QLabel("Страница: "));
+    horToolBar->addWidget(pageNumWidget);
+    maxPageNumWidget = new QLabel("  из "+QString::number(page_count));
+    horToolBar->addWidget(maxPageNumWidget);
+
+    horToolBar->addSeparator();
+    horToolBar->addWidget(new QLabel("ПЛК: "));
+    plcType = new QComboBox();
+
+    std::vector<QString> plcNames = PLCParams::readPLCNames();
+    for(const QString &plcName:plcNames) {
+        plcType->addItem(plcName);
+    }
+    if(!plcNames.empty()) plcChanged(plcType->currentText());
+
+    horToolBar->addWidget(plcType);
+    connect(plcType,&QComboBox::currentTextChanged,this,&MainWindow::plcChanged);
+    horToolBar->addSeparator();
+    horToolBar->addAction(QIcon(":/images/search.ico"),"Поиск",[this](){search();});
+    horToolBar->addSeparator();
+    horToolBar->addAction(QIcon(":/images/print.png"),"Печать",this,&MainWindow::previewAction);
+    horToolBar->addSeparator();
+
+
+
+    /*QComboBox *box = new QComboBox();
+    for(int i=1;i<100;i++) {
+        box->addItem(QString::number(i));
+    }
+    connect(box, QOverload<const QString&>::of(&QComboBox::activated),
+        [=](const QString &text){ auto *item = new LibraryElement(page.cell_width,page.cell_height,text);scene->setInsertElement(item);});
+    horToolBar->addWidget(new QLabel("Библиотека: "));
+    horToolBar->addWidget(box);*/
+
+
+    ElementLibrary *lib = new ElementLibrary();
+    auto libFolders = lib->getFolders();
+    for(const QString &folder:libFolders) {
+        QTreeWidgetItem *folderItem = new QTreeWidgetItem({folder});
+        auto elements = lib->getElementsByFolder(folder);
+        for(const QString &elFileName:elements) {
+            QTreeWidgetItem *item = new QTreeWidgetItem({elFileName});
+            folderItem->addChild(item);
+        }
+        ui->treeWidgetLibrary->addTopLevelItem(folderItem);
+    }
+    /*QTreeWidgetItem *item1 = new QTreeWidgetItem({"арифметика"});
+    QTreeWidgetItem *item2 = new QTreeWidgetItem({"логика"});
+    ui->treeWidgetLibrary->addTopLevelItem(item1);
+    ui->treeWidgetLibrary->addTopLevelItem(item2);
+    for(int i=1;i<5;i++) {
+        QTreeWidgetItem *item = new QTreeWidgetItem({QString::number(i)});
+        item1->addChild(item);
+    }
+    for(int i=1;i<8;i++) {
+        QTreeWidgetItem *item = new QTreeWidgetItem({QString::number(i)});
+        item2->addChild(item);
+    }*/
+    connect(ui->treeWidgetLibrary,&QTreeWidget::itemClicked,[this,lib](QTreeWidgetItem *item, int column){
+        if(item->childCount()==0) {
+            QString elFile = lib->getFileByElementName(item->text(0));
+            if(!elFile.isEmpty()) {
+                auto *lditem = new LibraryElement(page.cell_width,page.cell_height,elFile);
+                scene->setInsertElement(lditem);
+            }
+        }
+    });
+
+    ui->graphicsView->ensureVisible(0,0,10,10);
+
+    ui->statusbar->addWidget(new QLabel("строка:"));
+    mouseRow = new QLineEdit("");
+    mouseRow->setFixedHeight(24);
+    mouseRow->setReadOnly(true);
+    ui->statusbar->addWidget(mouseRow,0);
+
+    ui->statusbar->addWidget(new QLabel("колонка:"));
+    mouseCol = new QLineEdit("");
+    mouseCol->setFixedHeight(24);
+    mouseCol->setReadOnly(true);
+    ui->statusbar->addWidget(mouseCol,0);
+
+    ui->statusbar->addWidget(new QLabel("имя: "));
+
+    itemName = new QLineEdit("");
+    itemName->setFixedHeight(24);
+    itemName->setReadOnly(true);
+    ui->statusbar->addWidget(itemName,1);
+
+    ui->statusbar->addWidget(new QLabel("тип: "));
+    itemType = new QLineEdit("");
+    itemType->setFixedHeight(24);
+    itemType->setReadOnly(true);
+    ui->statusbar->addWidget(itemType,1);
+
+    ui->statusbar->addWidget(new QLabel("примечание: "));
+    itemComment = new QLineEdit("");
+    itemComment->setFixedHeight(24);
+    itemComment->setReadOnly(true);
+    ui->statusbar->addWidget(itemComment,1);
+
+    ui->statusbar->addWidget(new QLabel("привязка: "));
+    itemInfo = new QLineEdit("");
+    itemInfo->setFixedHeight(24);
+    itemInfo->setReadOnly(true);
+    ui->statusbar->addWidget(itemInfo,2);
+
+    buttonMin = new QPushButton(QIcon(":/images/minimize.png"),"");
+    buttonMax = new QPushButton(QIcon(":/images/maximize.png"),"");
+    ui->statusbar->addWidget(buttonMin);
+    ui->statusbar->addWidget(buttonMax);
+    connect(buttonMin,&QPushButton::clicked,[this](){ui->textBrowser->setVisible(false);});
+    connect(buttonMax,&QPushButton::clicked,[this](){ui->textBrowser->setVisible(true);});
+    buttonMin->clicked();
+
+    for(std::pair<LDScene*,CmdStack*> p:prPages) { connectScene(p.first); }
+
+
+
+
+    QMenu *fileMenu = new QMenu("Файл");
+    fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
+    fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить как",this,&MainWindow::saveAsProject);
+    fileMenu->addAction(QIcon(":/images/open.png"),"Открыть",this,&MainWindow::openProject);
+    ui->menubar->addMenu(fileMenu);
+
+    QMenu *viewMenu = new QMenu("Вид");
+    QMenu *background = new QMenu("Фон");
+    viewMenu->addMenu(background);
+    ui->menubar->addMenu(viewMenu);
+    background->addAction("белый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFF,0xFF,0xFF));}});
+    background->addAction("жёлтый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xFA,0xCC));}});
+    background->addAction("серый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xEE,0xEE,0xEE));}});
+    background->addAction("зелёный",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE5,0xFA,0xD9));}});
+    background->addAction("синий",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE0,0xF5,0xFD));}});
+    background->addAction("красный",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xDF,0xCC));}});
+
+    QAction *nameAction = new QAction("показать имена");
+    nameAction->setCheckable(true);
+    connect(nameAction,&QAction::triggered,[this,nameAction](){for(auto &page:prPages) {page.first->setNamesFlag(nameAction->isChecked());}});
+    viewMenu->addAction(nameAction);
+
+    QAction *libAction = new QAction("показать библиотеку");
+    libAction->setCheckable(true);
+    connect(libAction,&QAction::triggered,[this,libAction](){ui->treeWidgetLibrary->setVisible(libAction->isChecked());});
+    libAction->setChecked(true);
+    viewMenu->addAction(libAction);
+
+    QMenu *confMenu = new QMenu("Настройки");
+    confMenu->addAction(QIcon(":/images/plc_config.ico"),"ПЛК",[this](){
+        auto *dialog = new DialogProjectConfig(prDelay,this);
+        dialog->setBaudrate(baudrate);
+        dialog->setNetAddress(netAddr);
+        dialog->setParity(parity);
+        dialog->setStopBits(stopBits);
+        if(dialog->exec()==QDialog::Accepted) {
+            prDelay = dialog->getDelay();
+            baudrate = dialog->getBaudrate();
+            netAddr = dialog->getNetAddress();
+            parity = dialog->getParity();
+            stopBits = dialog->getStopBits();
+        };
+    });
+    ui->menubar->addMenu(confMenu);
+
+    prDir = QCoreApplication::applicationDirPath() + "/new_project/";
+    prFileName = QCoreApplication::applicationDirPath() + "/new_project/default.ldp";
+    setWindowTitle(prFileName);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+    delete stack;
+}
+
+void MainWindow::createPageBefore()
+{
+    auto iterator = prPages.begin()+static_cast<int>(page_num);
+
+    auto *sc = new LDScene(page);
+    auto *st = new CmdStack(sc);
+    sc->setStack(st);
+    sc->setCopyBuf(new CopyBufItem(page.cell_width,page.cell_height));
+    sc->empty_page();
+
+    connectScene(sc);
+
+    prPages.insert(iterator,std::make_pair(sc,st));
+    page_count++;
+    pageNumWidget->setMaximum(page_count);
+    maxPageNumWidget->setText("  из "+QString::number(page_count));
+
+    emit pageNumWidget->valueChanged(static_cast<int>(page_num+1));
+    this->update();
+    prChanged = true;
+}
+
+void MainWindow::createPageAfter()
+{
+    auto iterator = prPages.begin()+static_cast<int>(page_num);
+
+    auto *sc = new LDScene(page);
+    auto *st = new CmdStack(sc);
+    sc->setStack(st);
+    sc->setCopyBuf(new CopyBufItem(page.cell_width,page.cell_height));
+    sc->empty_page();
+
+    connectScene(sc);
+
+    iterator++;
+    if(iterator!=prPages.end()) prPages.insert(iterator,std::make_pair(sc,st));
+    else prPages.emplace_back(std::make_pair(sc,st));
+    page_count++;
+    page_num++;
+    pageNumWidget->setMaximum(page_count);
+    maxPageNumWidget->setText("  из "+QString::number(page_count));
+
+    pageNumWidget->setValue(static_cast<int>(page_num+1));
+    this->update();
+    prChanged = true;
+}
+
+void MainWindow::deletePage(bool confirmation)
+{
+    if(prPages.size()>1) {
+        if (!confirmation || (QMessageBox::Yes == QMessageBox::question(this,
+                                                      tr("Подтверждение операции"),
+                                                      tr("Вы действительно хотите удалить эту страницу?")))) {
+            auto iterator = prPages.begin()+static_cast<int>(page_num);
+            LDScene *delScene = iterator->first;
+            CmdStack *delStack = iterator->second;
+            auto nextIterator = iterator+1;
+            if(nextIterator!=prPages.end()) {
+                scene = nextIterator->first;
+                stack = nextIterator->second;
+                ui->graphicsView->setScene(scene);
+                ui->graphicsView->ensureVisible(0,0,10,10);
+                prPages.erase(iterator);
+                page_count--;
+                pageNumWidget->setMaximum(page_count);
+                maxPageNumWidget->setText("  из "+QString::number(page_count));
+                delete delScene;
+                delete delStack;
+                this->update();
+            }else {
+                page_num--;
+                pageNumWidget->setValue(static_cast<int>(page_num+1));
+                prPages.erase(iterator);
+                page_count--;
+                pageNumWidget->setMaximum(page_count);
+                maxPageNumWidget->setText("  из "+QString::number(page_count));
+                delete delScene;
+                delete delStack;
+                this->update();
+            }
+            prChanged = true;
+        }
+    }else {
+        QMessageBox::information(this,tr("Сообщение"),tr("Невозможно удалить единственную страницу"));
+    }
+}
+
+void MainWindow::updateInfo(const LDInfo &elInfo)
+{
+    itemName->setText(elInfo.name);
+    itemType->setText(elInfo.type);
+    itemInfo->setText(elInfo.info);
+    itemComment->setText(elInfo.comment);
+    mouseCol->setText(QString::number(elInfo.col));
+    mouseRow->setText(QString::number(elInfo.row));
+}
+
+void MainWindow::saveProject()
+{
+    if(!prFileName.isEmpty()) {
+        QFile file(prFileName);
+        if(file.open(QIODevice::WriteOnly) ) {
+            QDataStream out(&file);
+            out << QString("LD Project");
+            auto pageCount = static_cast<int>(prPages.size());
+            out << pageCount; // число страниц
+            for(std::pair<LDScene*,CmdStack*> &page: prPages) {
+                out << QString("Page");
+                LDScene* sc = page.first;
+                auto elCount = static_cast<int>(sc->getElementCount());
+                out << elCount; // количество элементов на странице
+                for(LDElement *el:sc->getAllelements()) out << *el;
+            }
+            savePLCVarContainer(out);
+            out << plcType->currentText();
+            out << prDelay;
+            out << stopBits;
+            out << baudrate;
+            out << parity;
+            out << netAddr;
+            prChanged = false;
+            QFileInfo fInfo(file);
+            prDir = fInfo.canonicalPath()+"/";
+            file.close();
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно сохранён");
+            ui->textBrowser->repaint();
+        }else {
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для записи");
+            ui->textBrowser->repaint();
+        }
+    }
+}
+
+void MainWindow::saveAsProject()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранить проект"),
+                               prFileName,
+                               tr("*.ldp"));
+    if(!fileName.isEmpty()) {
+        QFile file(fileName);
+        if(file.open(QIODevice::WriteOnly) ) {
+            QDataStream out(&file);
+            out << QString("LD Project");
+            auto pageCount = static_cast<int>(prPages.size());
+            out << pageCount; // число страниц
+            for(std::pair<LDScene*,CmdStack*> &page: prPages) {
+                out << QString("Page");
+                LDScene* sc = page.first;
+                auto elCount = static_cast<int>(sc->getElementCount());
+                out << elCount; // количество элементов на странице
+                for(LDElement *el:sc->getAllelements()) out << *el;
+            }
+            savePLCVarContainer(out);
+            out << plcType->currentText();
+            out << prDelay;
+            out << stopBits;
+            out << baudrate;
+            out << parity;
+            out << netAddr;
+            prChanged = false;
+            prFileName = fileName;
+            setWindowTitle(fileName);
+            QFileInfo fInfo(file);
+            prDir = fInfo.canonicalPath()+"/";
+            file.close();
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно сохранён");
+            ui->textBrowser->repaint();
+        }else {
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для записи");
+            ui->textBrowser->repaint();
+        }
+    }
+}
+
+void MainWindow::openProject()
+{
+    if(prChanged) {
+        if (QMessageBox::Yes == QMessageBox::question(this,
+                                                      tr("LD Редактор"),
+                                                      tr("Текущий проект был изменён.\nВы хотите его сохранить?"))) {
+            saveProject();
+        }
+    }
+    setCellConfig(page.cell_width,page.cell_height,scene->getColumnCount());
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть проект"),"",tr("*.ldp"));
+    if(!fileName.isEmpty()) {
+        QFile file(fileName);
+        if(file.open(QIODevice::ReadOnly) ) {
+            QDataStream in(&file);
+            QString tmpStr;
+            in >> tmpStr;
+            if(tmpStr=="LD Project") {
+                while(prPages.size()>1) deletePage(false);
+                scene->empty_page();
+                bool firstPage = true;
+                int pageCount = 0;
+                in >> pageCount;
+                for(int pageNum=0;pageNum<pageCount;pageNum++) {
+                    in >> tmpStr;
+                    if(tmpStr=="Page") {
+                        if(!firstPage) createPageAfter();
+                        else {firstPage=false;}
+                        int elCount = 0;
+                        in >> elCount;
+                        for(int i=0;i<elCount;i++) {
+                            auto res = readLDelement(in);
+                            LDElement *el = res.first;
+                            if(el) scene->addElement(el,el->getColNum(),el->getRowNum());
+                            else {
+                                ui->textBrowser->append(res.second);
+                            }
+                        }
+                    }
+                }
+                pageNumWidget->setValue(1);
+                stack->clear();
+
+                readPLCVarContainer(in);
+                QString plcName;
+                in >> plcName;
+                plcType->setCurrentText(plcName);
+                in >> prDelay;
+                in >> stopBits;
+                in >> baudrate;
+                in >> parity;
+                in >> netAddr;
+                plcChanged(plcName);
+                setWindowTitle(fileName);
+                prChanged = false;
+                prFileName = fileName;
+
+                QFileInfo fInfo(file);
+                prDir = fInfo.canonicalPath()+"/";
+
+                bool isSysInfoVisible = ui->textBrowser->isVisible();
+                if(!isSysInfoVisible) buttonMax->click();
+                if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+                ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект открыт");
+                ui->textBrowser->repaint();
+            }
+        }else {
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для чтения");
+            ui->textBrowser->repaint();
+        }
+    }
+}
+
+void MainWindow::printPreview(QPrinter *printer)
+{
+
+    printer->setPageSize(QPrinter::A4);
+    printer->setOrientation(QPrinter::Portrait);
+    printer->setFullPage(true);
+    QPainter p;
+    if( !p.begin(printer ) )
+    {
+        qDebug() << "Error!";
+        return;
+    }
+
+    int pageNum = 0;
+    for(std::pair<LDScene*,CmdStack*> &page:prPages) {
+        pageNum++;
+        page.first->render(&p);
+        if(static_cast<std::size_t>(pageNum)<prPages.size()) printer->newPage();
+    }
+    p.end();
+}
+
+void MainWindow::previewAction()
+{
+    QPrinter printer(QPrinter::HighResolution );
+    QPrintPreviewDialog preview(&printer);
+    preview.setWindowFlags ( Qt::Window );
+    connect(&preview, SIGNAL(paintRequested(QPrinter*)), SLOT(printPreview(QPrinter*)));
+    preview.exec();
+}
+
+void MainWindow::build()
+{
+    ui->textBrowser->clear();
+    bool isSysInfoVisible = ui->textBrowser->isVisible();
+    buttonMax->click();
+    ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проверка схемы");
+    ui->textBrowser->repaint();
+    int pageNum = 1;
+    bool  checkResult = true;
+    //ui->textBrowser->append(QDateTime::currentDateTime().time().toString("TIME hh:mm:ss.zzz"));
+    for(auto &page:prPages) {
+        std::vector<LDElement*> els = page.first->getAllelements();
+        std::vector<QString> res = LDChecker::checkVarConnectedElements(els);
+        if(!res.empty()) {
+            checkResult = false;
+            ui->textBrowser->append("Страница "+QString::number(pageNum));
+            for(const QString &s:res) ui->textBrowser->append(s);
+        }
+        pageNum++;
+    }
+
+    if(checkResult) {
+        ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Старт сборки проекта");
+        ui->textBrowser->repaint();
+        pageNum = 1;
+        std::vector<QString> varBody;
+        std::vector<QString> progBody;
+        std::vector<QString> funcBody;
+        std::set<QString> libHeader;
+        std::set<QString> libBody;
+        for(auto &page:prPages) {
+            ConnectionFinder pageScan(page.first,pageNum++);
+            auto result = pageScan.scanCircuits();
+
+            std::vector<LDElement*> notUsedElements = result.notUsedElements;
+            if(!notUsedElements.empty()) {
+                ui->textBrowser->append("Страница " + QString::number(pageNum-1));
+                for(LDElement *el:notUsedElements) {
+                    QString infoStr = "cтрока:" + QString::number(el->getRowNum());
+                    infoStr += " колонка:" + QString::number(el->getColNum()) + " <b><font color=\"orange\">(Элемент не влияет на работу программы)</font></b>";
+                    el->setSelected(true);
+                    el->getItem()->update();
+                    ui->textBrowser->append(infoStr);
+                }
+                ui->textBrowser->append("<b><font color=\"black\"></font></b>");
+            }
+
+
+            std::vector<LDElement*> shortCircuitElements = result.shortCircuitElements;
+            if(!shortCircuitElements.empty()) {
+                ui->textBrowser->append("Страница " + QString::number(pageNum-1));
+                for(LDElement *el:shortCircuitElements) {
+                    QString infoStr = "cтрока:" + QString::number(el->getRowNum());
+                    infoStr += " колонка:" + QString::number(el->getColNum()) + " <b><font color=\"red\">(Выход элемента замкнут на входную цепь)</font></b>";
+                    el->setSelected(true);
+                    el->getItem()->update();
+                    ui->textBrowser->append(infoStr);
+                }
+                ui->textBrowser->append("<b><font color=\"black\"></font></b>");
+            }
+
+            std::copy(result.varBody.begin(),result.varBody.end(),std::back_inserter(varBody));
+            std::copy(result.progBody.begin(),result.progBody.end(),std::back_inserter(progBody));
+            std::copy(result.functionsBody.begin(),result.functionsBody.end(),std::back_inserter(funcBody));
+            libHeader.insert(result.libHeader.begin(),result.libHeader.end());
+            libBody.insert(result.libBody.begin(),result.libBody.end());
+        }
+
+        ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Генерация файлов");
+        Compiler::makeProgFile(varBody,progBody,funcBody,prDelay);
+        Compiler::makeLibraryfiles(libHeader,libBody);
+        ui->textBrowser->repaint();
+        ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Компиляция и линковка");
+        ui->textBrowser->repaint();
+        std::vector<QString> compileResult = Compiler::compile(plcType->currentText(),prDir);
+        if(!compileResult.empty()) {
+            buttonMax->click();
+            for(const QString &s:compileResult) {
+                ui->textBrowser->append(s+"\n");
+            }
+        }else {
+            if(!isSysInfoVisible) QTimer::singleShot(500, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно собран");
+        }
+    }else {
+        this->update();
+    }
+    ui->textBrowser->repaint();
+}
+
+void MainWindow::search()
+{
+    std::vector<LDScene*> scenes;
+    for(auto &prPage:prPages) scenes.push_back(prPage.first);
+    auto pNum = static_cast<int>(page_num);
+
+    int row = scenes.at(pNum)->getLastRow();
+    int col = scenes.at(pNum)->getLastCol();
+    if(row==0) row=1;
+    if(col==0) col=1;
+    Finder *finder = new Finder(scenes);
+    auto *dialog = new DialogSearch(pNum,col,row);
+    connect(dialog,&DialogSearch::startSearch,finder,&Finder::search);
+    connect(finder,&Finder::findInfo,this,&MainWindow::searchResults);
+    connect(dialog,&DialogSearch::replaceVarName,finder,&Finder::replace);
+    dialog->exec();
+    delete dialog;
+    delete finder;
+}
+
+void MainWindow::searchResults(const std::vector<QString> &res)
+{
+    ui->textBrowser->clear();
+    ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Поиск элементов");
+    ui->textBrowser->setVisible(true);
+    if(res.empty()) {
+        ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Элементы не найдены");
+    }else {
+        for(const QString &info:res) {
+            ui->textBrowser->append(info);
+        }
+    }
+    ui->textBrowser->repaint();
+}
+
+void MainWindow::plcChanged(const QString &plcName)
+{
+    std::vector<QString> sysGroups = PLCVarContainer::getInstance().getSystemVarGroups();
+    std::map<QString,QString> sysVarsComments;
+    for(const QString &gr:sysGroups) {
+        std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup(gr);
+        for(const auto &var:vars) {
+            if(!var.getComment().isEmpty()) sysVarsComments[var.getName()]=var.getComment();
+        }
+        PLCVarContainer::getInstance().delGroup(gr);
+    }
+    PLCParams::readParamsByPLCName(plcName);
+    for(int i=0;i<PLCParams::diCnt;i++) {
+        PLCVar divar("DI"+QString::number(i+1),"Дискретные входы");
+        if(sysVarsComments.find(divar.getName())!=sysVarsComments.end()) divar.setComment(sysVarsComments[divar.getName()]);
+        divar.setReadable(true);
+        divar.setValue(false);
+        divar.setSystem(true);
+
+        PLCVarContainer::getInstance().addVar(divar);
+    }
+
+    for(int i=0;i<PLCParams::diCnt;i++) {
+        PLCVar divarFault("DI"+QString::number(i+1)+"_FAULT","Дискретные входы (ошибка)");
+        if(sysVarsComments.find(divarFault.getName())!=sysVarsComments.end()) divarFault.setComment(sysVarsComments[divarFault.getName()]);
+        divarFault.setReadable(true);
+        divarFault.setValue(false);
+        divarFault.setSystem(true);
+
+        PLCVarContainer::getInstance().addVar(divarFault);
+    }
+
+    for(int i=0;i<PLCParams::diCnt;i++) {
+        PLCVar divarBreak("DI"+QString::number(i+1)+"_BREAK","Дискретные входы (обрыв)");
+        if(sysVarsComments.find(divarBreak.getName())!=sysVarsComments.end()) divarBreak.setComment(sysVarsComments[divarBreak.getName()]);
+        divarBreak.setReadable(true);
+        divarBreak.setValue(false);
+        divarBreak.setSystem(true);
+        PLCVarContainer::getInstance().addVar(divarBreak);
+    }
+
+    for(int i=0;i<PLCParams::diCnt;i++) {
+        PLCVar divarShort("DI"+QString::number(i+1)+"_SHORT","Дискретные входы (кор. замыкание)");
+        if(sysVarsComments.find(divarShort.getName())!=sysVarsComments.end()) divarShort.setComment(sysVarsComments[divarShort.getName()]);
+        divarShort.setReadable(true);
+        divarShort.setValue(false);
+        divarShort.setSystem(true);
+        PLCVarContainer::getInstance().addVar(divarShort);
+    }
+
+    for(int i=0;i<PLCParams::doCnt;i++) {
+        PLCVar dovar("DO"+QString::number(i+1),"Дискретные выходы");
+        if(sysVarsComments.find(dovar.getName())!=sysVarsComments.end()) dovar.setComment(sysVarsComments[dovar.getName()]);
+        dovar.setReadable(true);
+        dovar.setWriteable(true);
+        dovar.setValue(false);
+        dovar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(dovar);
+    }
+
+    for(int i=0;i<PLCParams::aiCnt;i++) {
+        PLCVar aivar("AI"+QString::number(i+1),"Аналоговые входы");
+        if(sysVarsComments.find(aivar.getName())!=sysVarsComments.end()) aivar.setComment(sysVarsComments[aivar.getName()]);
+        aivar.setReadable(true);
+        aivar.setValue(static_cast<short>(0));
+        aivar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(aivar);
+    }
+
+    for(int i=0;i<PLCParams::tmrms_cnt;i++) {
+        PLCVar tmrvar("TMRms"+QString::number(i+1),"Таймеры мс");
+        if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
+        tmrvar.setReadable(true);
+        tmrvar.setWriteable(true);
+        tmrvar.setValue(static_cast<short>(0));
+        tmrvar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(tmrvar);
+    }
+    for(int i=0;i<PLCParams::tmrs_cnt;i++) {
+        PLCVar tmrvar("TMRs"+QString::number(i+1),"Таймеры сек");
+        if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
+        tmrvar.setReadable(true);
+        tmrvar.setWriteable(true);
+        tmrvar.setValue(static_cast<short>(0));
+        tmrvar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(tmrvar);
+    }
+
+    for(int i=0;i<PLCParams::ibit_cnt;i++) {
+        PLCVar bitVar("IB" + QString::number(i+1), "Биты");
+        if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+        bitVar.setReadable(true);
+        bitVar.setWriteable(true);
+        bitVar.setValue(false);
+        bitVar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(bitVar);
+    }
+
+    for(int i=0;i<PLCParams::ireg_cnt;i++) {
+        PLCVar regVar("IR" + QString::number(i+1), "Регистры");
+        if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+        regVar.setReadable(true);
+        regVar.setWriteable(true);
+        regVar.setValue(static_cast<short>(0));
+        regVar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(regVar);
+    }
+
+    PLCVar workTimeVar("work_time", "Системное время");
+    workTimeVar.setReadable(true);
+    workTimeVar.setWriteable(true);
+    workTimeVar.setValue(static_cast<short>(0));
+    workTimeVar.setSystem(true);
+    PLCVarContainer::getInstance().addVar(workTimeVar);
+}
+
+void MainWindow::connectScene(LDScene *sc)
+{
+    connect(sc,&LDScene::updateName,this,&MainWindow::updateInfo);
+    connect(sc,&LDScene::createPageBefore,this,&MainWindow::createPageBefore);
+    connect(sc,&LDScene::createPageAfter,this,&MainWindow::createPageAfter);
+    connect(sc,&LDScene::deletePage,this,&MainWindow::deletePage);
+    connect(sc,&LDScene::sceneChanged,[this](){prChanged=true;});
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if(prChanged) {
+        if (QMessageBox::Yes == QMessageBox::question(this,
+            tr("LD Редактор"),
+            tr("Текущий проект был изменён.\nВы хотите его сохранить?"))) {
+            saveProject();
+        }
+    }
+    event->accept();
+}
