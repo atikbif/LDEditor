@@ -1,8 +1,9 @@
 #include "dialogprojectconfig.h"
 #include "ui_dialogprojectconfig.h"
+#include "plcutils.h"
 
-DialogProjectConfig::DialogProjectConfig(int msCnt, QWidget *parent) :
-    QDialog(parent),
+DialogProjectConfig::DialogProjectConfig(const QString &plcName, int msCnt, QWidget *parent) :
+    QDialog(parent),_plcName(plcName),
     ui(new Ui::DialogProjectConfig)
 {
     ui->setupUi(this);
@@ -12,6 +13,20 @@ DialogProjectConfig::DialogProjectConfig(int msCnt, QWidget *parent) :
     else if(msCnt==50) ui->radioButton_50ms->setChecked(true);
     else if(msCnt==100) ui->radioButton_100ms->setChecked(true);
     else if(msCnt==1000) ui->radioButton_1000ms->setChecked(true);
+
+    QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
+    QRegExp ipRegex ("^" + ipRange
+                     + "\\." + ipRange
+                     + "\\." + ipRange
+                     + "\\." + ipRange + "$");
+
+    QRegExpValidator *ipValidator = new QRegExpValidator(ipRegex, this);
+    ui->lineEditIP->setValidator(ipValidator);
+    ui->groupBox_ETH->setVisible(false);
+    if(PLCUtils::isPLCSupportEth(plcName)) {
+        ui->groupBox_ETH->setVisible(true);
+    }
+
 }
 
 DialogProjectConfig::~DialogProjectConfig()
@@ -69,4 +84,25 @@ void DialogProjectConfig::setStopBits(int value)
 {
     if(value<1 || value>2) value = 1;
     ui->comboBoxStopBits->setCurrentIndex(value-1);
+}
+
+QString DialogProjectConfig::getIP() const
+{
+    return ui->lineEditIP->text();
+}
+
+void DialogProjectConfig::setIP(const QString &value)
+{
+    ui->lineEditIP->setText(value);
+}
+
+bool DialogProjectConfig::useIPasDefault() const
+{
+    if(PLCUtils::isPLCSupportEth(_plcName)) return ui->checkBoxEthUse->isChecked();
+    return false;
+}
+
+void DialogProjectConfig::setIPasDefault(bool value)
+{
+    ui->checkBoxEthUse->setChecked(value);
 }

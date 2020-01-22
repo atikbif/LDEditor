@@ -55,12 +55,13 @@
 #include <QPushButton>
 #include <QTimer>
 #include "Checker/ldchecker.h"
-#include "plcfinder.h"
+#include "Loader/plcfinder.h"
 #include "SourceBuilder/plcparams.h"
 #include "SourceBuilder/finder.h"
 #include "Dialogs/dialogprojectconfig.h"
 
 #include "portconfig.h"
+#include "plcutils.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -187,7 +188,10 @@ MainWindow::MainWindow(QWidget *parent) :
             portConf.baudrate = baudrate;
             portConf.parity = parity;
             portConf.stopBits = stopBits;
-            PLCFinder *finder=new PLCFinder("",portConf,binFileName);Q_UNUSED(finder)
+            portConf.ip = progIP;
+            if(PLCUtils::isPLCSupportEth(plcType->currentText())) portConf.isEthDefault = ethAsDefault;
+            else portConf.isEthDefault = false;
+            PLCFinder *finder=new PLCFinder(plcType->currentText(),"",portConf,binFileName);Q_UNUSED(finder)
         }else {
             QString info = "Необходимо скомпилировать проект.\nНе найден бинарный файл программы:\n" + binFileName;
             QMessageBox::information(this,tr("Сообщение"),tr(info.toStdString().c_str()));
@@ -266,6 +270,7 @@ MainWindow::MainWindow(QWidget *parent) :
         item2->addChild(item);
     }*/
     connect(ui->treeWidgetLibrary,&QTreeWidget::itemClicked,[this,lib](QTreeWidgetItem *item, int column){
+        Q_UNUSED(column)
         if(item->childCount()==0) {
             QString elFile = lib->getFileByElementName(item->text(0));
             if(!elFile.isEmpty()) {
@@ -357,18 +362,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *confMenu = new QMenu("Настройки");
     confMenu->addAction(QIcon(":/images/plc_config.ico"),"ПЛК",[this](){
-        auto *dialog = new DialogProjectConfig(prDelay,this);
+        qDebug() << "TYPE:" << plcType->currentText();
+        auto *dialog = new DialogProjectConfig(plcType->currentText(),prDelay,this);
         dialog->setBaudrate(baudrate);
         dialog->setNetAddress(netAddr);
         dialog->setParity(parity);
         dialog->setStopBits(stopBits);
+        dialog->setIP(progIP);
+        dialog->setIPasDefault(ethAsDefault);
         if(dialog->exec()==QDialog::Accepted) {
             prDelay = dialog->getDelay();
             baudrate = dialog->getBaudrate();
             netAddr = dialog->getNetAddress();
             parity = dialog->getParity();
             stopBits = dialog->getStopBits();
-        };
+            progIP = dialog->getIP();
+            ethAsDefault = dialog->useIPasDefault();
+        }
     });
     ui->menubar->addMenu(confMenu);
 
@@ -503,6 +513,10 @@ void MainWindow::saveProject()
             out << baudrate;
             out << parity;
             out << netAddr;
+            if(PLCUtils::isPLCSupportEth(plcType->currentText())) {
+                out << progIP;
+                out << ethAsDefault;
+            }
             prChanged = false;
             QFileInfo fInfo(file);
             prDir = fInfo.canonicalPath()+"/";
@@ -548,6 +562,10 @@ void MainWindow::saveAsProject()
             out << baudrate;
             out << parity;
             out << netAddr;
+            if(PLCUtils::isPLCSupportEth(plcType->currentText())) {
+                out << progIP;
+                out << ethAsDefault;
+            }
             prChanged = false;
             prFileName = fileName;
             setWindowTitle(fileName);
@@ -621,6 +639,10 @@ void MainWindow::openProject()
                 in >> baudrate;
                 in >> parity;
                 in >> netAddr;
+                if(PLCUtils::isPLCSupportEth(plcName)) {
+                    in >> progIP;
+                    in >> ethAsDefault;
+                }
                 plcChanged(plcName);
                 setWindowTitle(fileName);
                 prChanged = false;
@@ -915,6 +937,13 @@ void MainWindow::plcChanged(const QString &plcName)
     workTimeVar.setValue(static_cast<short>(0));
     workTimeVar.setSystem(true);
     PLCVarContainer::getInstance().addVar(workTimeVar);
+
+    if(PLCUtils::isPLCSupportEth(plcName)) {
+        if(progIP.isEmpty()) {
+            progIP="192.168.1.2";
+            ethAsDefault = true;
+        }
+    }
 }
 
 void MainWindow::connectScene(LDScene *sc)

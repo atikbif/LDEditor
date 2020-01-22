@@ -10,9 +10,10 @@ class DialogProjectConfig;
 class DialogProjectConfig : public QDialog
 {
     Q_OBJECT
+    QString _plcName;
 
 public:
-    explicit DialogProjectConfig(int msCnt = 10, QWidget *parent = nullptr);
+    explicit DialogProjectConfig(const QString &plcName, int msCnt = 10, QWidget *parent = nullptr);
     ~DialogProjectConfig();
     int getDelay() const;
     int getNetAddress() const;
@@ -23,6 +24,10 @@ public:
     void setParity(const QString &value);
     int getStopBits() const;
     void setStopBits(int value);
+    QString getIP() const;
+    void setIP(const QString &value);
+    bool useIPasDefault() const;
+    void setIPasDefault(bool value);
 private:
     Ui::DialogProjectConfig *ui;
 };

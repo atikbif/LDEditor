@@ -46,6 +46,8 @@ class MainWindow : public QMainWindow
     QString baudrate = "АВТО";
     QString parity = "чётный (even)";
     int netAddr = 0x00;
+    QString progIP;
+    bool ethAsDefault = false;
 
 
     std::size_t page_num = 0;

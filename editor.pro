@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets svg printsupport serialport
+QT       += core gui network widgets svg printsupport serialport
 
 RC_ICONS = ld.ico
 VERSION = 1.0.0.0
@@ -34,10 +34,14 @@ INCLUDEPATH += Elements
 INCLUDEPATH += Dialogs
 
 SOURCES += \
+    Loader/ethfinderthread.cpp \
+    Loader/ethloader.cpp \
+    Loader/ethloaderthread.cpp \
     Loader/finderthread.cpp \
     Loader/loader.cpp \
     Loader/loaderthread.cpp \
     Loader/plcfinder.cpp \
+    checksum.cpp \
         main.cpp \
     mainwindow.cpp \
     ldscene.cpp \
@@ -66,6 +70,7 @@ SOURCES += \
     Elements\srtrigger.cpp \
     Elements\delayon.cpp \
     Elements\delayoff.cpp \
+    plcutils.cpp \
     plcvarcontainer.cpp \
     Dialogs\dialogldelementproperties.cpp \
     Dialogs\dialogvarconfig.cpp \
@@ -92,10 +97,14 @@ SOURCES += \
     elementlibrary.cpp
 
 HEADERS += \
+    Loader/ethfinderthread.h \
+    Loader/ethloader.h \
+    Loader/ethloaderthread.h \
     Loader/finderthread.h \
     Loader/loader.h \
     Loader/loaderthread.h \
     Loader/plcfinder.h \
+    checksum.h \
         mainwindow.h \
     mainwindow.h \
     ldscene.h \
@@ -124,6 +133,7 @@ HEADERS += \
     Elements\srtrigger.h \
     Elements\delayon.h \
     Elements\delayoff.h \
+    plcutils.h \
     plcvar.h \
     plcvarcontainer.h \
     Dialogs\dialogldelementproperties.h \
