@@ -65,6 +65,8 @@
 #include <QWidgetAction>
 #include "dialogplcconfig.h"
 
+#include <QSettings>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -339,7 +341,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    QMenu *fileMenu = new QMenu("Файл");
+    fileMenu = new QMenu("Файл");
     fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
     fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить как",this,&MainWindow::saveAsProject);
     fileMenu->addAction(QIcon(":/images/open.png"),"Открыть",this,&MainWindow::openProject);
@@ -396,6 +398,10 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(prFileName);
 
     ui->graphicsView->scale(0.8,0.8);
+
+    QStringList prevPr = getPrevProjects();
+    updatePrevProjects(prevPr);
+
     update();
 }
 
@@ -403,6 +409,57 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete stack;
+}
+
+void MainWindow::openPrevProject()
+{
+    QAction *a = qobject_cast<QAction *>(sender());
+    if(a!=nullptr) {
+        if(prChanged) {
+            if (QMessageBox::Yes == QMessageBox::question(this,
+                                                          tr("LD Редактор"),
+                                                          tr("Текущий проект был изменён.\nВы хотите его сохранить?"))) {
+                saveProject();
+            }
+        }
+        setCellConfig(page.cell_width,page.cell_height,scene->getColumnCount());
+        QString fName = a->text();
+        openProjectByName(fName);
+    }
+}
+
+QStringList MainWindow::getPrevProjects()
+{
+    QStringList res;
+    QSettings settings;
+    res = settings.value("/Settings/PrevProjects",QStringList()).toStringList();
+    for(int i=0;i<res.count();i++) {
+        QString s = res.at(i);
+        s.replace('\\','/');
+        res[i] = s;
+    }
+    res.removeDuplicates();
+    if(res.count()>maxAmountOfPrevProjects) res = res.mid(0,maxAmountOfPrevProjects);
+    settings.setValue("/Settings/PrevProjects",res);
+    return res;
+}
+
+void MainWindow::updatePrevProjects(const QStringList &prNames)
+{
+    QSettings settings;
+    settings.setValue("/Settings/PrevProjects",prNames);
+    QStringList resList = getPrevProjects();
+    fileMenu->clear();
+    fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
+    fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить как",this,&MainWindow::saveAsProject);
+    fileMenu->addAction(QIcon(":/images/open.png"),"Открыть",this,&MainWindow::openProject);
+
+    QMenu* recPr = new QMenu("Недавние проекты");
+    fileMenu->addMenu(recPr);
+    foreach(QString name, resList) {
+        //ui->menu->addAction(name,this,SLOT(openPrevProject()));
+        recPr->addAction(name,this,SLOT(openPrevProject()));
+    }
 }
 
 void MainWindow::createPageBefore()
@@ -505,6 +562,11 @@ void MainWindow::updateInfo(const LDInfo &elInfo)
 void MainWindow::saveProject()
 {
     if(!prFileName.isEmpty()) {
+
+        QStringList prevPr = getPrevProjects();
+        prevPr.insert(0,prFileName);
+        updatePrevProjects(prevPr);
+
         QFile file(prFileName);
         if(file.open(QIODevice::WriteOnly) ) {
             QDataStream out(&file);
@@ -554,6 +616,11 @@ void MainWindow::saveAsProject()
                                prFileName,
                                tr("*.ldp"));
     if(!fileName.isEmpty()) {
+
+        QStringList prevPr = getPrevProjects();
+        prevPr.insert(0,fileName);
+        updatePrevProjects(prevPr);
+
         QFile file(fileName);
         if(file.open(QIODevice::WriteOnly) ) {
             QDataStream out(&file);
@@ -599,6 +666,77 @@ void MainWindow::saveAsProject()
     }
 }
 
+void MainWindow::openProjectByName(const QString &fName) {
+    QStringList prevPr = getPrevProjects();
+    prevPr.insert(0,fName);
+    updatePrevProjects(prevPr);
+    QFile file(fName);
+    if(file.open(QIODevice::ReadOnly) ) {
+        QDataStream in(&file);
+        QString tmpStr;
+        in >> tmpStr;
+        if(tmpStr=="LD Project") {
+            while(prPages.size()>1) deletePage(false);
+            scene->empty_page();
+            bool firstPage = true;
+            int pageCount = 0;
+            in >> pageCount;
+            for(int pageNum=0;pageNum<pageCount;pageNum++) {
+                in >> tmpStr;
+                if(tmpStr=="Page") {
+                    if(!firstPage) createPageAfter();
+                    else {firstPage=false;}
+                    int elCount = 0;
+                    in >> elCount;
+                    for(int i=0;i<elCount;i++) {
+                        auto res = readLDelement(in);
+                        LDElement *el = res.first;
+                        if(el) scene->addElement(el,el->getColNum(),el->getRowNum());
+                        else {
+                            ui->textBrowser->append(res.second);
+                        }
+                    }
+                }
+            }
+            pageNumWidget->setValue(1);
+            stack->clear();
+
+            readPLCVarContainer(in);
+            QString plcName;
+            in >> plcName;
+            plcType->setCurrentText(plcName);
+            in >> prDelay;
+            in >> stopBits;
+            in >> baudrate;
+            in >> parity;
+            in >> netAddr;
+            if(PLCUtils::isPLCSupportEth(plcName)) {
+                in >> progIP;
+                in >> ethAsDefault;
+            }
+            plcChanged(plcName);
+            setWindowTitle(fName);
+            prChanged = false;
+            prFileName = fName;
+
+            QFileInfo fInfo(file);
+            prDir = fInfo.canonicalPath()+"/";
+
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект открыт");
+            ui->textBrowser->repaint();
+        }
+    }else {
+        bool isSysInfoVisible = ui->textBrowser->isVisible();
+        if(!isSysInfoVisible) buttonMax->click();
+        if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
+        ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для чтения");
+        ui->textBrowser->repaint();
+    }
+}
+
 void MainWindow::openProject()
 {
     if(prChanged) {
@@ -611,71 +749,7 @@ void MainWindow::openProject()
     setCellConfig(page.cell_width,page.cell_height,scene->getColumnCount());
     QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть проект"),"",tr("*.ldp"));
     if(!fileName.isEmpty()) {
-        QFile file(fileName);
-        if(file.open(QIODevice::ReadOnly) ) {
-            QDataStream in(&file);
-            QString tmpStr;
-            in >> tmpStr;
-            if(tmpStr=="LD Project") {
-                while(prPages.size()>1) deletePage(false);
-                scene->empty_page();
-                bool firstPage = true;
-                int pageCount = 0;
-                in >> pageCount;
-                for(int pageNum=0;pageNum<pageCount;pageNum++) {
-                    in >> tmpStr;
-                    if(tmpStr=="Page") {
-                        if(!firstPage) createPageAfter();
-                        else {firstPage=false;}
-                        int elCount = 0;
-                        in >> elCount;
-                        for(int i=0;i<elCount;i++) {
-                            auto res = readLDelement(in);
-                            LDElement *el = res.first;
-                            if(el) scene->addElement(el,el->getColNum(),el->getRowNum());
-                            else {
-                                ui->textBrowser->append(res.second);
-                            }
-                        }
-                    }
-                }
-                pageNumWidget->setValue(1);
-                stack->clear();
-
-                readPLCVarContainer(in);
-                QString plcName;
-                in >> plcName;
-                plcType->setCurrentText(plcName);
-                in >> prDelay;
-                in >> stopBits;
-                in >> baudrate;
-                in >> parity;
-                in >> netAddr;
-                if(PLCUtils::isPLCSupportEth(plcName)) {
-                    in >> progIP;
-                    in >> ethAsDefault;
-                }
-                plcChanged(plcName);
-                setWindowTitle(fileName);
-                prChanged = false;
-                prFileName = fileName;
-
-                QFileInfo fInfo(file);
-                prDir = fInfo.canonicalPath()+"/";
-
-                bool isSysInfoVisible = ui->textBrowser->isVisible();
-                if(!isSysInfoVisible) buttonMax->click();
-                if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
-                ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект открыт");
-                ui->textBrowser->repaint();
-            }
-        }else {
-            bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) buttonMax->click();
-            if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
-            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для чтения");
-            ui->textBrowser->repaint();
-        }
+        openProjectByName(fileName);
     }
 }
 

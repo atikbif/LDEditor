@@ -11,6 +11,7 @@
 #include <QPrinter>
 #include <QPushButton>
 #include <QComboBox>
+#include <QStringList>
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +39,10 @@ class MainWindow : public QMainWindow
     QLabel *maxPageNumWidget;
     int zoomLevel = 0;
 
+    QMenu *fileMenu;
+
+    const int maxAmountOfPrevProjects = 10;
+
     bool prChanged = false;
     QString prFileName;
     QString prDir;
@@ -58,6 +63,9 @@ class MainWindow : public QMainWindow
 
     QAction *configAction = nullptr;
 
+    QStringList getPrevProjects(void);
+    void updatePrevProjects(const QStringList &prNames);
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -70,6 +78,7 @@ private slots:
     void saveProject();
     void saveAsProject();
     void openProject();
+    void openProjectByName(const QString &fName);
     void printPreview(QPrinter *printer);
     void previewAction();
     void build();
@@ -77,6 +86,7 @@ private slots:
     void searchResults(const std::vector<QString> &res);
     void plcChanged(const QString &plcName);
     void readWriteConfig();
+    void openPrevProject();
 
 private:
     void connectScene(LDScene *sc);
