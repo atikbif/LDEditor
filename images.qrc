@@ -74,5 +74,6 @@
         <file>images/plc_config.ico</file>
         <file>images/read_write_config.png</file>
         <file>images/compile2.png</file>
+        <file>images/clock.png</file>
     </qresource>
 </RCC>

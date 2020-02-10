@@ -64,6 +64,7 @@
 #include "plcutils.h"
 #include <QWidgetAction>
 #include "dialogplcconfig.h"
+#include "dialogcycleconfig.h"
 
 #include <QSettings>
 
@@ -380,9 +381,9 @@ MainWindow::MainWindow(QWidget *parent) :
     viewMenu->addAction(libAction);
 
     QMenu *confMenu = new QMenu("Настройки");
-    confMenu->addAction(QIcon(":/images/plc_config.ico"),"Загрузка",[this](){
+    confMenu->addAction(QIcon(":/images/plc_config.ico"),"Линия связи",[this](){
         qDebug() << "TYPE:" << plcType->currentText();
-        auto *dialog = new DialogProjectConfig(plcType->currentText(),prDelay,this);
+        auto *dialog = new DialogProjectConfig(plcType->currentText(),this);
         dialog->setBaudrate(baudrate);
         dialog->setNetAddress(netAddr);
         dialog->setParity(parity);
@@ -390,7 +391,6 @@ MainWindow::MainWindow(QWidget *parent) :
         dialog->setIP(progIP);
         dialog->setIPasDefault(ethAsDefault);
         if(dialog->exec()==QDialog::Accepted) {
-            prDelay = dialog->getDelay();
             baudrate = dialog->getBaudrate();
             netAddr = dialog->getNetAddress();
             parity = dialog->getParity();
@@ -399,6 +399,13 @@ MainWindow::MainWindow(QWidget *parent) :
             ethAsDefault = dialog->useIPasDefault();
         }
     });
+    confMenu->addAction(QIcon(":/images/clock.png"),"Системный цикл",[this](){
+        auto *dialog = new DialogCycleConfig(prDelay,this);
+        if(dialog->exec()==QDialog::Accepted) {
+            prDelay = dialog->getDelay();
+        }
+    });
+
     confMenu->addAction(configAction);
     ui->menubar->addMenu(confMenu);
 

@@ -2,17 +2,11 @@
 #include "ui_dialogprojectconfig.h"
 #include "plcutils.h"
 
-DialogProjectConfig::DialogProjectConfig(const QString &plcName, int msCnt, QWidget *parent) :
+DialogProjectConfig::DialogProjectConfig(const QString &plcName, QWidget *parent) :
     QDialog(parent),_plcName(plcName),
     ui(new Ui::DialogProjectConfig)
 {
     ui->setupUi(this);
-    if(msCnt==0) ui->radioButton_0ms->setChecked(true);
-    else if(msCnt==1) ui->radioButton_1ms->setChecked(true);
-    else if(msCnt==10) ui->radioButton_10ms->setChecked(true);
-    else if(msCnt==50) ui->radioButton_50ms->setChecked(true);
-    else if(msCnt==100) ui->radioButton_100ms->setChecked(true);
-    else if(msCnt==1000) ui->radioButton_1000ms->setChecked(true);
 
     QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
     QRegExp ipRegex ("^" + ipRange
@@ -32,17 +26,6 @@ DialogProjectConfig::DialogProjectConfig(const QString &plcName, int msCnt, QWid
 DialogProjectConfig::~DialogProjectConfig()
 {
     delete ui;
-}
-
-int DialogProjectConfig::getDelay() const
-{
-    if(ui->radioButton_0ms->isChecked()) return 0;
-    if(ui->radioButton_1ms->isChecked()) return 1;
-    if(ui->radioButton_10ms->isChecked()) return 10;
-    if(ui->radioButton_50ms->isChecked()) return 50;
-    if(ui->radioButton_100ms->isChecked()) return 100;
-    if(ui->radioButton_1000ms->isChecked()) return 1000;
-    return 0;
 }
 
 int DialogProjectConfig::getNetAddress() const

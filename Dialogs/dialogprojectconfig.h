@@ -13,9 +13,8 @@ class DialogProjectConfig : public QDialog
     QString _plcName;
 
 public:
-    explicit DialogProjectConfig(const QString &plcName, int msCnt = 10, QWidget *parent = nullptr);
+    explicit DialogProjectConfig(const QString &plcName, QWidget *parent = nullptr);
     ~DialogProjectConfig();
-    int getDelay() const;
     int getNetAddress() const;
     void setNetAddress(int value);
     QString getBaudrate() const;
