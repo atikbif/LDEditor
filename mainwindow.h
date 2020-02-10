@@ -56,6 +56,8 @@ class MainWindow : public QMainWindow
 
     int page_count = 1;
 
+    QAction *configAction = nullptr;
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -74,6 +76,7 @@ private slots:
     void search();
     void searchResults(const std::vector<QString> &res);
     void plcChanged(const QString &plcName);
+    void readWriteConfig();
 
 private:
     void connectScene(LDScene *sc);

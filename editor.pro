@@ -34,6 +34,11 @@ INCLUDEPATH += Elements
 INCLUDEPATH += Dialogs
 
 SOURCES += \
+    Dialogs/dialogplcconfig.cpp \
+    Loader/ethconfigreader.cpp \
+    Loader/ethconfigreaderthread.cpp \
+    Loader/ethconfigwriter.cpp \
+    Loader/ethconfigwriterthread.cpp \
     Loader/ethfinderthread.cpp \
     Loader/ethloader.cpp \
     Loader/ethloaderthread.cpp \
@@ -97,6 +102,11 @@ SOURCES += \
     elementlibrary.cpp
 
 HEADERS += \
+    Dialogs/dialogplcconfig.h \
+    Loader/ethconfigreader.h \
+    Loader/ethconfigreaderthread.h \
+    Loader/ethconfigwriter.h \
+    Loader/ethconfigwriterthread.h \
     Loader/ethfinderthread.h \
     Loader/ethloader.h \
     Loader/ethloaderthread.h \
@@ -162,6 +172,7 @@ HEADERS += \
     elementlibrary.h
 
 FORMS += \
+    Dialogs/dialogplcconfig.ui \
     mainwindow.ui \
     Dialogs\dialogldelementproperties.ui \
     Dialogs\dialogvarconfig.ui \

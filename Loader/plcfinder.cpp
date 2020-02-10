@@ -140,6 +140,7 @@ void PLCFinder::found(const PLCRS485State &plc)
         //QString fName = QCoreApplication::applicationDirPath() + "/CORE/prog.bin";
         if(plc.code==PLCParams::code || plc.code==1 || plc.code==5) {
             auto *loader = new Loader(plc,binFileName);
+            //QTimer::singleShot(60000,this,[loader](){delete loader;});
             Q_UNUSED(loader)
         }
         else QMessageBox::warning(nullptr,tr("Сообщение"),tr("Тип контроллера в проекте не соответствует типу подключенного контроллера"));
@@ -170,6 +171,7 @@ void PLCFinder::ethFound(const PLCState &plc)
         QTimer::singleShot(50,this,SLOT(deleteLater()));
         if(PLCUtils::checkPLCCode(plcName,plc.code)) {
             auto *loader = new EthLoader(portConf.ip,plc,binFileName);
+            //QTimer::singleShot(60000,this,[loader](){delete loader;});
             Q_UNUSED(loader)
         }else QMessageBox::warning(nullptr,tr("Сообщение"),tr("Тип контроллера в проекте не соответствует типу подключенного контроллера"));
     }

@@ -62,6 +62,8 @@
 
 #include "portconfig.h"
 #include "plcutils.h"
+#include <QWidgetAction>
+#include "dialogplcconfig.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -177,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent) :
     horToolBar->addSeparator();
     horToolBar->addAction(QIcon(":/images/variable.png"),"Конфигурация переменных",[this](){auto *dialog = new DialogVarConfig();if(dialog->exec()==QDialog::Accepted) prChanged=true;delete dialog;});
     horToolBar->addSeparator();
-    horToolBar->addAction(QIcon(":/images/compile.png"),"Собрать проект",this,&MainWindow::build);
+    horToolBar->addAction(QIcon(":/images/compile2.png"),"Собрать проект",this,&MainWindow::build);
 
     horToolBar->addSeparator();
     horToolBar->addAction(QIcon(":/images/program_flash.png"),"Загрузить программу в ПЛК",[this](){
@@ -192,11 +194,16 @@ MainWindow::MainWindow(QWidget *parent) :
             if(PLCUtils::isPLCSupportEth(plcType->currentText())) portConf.isEthDefault = ethAsDefault;
             else portConf.isEthDefault = false;
             PLCFinder *finder=new PLCFinder(plcType->currentText(),"",portConf,binFileName);Q_UNUSED(finder)
+            //QTimer::singleShot(70000,this,[finder](){delete finder;});
         }else {
             QString info = "Необходимо скомпилировать проект.\nНе найден бинарный файл программы:\n" + binFileName;
             QMessageBox::information(this,tr("Сообщение"),tr(info.toStdString().c_str()));
         }
     });
+    horToolBar->addSeparator();
+
+    configAction = horToolBar->addAction(QIcon(":/images/read_write_config.png"),"Настройки ПЛК",this,&MainWindow::readWriteConfig);
+
     horToolBar->addSeparator();
 
     pageNumWidget = new QSpinBox(this);
@@ -342,8 +349,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *background = new QMenu("Фон");
     viewMenu->addMenu(background);
     ui->menubar->addMenu(viewMenu);
+
     background->addAction("белый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFF,0xFF,0xFF));}});
-    background->addAction("жёлтый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xFA,0xCC));}});
+    background->addAction("<bold>жёлтый</bold>",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xFA,0xCC));}});
     background->addAction("серый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xEE,0xEE,0xEE));}});
     background->addAction("зелёный",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE5,0xFA,0xD9));}});
     background->addAction("синий",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE0,0xF5,0xFD));}});
@@ -361,7 +369,7 @@ MainWindow::MainWindow(QWidget *parent) :
     viewMenu->addAction(libAction);
 
     QMenu *confMenu = new QMenu("Настройки");
-    confMenu->addAction(QIcon(":/images/plc_config.ico"),"ПЛК",[this](){
+    confMenu->addAction(QIcon(":/images/plc_config.ico"),"Загрузка",[this](){
         qDebug() << "TYPE:" << plcType->currentText();
         auto *dialog = new DialogProjectConfig(plcType->currentText(),prDelay,this);
         dialog->setBaudrate(baudrate);
@@ -380,11 +388,15 @@ MainWindow::MainWindow(QWidget *parent) :
             ethAsDefault = dialog->useIPasDefault();
         }
     });
+    confMenu->addAction(configAction);
     ui->menubar->addMenu(confMenu);
 
     prDir = QCoreApplication::applicationDirPath() + "/new_project/";
     prFileName = QCoreApplication::applicationDirPath() + "/new_project/default.ldp";
     setWindowTitle(prFileName);
+
+    ui->graphicsView->scale(0.8,0.8);
+    update();
 }
 
 MainWindow::~MainWindow()
@@ -943,6 +955,18 @@ void MainWindow::plcChanged(const QString &plcName)
             progIP="192.168.1.2";
             ethAsDefault = true;
         }
+    }
+    if(PLCUtils::isPLCSupportEth(plcName)) {configAction->setVisible(true);configAction->setEnabled(true);}
+    else {configAction->setVisible(false);configAction->setEnabled(false);}
+}
+
+void MainWindow::readWriteConfig()
+{
+    if(PLCUtils::isPLCSupportEth(plcType->currentText())) {
+        DialogPLCConfig *dialog = new DialogPLCConfig();
+        dialog->setCurrentIP(progIP);
+        dialog->exec();
+        delete dialog;
     }
 }
 

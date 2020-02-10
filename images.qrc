@@ -72,5 +72,7 @@
         <file>images/disable.ico</file>
         <file>images/enable.ico</file>
         <file>images/plc_config.ico</file>
+        <file>images/read_write_config.png</file>
+        <file>images/compile2.png</file>
     </qresource>
 </RCC>
