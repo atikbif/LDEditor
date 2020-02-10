@@ -63,6 +63,7 @@ class LDScene : public QGraphicsScene
     int row_count = 69;
     int column_count = 15;
     qreal last_x=0,last_y=0;
+    qreal cur_x=0, cur_y=0;
     int last_row=0, last_col=0;
     bool insertLine = false;
     Q_OBJECT

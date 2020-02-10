@@ -17,6 +17,7 @@
 #include <QList>
 #include <QScrollBar>
 #include "dialogaddeditcomment.h"
+#include <QApplication>
 
 
 void LDScene::createHorLine(int row, int col1, int col2)
@@ -500,7 +501,8 @@ void LDScene::createConnection(int col1, int row1, int col2, int row2,bool hor_m
 
 void LDScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-
+    cur_x = event->scenePos().x();
+    cur_y = event->scenePos().y();
     if(!lMode.on_flag) {
         lMode.clear();
 
@@ -691,6 +693,33 @@ void LDScene::keyPressEvent(QKeyEvent *event)
     // копирование, вырезание удаление выделенных объектов
 
     switch(event->key()) {
+        case Qt::Key_C:
+            if (QApplication::keyboardModifiers() && Qt::ControlModifier) {
+                copyItem->setElements(selectedElements);
+                deselectAll();
+            }
+            break;
+        case Qt::Key_X:
+            if (QApplication::keyboardModifiers() && Qt::ControlModifier) {
+                copyItem->setElements(selectedElements);
+                stack->startGroupCmd();
+                removeElements(selectedElements);
+                selectedElements.clear();
+                stack->stopGroupCmd();
+                emit sceneChanged();
+            }
+            break;
+        case Qt::Key_V:
+            if (QApplication::keyboardModifiers() && Qt::ControlModifier) {
+                if(copyItem->count()) {
+                    deselectAll();
+                    setInsertElement(nullptr);
+                    copyItem->setVisible(true);
+                    drawCopyBuf(cur_x,cur_y);
+                    emit sceneChanged();
+                }
+            }
+            break;
         case Qt::Key_Delete:
             if(!selectedElements.empty()) {
                 stack->startGroupCmd();

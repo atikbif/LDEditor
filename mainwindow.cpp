@@ -170,8 +170,13 @@ MainWindow::MainWindow(QWidget *parent) :
     horToolBar->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
     horToolBar->addSeparator();
 
-    horToolBar->addAction(QIcon(":/images/undo.png"),"Отменить",[this](){stack->undo();});
-    horToolBar->addAction(QIcon(":/images/redo.png"),"Повторить",[this](){stack->redo();});
+    auto undoAct = horToolBar->addAction(QIcon(":/images/undo.png"),"Отменить",[this](){stack->undo();});
+    undoAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+    addAction(undoAct);
+
+    auto redoAct = horToolBar->addAction(QIcon(":/images/redo.png"),"Повторить",[this](){stack->redo();});
+    redoAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Y));
+    addAction(redoAct);
     horToolBar->addSeparator();
 
     horToolBar->addAction(QIcon(":/images/zoom_in.png"),"Приблизить",[this](){if(zoomLevel<3) {zoomLevel++;ui->graphicsView->scale(1.25,1.25);this->update();}});
@@ -342,9 +347,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     fileMenu = new QMenu("Файл");
-    fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
+    auto saveAct = fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить",this,&MainWindow::saveProject);
+    saveAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+    addAction(saveAct);
     fileMenu->addAction(QIcon(":/images/save.png"),"Сохранить как",this,&MainWindow::saveAsProject);
-    fileMenu->addAction(QIcon(":/images/open.png"),"Открыть",this,&MainWindow::openProject);
+    auto openAct = fileMenu->addAction(QIcon(":/images/open.png"),"Открыть",this,&MainWindow::openProject);
+    openAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    addAction(openAct);
     ui->menubar->addMenu(fileMenu);
 
     QMenu *viewMenu = new QMenu("Вид");
