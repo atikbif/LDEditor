@@ -65,6 +65,7 @@
 #include <QWidgetAction>
 #include "dialogplcconfig.h"
 #include "dialogcycleconfig.h"
+#include "dialogadcconfig.h"
 
 #include <QSettings>
 
@@ -407,6 +408,14 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     confMenu->addAction(configAction);
+
+    configADCAction = confMenu->addAction(QIcon(":/images/analogue.png"),"Аналоговые входы",[this](){
+        auto *dialog = new DialogADCconfig(this);
+        if(dialog->exec()==QDialog::Accepted) {
+
+        }
+    });
+
     ui->menubar->addMenu(confMenu);
 
     prDir = QCoreApplication::applicationDirPath() + "/new_project/";
@@ -1046,8 +1055,15 @@ void MainWindow::plcChanged(const QString &plcName)
             ethAsDefault = true;
         }
     }
-    if(PLCUtils::isPLCSupportEth(plcName)) {configAction->setVisible(true);configAction->setEnabled(true);}
-    else {configAction->setVisible(false);configAction->setEnabled(false);}
+    if(configAction) {
+        if(PLCUtils::isPLCSupportEth(plcName)) {configAction->setVisible(true);configAction->setEnabled(true);}
+        else {configAction->setVisible(false);configAction->setEnabled(false);}
+    }
+    if(configADCAction) {
+        qDebug() << "ADC CONFIG CHECK";
+        if(PLCUtils::isPLCSupportADC(plcName)) {configADCAction->setVisible(true);configADCAction->setEnabled(true);}
+        else {configADCAction->setVisible(false);configADCAction->setEnabled(false);}
+    }
 }
 
 void MainWindow::readWriteConfig()

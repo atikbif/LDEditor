@@ -1,7 +1,9 @@
 #include "plcutils.h"
 #include <Qdebug>
 
+std::set<QString> PLCUtils::ethPLCNames = {"PC21-1 2019"};
 std::set<QString> PLCUtils::plcNames = {"PC21-1 2019"};
+std::set<QString> PLCUtils::adcPLCNames = {"PC21-1 2019"};
 
 PLCUtils::PLCUtils()
 {
@@ -10,7 +12,13 @@ PLCUtils::PLCUtils()
 
 bool PLCUtils::isPLCSupportEth(const QString &plcName)
 {
-    if(plcNames.find(plcName)!=plcNames.end()) return true;
+    if(ethPLCNames.find(plcName)!=ethPLCNames.end()) return true;
+    return false;
+}
+
+bool PLCUtils::isPLCSupportADC(const QString &plcName)
+{
+    if(adcPLCNames.find(plcName)!=adcPLCNames.end()) return true;
     return false;
 }
 

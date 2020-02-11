@@ -6,10 +6,13 @@
 
 class PLCUtils
 {
+    static std::set<QString> ethPLCNames;
     static std::set<QString> plcNames;
+    static std::set<QString> adcPLCNames;
 public:
     PLCUtils();
     static bool isPLCSupportEth(const QString &plcName);
+    static bool isPLCSupportADC(const QString &plcName);
     static bool checkPLCCode(const QString &plcName, int code);
 };
 

@@ -60,6 +60,14 @@ QGroupBox::title {
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="3" column="1">
           <widget class="QComboBox" name="comboBoxStopBits">
+           <property name="styleSheet">
+            <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+           </property>
            <item>
             <property name="text">
              <string>1 </string>
@@ -81,6 +89,14 @@ QGroupBox::title {
          </item>
          <item row="1" column="1">
           <widget class="QComboBox" name="comboBoxSpeed">
+           <property name="styleSheet">
+            <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+           </property>
            <item>
             <property name="text">
              <string>АВТО</string>
@@ -140,6 +156,14 @@ QGroupBox::title {
          </item>
          <item row="2" column="1">
           <widget class="QComboBox" name="comboBoxParity">
+           <property name="styleSheet">
+            <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+           </property>
            <item>
             <property name="text">
              <string>выключ.</string>

@@ -57,6 +57,11 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
         out << "}\n";
         out << "\n";
 
+        out << "void calculate_adc(){\n";
+        //for(const QString &s:funcBody) out << "\t" << s << "\n";
+        out << "}\n";
+        out << "\n";
+
         out << "void ld_process(void) {\n";
         for(const QString &line:prog) out << "\t" << line << "\n";
         out << "}\n";
@@ -210,6 +215,10 @@ std::vector<QString> Compiler::getInternalVars()
     std::vector<QString> groups = PLCVarContainer::getInstance().getNotSystemVarGroups();
 
     result.push_back(QString("short ain[AI_CNT];"));
+    result.push_back(QString("short ain_raw[AI_CNT];"));
+    result.push_back(QString("unsigned char ain_under[AI_CNT];"));
+    result.push_back(QString("unsigned char ain_over[AI_CNT];"));
+    result.push_back(QString("unsigned char ain_alarm[AI_CNT];"));
     result.push_back(QString("unsigned char din[DI_CNT];"));
     result.push_back(QString("unsigned char dinr[DI_CNT];"));
     result.push_back(QString("unsigned char dinf[DI_CNT];"));

@@ -31,6 +31,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp1">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -56,6 +64,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp8">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -81,6 +97,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp2">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -106,6 +130,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp9">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -131,6 +163,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp3">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -156,6 +196,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp10">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -181,6 +229,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp4">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -206,6 +262,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp11">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -231,6 +295,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp5">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -256,6 +328,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp12">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -281,6 +361,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp6">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -306,6 +394,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp13">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -331,6 +427,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp7">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>
@@ -356,6 +460,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBoxInp14">
+          <property name="styleSheet">
+           <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+          </property>
           <item>
            <property name="text">
             <string>напряжение</string>

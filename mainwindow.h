@@ -62,6 +62,7 @@ class MainWindow : public QMainWindow
     int page_count = 1;
 
     QAction *configAction = nullptr;
+    QAction *configADCAction = nullptr;
 
     QStringList getPrevProjects(void);
     void updatePrevProjects(const QStringList &prNames);

@@ -34,6 +34,7 @@ INCLUDEPATH += Elements
 INCLUDEPATH += Dialogs
 
 SOURCES += \
+    Dialogs/dialogadcconfig.cpp \
     Dialogs/dialogcycleconfig.cpp \
     Dialogs/dialogplcconfig.cpp \
     Loader/ethconfigreader.cpp \
@@ -103,6 +104,7 @@ SOURCES += \
     elementlibrary.cpp
 
 HEADERS += \
+    Dialogs/dialogadcconfig.h \
     Dialogs/dialogcycleconfig.h \
     Dialogs/dialogplcconfig.h \
     Loader/ethconfigreader.h \
@@ -174,6 +176,7 @@ HEADERS += \
     elementlibrary.h
 
 FORMS += \
+    Dialogs/dialogadcconfig.ui \
     Dialogs/dialogcycleconfig.ui \
     Dialogs/dialogplcconfig.ui \
     mainwindow.ui \

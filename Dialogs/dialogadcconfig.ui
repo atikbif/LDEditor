@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogADCconfig</class>
+ <widget class="QDialog" name="DialogADCconfig">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>393</width>
+    <height>259</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Настройка аналоговых входов</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>типы аналоговых датчиков</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Вход 1:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="comboBox_IN1">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Вход 8:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QComboBox" name="comboBox_IN8">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Вход 2:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBox_IN2">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>Вход 9:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QComboBox" name="comboBox_IN9">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Вход 3:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="comboBox_IN3">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Вход 10:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QComboBox" name="comboBox_IN10">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Вход 4:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="comboBox_IN4">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Вход 11:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QComboBox" name="comboBox_IN11">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Вход 5:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="comboBox_IN5">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Вход 12:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QComboBox" name="comboBox_IN12">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Вход 6:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="comboBox_IN6">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Вход 13:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QComboBox" name="comboBox_IN13">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Вход 7:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QComboBox" name="comboBox_IN7">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Вход 14:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="3">
+       <widget class="QComboBox" name="comboBox_IN14">
+        <property name="styleSheet">
+         <string notr="true">QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>не подключен</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0.4 - 2 В</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4 - 20 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2 - 10 мА</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>0 - 2.5 В</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>DialogADCconfig</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>DialogADCconfig</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
