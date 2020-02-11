@@ -76,5 +76,11 @@
         <file>images/compile2.png</file>
         <file>images/clock.png</file>
         <file>images/analogue.png</file>
+        <file>images/green.png</file>
+        <file>images/orange.png</file>
+        <file>images/red.png</file>
+        <file>images/blue.png</file>
+        <file>images/grey.png</file>
+        <file>images/white.png</file>
     </qresource>
 </RCC>

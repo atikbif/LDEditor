@@ -363,12 +363,12 @@ MainWindow::MainWindow(QWidget *parent) :
     viewMenu->addMenu(background);
     ui->menubar->addMenu(viewMenu);
 
-    background->addAction("белый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFF,0xFF,0xFF));}});
-    background->addAction("<bold>жёлтый</bold>",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xFA,0xCC));}});
-    background->addAction("серый",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xEE,0xEE,0xEE));}});
-    background->addAction("зелёный",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE5,0xFA,0xD9));}});
-    background->addAction("синий",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE0,0xF5,0xFD));}});
-    background->addAction("красный",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xDF,0xCC));}});
+    background->addAction(QIcon(":/images/white.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFF,0xFF,0xFF));}});
+    background->addAction(QIcon(":/images/orange.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xFA,0xCC));}});
+    background->addAction(QIcon(":/images/grey.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xEE,0xEE,0xEE));}});
+    background->addAction(QIcon(":/images/green.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE5,0xFA,0xD9));}});
+    background->addAction(QIcon(":/images/blue.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE0,0xF5,0xFD));}});
+    background->addAction(QIcon(":/images/red.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xDF,0xCC));}});
 
     QAction *nameAction = new QAction("показать имена");
     nameAction->setCheckable(true);
