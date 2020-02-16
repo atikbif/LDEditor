@@ -48,6 +48,7 @@ SOURCES += \
     Loader/loader.cpp \
     Loader/loaderthread.cpp \
     Loader/plcfinder.cpp \
+    SourceBuilder/adcmanager.cpp \
     checksum.cpp \
         main.cpp \
     mainwindow.cpp \
@@ -77,6 +78,7 @@ SOURCES += \
     Elements\srtrigger.cpp \
     Elements\delayon.cpp \
     Elements\delayoff.cpp \
+    plcconfig.cpp \
     plcutils.cpp \
     plcvarcontainer.cpp \
     Dialogs\dialogldelementproperties.cpp \
@@ -118,6 +120,7 @@ HEADERS += \
     Loader/loader.h \
     Loader/loaderthread.h \
     Loader/plcfinder.h \
+    SourceBuilder/adcmanager.h \
     checksum.h \
         mainwindow.h \
     mainwindow.h \
@@ -147,6 +150,7 @@ HEADERS += \
     Elements\srtrigger.h \
     Elements\delayon.h \
     Elements\delayoff.h \
+    plcconfig.h \
     plcutils.h \
     plcvar.h \
     plcvarcontainer.h \

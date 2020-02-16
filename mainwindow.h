@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QStringList>
+#include "plcconfig.h"
 
 namespace Ui {
 class MainWindow;
@@ -40,6 +41,8 @@ class MainWindow : public QMainWindow
     int zoomLevel = 0;
 
     QMenu *fileMenu;
+
+    PLCConfig plcConfig;
 
     const int maxAmountOfPrevProjects = 10;
 

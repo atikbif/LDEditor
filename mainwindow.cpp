@@ -410,9 +410,12 @@ MainWindow::MainWindow(QWidget *parent) :
     confMenu->addAction(configAction);
 
     configADCAction = confMenu->addAction(QIcon(":/images/analogue.png"),"Аналоговые входы",[this](){
-        auto *dialog = new DialogADCconfig(this);
+        auto *dialog = new DialogADCconfig(plcConfig, this);
         if(dialog->exec()==QDialog::Accepted) {
-
+            std::vector<int> result = dialog->getSensorTypes();
+            for(int i=0;i<result.size();i++) {
+                plcConfig.setSensorType(i,result.at(i));
+            }
         }
     });
 
@@ -616,6 +619,10 @@ void MainWindow::saveProject()
                 out << progIP;
                 out << ethAsDefault;
             }
+            if(plcType->currentText()!="MKU") {
+                QByteArray config = plcConfig.toBytes();
+                out << config;
+            }
             prChanged = false;
             QFileInfo fInfo(file);
             prDir = fInfo.canonicalPath()+"/";
@@ -669,6 +676,10 @@ void MainWindow::saveAsProject()
             if(PLCUtils::isPLCSupportEth(plcType->currentText())) {
                 out << progIP;
                 out << ethAsDefault;
+            }
+            if(plcType->currentText()!="MKU") {
+                QByteArray config = plcConfig.toBytes();
+                out << config;
             }
             prChanged = false;
             prFileName = fileName;
@@ -739,6 +750,11 @@ void MainWindow::openProjectByName(const QString &fName) {
                 in >> progIP;
                 in >> ethAsDefault;
             }
+            if(plcType->currentText()!="MKU") {
+                QByteArray config;
+                in >> config;
+                plcConfig.fromBytes(config);
+            }else plcConfig = PLCConfig();
             plcChanged(plcName);
             setWindowTitle(fName);
             prChanged = false;
@@ -878,7 +894,7 @@ void MainWindow::build()
         }
 
         ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Генерация файлов");
-        Compiler::makeProgFile(varBody,progBody,funcBody,prDelay);
+        Compiler::makeProgFile(varBody,progBody,funcBody,plcConfig,prDelay);
         Compiler::makeLibraryfiles(libHeader,libBody);
         ui->textBrowser->repaint();
         ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Компиляция и линковка");
@@ -1003,6 +1019,42 @@ void MainWindow::plcChanged(const QString &plcName)
         PLCVarContainer::getInstance().addVar(aivar);
     }
 
+    if(plcName!="MKU") {
+        for(int i=0;i<PLCParams::aiCnt;i++) {
+            PLCVar aivarRaw("AI"+QString::number(i+1)+"_RAW","Аналоговые входы (необраб)");
+            if(sysVarsComments.find(aivarRaw.getName())!=sysVarsComments.end()) aivarRaw.setComment(sysVarsComments[aivarRaw.getName()]);
+            aivarRaw.setReadable(true);
+            aivarRaw.setValue(static_cast<short>(0));
+            aivarRaw.setSystem(true);
+            PLCVarContainer::getInstance().addVar(aivarRaw);
+        }
+
+        for(int i=0;i<PLCParams::aiCnt;i++) {
+            PLCVar aivarUnder("AI"+QString::number(i+1)+"_UNDER","Аналоговые входы (ниже порога)");
+            if(sysVarsComments.find(aivarUnder.getName())!=sysVarsComments.end()) aivarUnder.setComment(sysVarsComments[aivarUnder.getName()]);
+            aivarUnder.setReadable(true);
+            aivarUnder.setValue(static_cast<short>(0));
+            aivarUnder.setSystem(true);
+            PLCVarContainer::getInstance().addVar(aivarUnder);
+        }
+        for(int i=0;i<PLCParams::aiCnt;i++) {
+            PLCVar aivarOver("AI"+QString::number(i+1)+"_OVER","Аналоговые входы (выше порога)");
+            if(sysVarsComments.find(aivarOver.getName())!=sysVarsComments.end()) aivarOver.setComment(sysVarsComments[aivarOver.getName()]);
+            aivarOver.setReadable(true);
+            aivarOver.setValue(static_cast<short>(0));
+            aivarOver.setSystem(true);
+            PLCVarContainer::getInstance().addVar(aivarOver);
+        }
+        for(int i=0;i<PLCParams::aiCnt;i++) {
+            PLCVar aivarAlarm("AI"+QString::number(i+1)+"_ALARM","Аналоговые входы (авария)");
+            if(sysVarsComments.find(aivarAlarm.getName())!=sysVarsComments.end()) aivarAlarm.setComment(sysVarsComments[aivarAlarm.getName()]);
+            aivarAlarm.setReadable(true);
+            aivarAlarm.setValue(static_cast<short>(0));
+            aivarAlarm.setSystem(true);
+            PLCVarContainer::getInstance().addVar(aivarAlarm);
+        }
+    }
+
     for(int i=0;i<PLCParams::tmrms_cnt;i++) {
         PLCVar tmrvar("TMRms"+QString::number(i+1),"Таймеры мс");
         if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
@@ -1064,6 +1116,7 @@ void MainWindow::plcChanged(const QString &plcName)
         if(PLCUtils::isPLCSupportADC(plcName)) {configADCAction->setVisible(true);configADCAction->setEnabled(true);}
         else {configADCAction->setVisible(false);configADCAction->setEnabled(false);}
     }
+    plcConfig.setName(plcName);
 }
 
 void MainWindow::readWriteConfig()

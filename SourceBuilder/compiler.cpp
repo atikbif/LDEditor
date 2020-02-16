@@ -9,8 +9,9 @@
 #include <QProcess>
 #include "plcvarcontainer.h"
 #include "plcparams.h"
+#include "adcmanager.h"
 
-void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<QString> &prog, const std::vector<QString> &funcBody, int delay)
+void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<QString> &prog, const std::vector<QString> &funcBody, PLCConfig config, int delay)
 {
     QFile progFile(getBuildPath() + "/CompileFiles/ld_prog.c");
 
@@ -57,10 +58,10 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
         out << "}\n";
         out << "\n";
 
-        out << "void calculate_adc(){\n";
-        //for(const QString &s:funcBody) out << "\t" << s << "\n";
-        out << "}\n";
-        out << "\n";
+        if(config.getName()!="MKU") {
+            std::vector<QString> res = ADCManager::getConverterFunction(config,14);
+            for(QString s:res) out << s;
+        }
 
         out << "void ld_process(void) {\n";
         for(const QString &line:prog) out << "\t" << line << "\n";
