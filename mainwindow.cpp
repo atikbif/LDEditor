@@ -66,6 +66,7 @@
 #include "dialogplcconfig.h"
 #include "dialogcycleconfig.h"
 #include "dialogadcconfig.h"
+#include "Modbus/dialogmodbusmaster.h"
 
 #include <QSettings>
 
@@ -212,6 +213,14 @@ MainWindow::MainWindow(QWidget *parent) :
     horToolBar->addSeparator();
 
     configAction = horToolBar->addAction(QIcon(":/images/read_write_config.png"),"Настройки ПЛК",this,&MainWindow::readWriteConfig);
+
+    horToolBar->addSeparator();
+
+    modbusAction = horToolBar->addAction(QIcon(":/images/modbus.ico"),"Modbus настройка",[this](){
+        auto *dialog = new DialogModbusMaster(this);
+        if(dialog->exec()==QDialog::Accepted) {
+        }
+    });
 
     horToolBar->addSeparator();
 
@@ -418,6 +427,8 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
     });
+
+    confMenu->addAction(modbusAction);
 
     ui->menubar->addMenu(confMenu);
 

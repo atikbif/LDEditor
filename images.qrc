@@ -82,5 +82,6 @@
         <file>images/blue.png</file>
         <file>images/grey.png</file>
         <file>images/white.png</file>
+        <file>images/modbus.ico</file>
     </qresource>
 </RCC>

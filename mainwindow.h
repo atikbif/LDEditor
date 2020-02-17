@@ -66,6 +66,7 @@ class MainWindow : public QMainWindow
 
     QAction *configAction = nullptr;
     QAction *configADCAction = nullptr;
+    QAction *modbusAction = nullptr;
 
     QStringList getPrevProjects(void);
     void updatePrevProjects(const QStringList &prNames);

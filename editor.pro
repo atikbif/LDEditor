@@ -48,6 +48,13 @@ SOURCES += \
     Loader/loader.cpp \
     Loader/loaderthread.cpp \
     Loader/plcfinder.cpp \
+    Modbus/dialogaddmodbusvar.cpp \
+    Modbus/dialogconfigmodbuscanal.cpp \
+    Modbus/dialogeditmodbusvar.cpp \
+    Modbus/dialogmodbusmaster.cpp \
+    Modbus/modbuscanals.cpp \
+    Modbus/modbusvar.cpp \
+    Modbus/modbusvarsstorage.cpp \
     SourceBuilder/adcmanager.cpp \
     checksum.cpp \
         main.cpp \
@@ -120,6 +127,13 @@ HEADERS += \
     Loader/loader.h \
     Loader/loaderthread.h \
     Loader/plcfinder.h \
+    Modbus/dialogaddmodbusvar.h \
+    Modbus/dialogconfigmodbuscanal.h \
+    Modbus/dialogeditmodbusvar.h \
+    Modbus/dialogmodbusmaster.h \
+    Modbus/modbuscanals.h \
+    Modbus/modbusvar.h \
+    Modbus/modbusvarsstorage.h \
     SourceBuilder/adcmanager.h \
     checksum.h \
         mainwindow.h \
@@ -183,6 +197,10 @@ FORMS += \
     Dialogs/dialogadcconfig.ui \
     Dialogs/dialogcycleconfig.ui \
     Dialogs/dialogplcconfig.ui \
+    Modbus/dialogaddmodbusvar.ui \
+    Modbus/dialogconfigmodbuscanal.ui \
+    Modbus/dialogeditmodbusvar.ui \
+    Modbus/dialogmodbusmaster.ui \
     mainwindow.ui \
     Dialogs\dialogldelementproperties.ui \
     Dialogs\dialogvarconfig.ui \
