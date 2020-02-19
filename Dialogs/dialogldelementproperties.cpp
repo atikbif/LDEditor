@@ -73,6 +73,7 @@ void DialogLDElementProperties::on_treeWidget_itemClicked(QTreeWidgetItem *item,
         varName = item->text(0);
         comment = item->text(2);
         ui->lineEditVarName->setText(grName + ": " + varName);
+        if(!comment.isEmpty()) ui->lineEditName->setText(comment);
         //el->connectedVar.group = grName;
         //el->connectedVar.name = varName;
     }
@@ -83,6 +84,11 @@ void DialogLDElementProperties::on_buttonBox_accepted()
     if(el) {
         el->connectedVar.group = grName;
         el->connectedVar.name = varName;
+        QString name = ui->lineEditName->text();
+        auto v = PLCVarContainer::getInstance().getVarByGroupAndName(grName,varName);
+        if(v) {
+            PLCVarContainer::getInstance().updateComment(grName,varName,ui->lineEditName->text());
+        }
         el->setName(ui->lineEditName->text());
         el->setComment(ui->lineEditComment->text());
         if(!comment.isEmpty()) el->setName(comment);
