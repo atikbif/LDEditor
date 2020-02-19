@@ -215,8 +215,8 @@ std::vector<QString> Compiler::getInternalVars()
     std::vector<QString> result;
     std::vector<QString> groups = PLCVarContainer::getInstance().getNotSystemVarGroups();
 
-    result.push_back(QString("short ain[AI_CNT];"));
-    result.push_back(QString("short ain_raw[AI_CNT];"));
+    result.push_back(QString("unsigned short ain[AI_CNT];"));
+    result.push_back(QString("unsigned short ain_raw[AI_CNT];"));
     result.push_back(QString("unsigned char ain_under[AI_CNT];"));
     result.push_back(QString("unsigned char ain_over[AI_CNT];"));
     result.push_back(QString("unsigned char ain_alarm[AI_CNT];"));
@@ -231,10 +231,10 @@ std::vector<QString> Compiler::getInternalVars()
     result.push_back(QString("unsigned char ibit[IBIT_CNT];"));
     result.push_back(QString("unsigned short tmrms[TMRMS_CNT];"));
     result.push_back(QString("unsigned short tmrs[TMRS_CNT];"));
-    result.push_back(QString("short ireg[IREG_CNT];"));
-    result.push_back(QString("short frsh[FRSH_CNT];"));
+    result.push_back(QString("unsigned short ireg[IREG_CNT];"));
+    result.push_back(QString("unsigned short frsh[FRSH_CNT];"));
     result.push_back(QString("double frd[FRD_CNT];"));
-    result.push_back(QString("long frl[FRL_CNT];\n\n"));
+    result.push_back(QString("unsigned long frl[FRL_CNT];\n\n"));
 
     result.push_back(QString("extern unsigned short work_time;\n\n"));
 

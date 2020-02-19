@@ -115,8 +115,8 @@ void DialogVarConfig::on_pushButtonEditVar_clicked()
                     PLCVar updVar(newVarName,group);
                     updVar.setComment(dialog->getVarComment());
                     QString vType = dialog->getVarType();
-                    if(vType=="short") updVar.setValue(static_cast<short>(0));
-                    else if(vType=="long") updVar.setValue(0l);
+                    if(vType=="unsigned short") updVar.setValue(static_cast<unsigned short>(0));
+                    else if(vType=="unsigned long") updVar.setValue(static_cast<unsigned long>(0));
                     else if(vType=="double") updVar.setValue(0.0);
                     else if(vType=="bool") updVar.setValue(false);
                     updVar.setReadable(true);

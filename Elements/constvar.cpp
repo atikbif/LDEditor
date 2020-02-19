@@ -57,6 +57,7 @@ public:
                 painter->setFont(font);
                 painter->setPen(Qt::darkBlue);
                 QString varType = ptr->getConstVarType();
+                varType.replace("unsigned ","u");
                 if(!varType.isEmpty()) stringValue += "(" + varType + ")";
                 painter->drawText(QRectF(width*0.1,height*0,width*0.8,height*0.9), Qt::AlignLeft, stringValue);
             }
@@ -71,8 +72,8 @@ public:
 QString ConstVar::getStringValue() const
 {
     QString stringValue;
-    if(auto pval = std::get_if<short>(&value)) stringValue = QString::number(*pval);
-    if(auto pval = std::get_if<long>(&value)) stringValue = QString::number(*pval);
+    if(auto pval = std::get_if<unsigned short>(&value)) stringValue = QString::number(*pval);
+    if(auto pval = std::get_if<unsigned long>(&value)) stringValue = QString::number(*pval);
     if(auto pval = std::get_if<double>(&value)) stringValue = QString::number(*pval);
     if(auto pval = std::get_if<bool>(&value)) {
         stringValue = (*pval?"1":"0");
@@ -83,12 +84,12 @@ QString ConstVar::getStringValue() const
 
 void ConstVar::setStringValue(const QString &varValue)
 {
-    if(constVarType=="short") {
-        auto res = static_cast<qint16>(varValue.toShort());
-        value = static_cast<short>(res);
-    }else if(constVarType=="long") {
-        qint32 res = varValue.toLong();
-        value = static_cast<long>(res);
+    if(constVarType=="unsigned short") {
+        auto res = static_cast<quint16>(varValue.toUInt());
+        value = static_cast<unsigned short>(res);
+    }else if(constVarType=="unsigned long") {
+        quint32 res = varValue.toULong();
+        value = static_cast<unsigned long>(res);
     }else if(constVarType=="double") {
         double res = varValue.toDouble();
         value = res;
@@ -109,8 +110,8 @@ ConstVar::ConstVar(qreal cell_width, qreal cell_height): LDElement (cell_width,c
 void ConstVar::setValue(const PLCVar::varType &value)
 {
     this->value = value;
-    if(std::holds_alternative<short>(value)) constVarType = "short";
-    else if(std::holds_alternative<long>(value)) constVarType = "long";
+    if(std::holds_alternative<unsigned short>(value)) constVarType = "unsigned short";
+    else if(std::holds_alternative<unsigned long>(value)) constVarType = "unsigned long";
     else if(std::holds_alternative<double>(value)) constVarType = "double";
     else if(std::holds_alternative<QString>(value)) constVarType = "string";
     else if(std::holds_alternative<bool>(value)) constVarType = "bool";

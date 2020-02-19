@@ -61,8 +61,8 @@ void DialogAddVar::on_DialogAddVar_accepted()
                 var.setReadable(true);
                 var.setWriteable(true);
                 QString type = ui->comboBox->currentText();
-                if(type=="short") var.setValue(static_cast<short>(0));
-                else if(type=="long") var.setValue(0l);
+                if(type=="unsigned short") var.setValue(static_cast<unsigned short>(0));
+                else if(type=="unsigned long") var.setValue(static_cast<unsigned long>(0));
                 else if(type=="double") var.setValue(0.0);
                 else if(type=="bool") var.setValue(false);
                 PLCVarContainer::getInstance().addVar(var);

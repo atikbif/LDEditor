@@ -1025,7 +1025,7 @@ void MainWindow::plcChanged(const QString &plcName)
         PLCVar aivar("AI"+QString::number(i+1),"Аналоговые входы");
         if(sysVarsComments.find(aivar.getName())!=sysVarsComments.end()) aivar.setComment(sysVarsComments[aivar.getName()]);
         aivar.setReadable(true);
-        aivar.setValue(static_cast<short>(0));
+        aivar.setValue(static_cast<unsigned short>(0));
         aivar.setSystem(true);
         PLCVarContainer::getInstance().addVar(aivar);
     }
@@ -1035,7 +1035,7 @@ void MainWindow::plcChanged(const QString &plcName)
             PLCVar aivarRaw("AI"+QString::number(i+1)+"_RAW","Аналоговые входы (необраб)");
             if(sysVarsComments.find(aivarRaw.getName())!=sysVarsComments.end()) aivarRaw.setComment(sysVarsComments[aivarRaw.getName()]);
             aivarRaw.setReadable(true);
-            aivarRaw.setValue(static_cast<short>(0));
+            aivarRaw.setValue(static_cast<unsigned short>(0));
             aivarRaw.setSystem(true);
             PLCVarContainer::getInstance().addVar(aivarRaw);
         }
@@ -1044,7 +1044,7 @@ void MainWindow::plcChanged(const QString &plcName)
             PLCVar aivarUnder("AI"+QString::number(i+1)+"_UNDER","Аналоговые входы (ниже порога)");
             if(sysVarsComments.find(aivarUnder.getName())!=sysVarsComments.end()) aivarUnder.setComment(sysVarsComments[aivarUnder.getName()]);
             aivarUnder.setReadable(true);
-            aivarUnder.setValue(static_cast<short>(0));
+            aivarUnder.setValue(static_cast<unsigned short>(0));
             aivarUnder.setSystem(true);
             PLCVarContainer::getInstance().addVar(aivarUnder);
         }
@@ -1052,7 +1052,7 @@ void MainWindow::plcChanged(const QString &plcName)
             PLCVar aivarOver("AI"+QString::number(i+1)+"_OVER","Аналоговые входы (выше порога)");
             if(sysVarsComments.find(aivarOver.getName())!=sysVarsComments.end()) aivarOver.setComment(sysVarsComments[aivarOver.getName()]);
             aivarOver.setReadable(true);
-            aivarOver.setValue(static_cast<short>(0));
+            aivarOver.setValue(static_cast<unsigned short>(0));
             aivarOver.setSystem(true);
             PLCVarContainer::getInstance().addVar(aivarOver);
         }
@@ -1060,7 +1060,7 @@ void MainWindow::plcChanged(const QString &plcName)
             PLCVar aivarAlarm("AI"+QString::number(i+1)+"_ALARM","Аналоговые входы (авария)");
             if(sysVarsComments.find(aivarAlarm.getName())!=sysVarsComments.end()) aivarAlarm.setComment(sysVarsComments[aivarAlarm.getName()]);
             aivarAlarm.setReadable(true);
-            aivarAlarm.setValue(static_cast<short>(0));
+            aivarAlarm.setValue(static_cast<unsigned short>(0));
             aivarAlarm.setSystem(true);
             PLCVarContainer::getInstance().addVar(aivarAlarm);
         }
@@ -1071,7 +1071,7 @@ void MainWindow::plcChanged(const QString &plcName)
         if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
         tmrvar.setReadable(true);
         tmrvar.setWriteable(true);
-        tmrvar.setValue(static_cast<short>(0));
+        tmrvar.setValue(static_cast<unsigned short>(0));
         tmrvar.setSystem(true);
         PLCVarContainer::getInstance().addVar(tmrvar);
     }
@@ -1080,7 +1080,7 @@ void MainWindow::plcChanged(const QString &plcName)
         if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
         tmrvar.setReadable(true);
         tmrvar.setWriteable(true);
-        tmrvar.setValue(static_cast<short>(0));
+        tmrvar.setValue(static_cast<unsigned short>(0));
         tmrvar.setSystem(true);
         PLCVarContainer::getInstance().addVar(tmrvar);
     }
@@ -1100,7 +1100,7 @@ void MainWindow::plcChanged(const QString &plcName)
         if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
         regVar.setReadable(true);
         regVar.setWriteable(true);
-        regVar.setValue(static_cast<short>(0));
+        regVar.setValue(static_cast<unsigned short>(0));
         regVar.setSystem(true);
         PLCVarContainer::getInstance().addVar(regVar);
     }
@@ -1108,7 +1108,7 @@ void MainWindow::plcChanged(const QString &plcName)
     PLCVar workTimeVar("work_time", "Системное время");
     workTimeVar.setReadable(true);
     workTimeVar.setWriteable(true);
-    workTimeVar.setValue(static_cast<short>(0));
+    workTimeVar.setValue(static_cast<unsigned short>(0));
     workTimeVar.setSystem(true);
     PLCVarContainer::getInstance().addVar(workTimeVar);
 

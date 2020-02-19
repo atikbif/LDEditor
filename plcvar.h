@@ -8,7 +8,7 @@
 class PLCVar
 {
 public:
-    using varType = std::variant<bool,short,long,double,QString>;
+    using varType = std::variant<bool,unsigned short,unsigned long,double,QString>;
 private:
     QString group;
     QString name;
@@ -18,7 +18,7 @@ private:
     varType value;
     bool system=false;
 public:
-    PLCVar(const QString &vName,QString vGroup=""):group(vGroup),name(vName) {value=static_cast<short>(0);}
+    PLCVar(const QString &vName,QString vGroup=""):group(vGroup),name(vName) {value=static_cast<unsigned short>(0);}
     void setComment(const QString &vComment) {comment = vComment;}
     void setGroup(const QString &name) {group=name;}
     void setSystem(bool value) {system = value;}
@@ -27,12 +27,12 @@ public:
     QString getGroup() const {return group;}
     QString getName() const {return name;}
     static std::vector<QString> getSupportedTypes() {
-        return {"short","long","double","bool"};
+        return {"unsigned short","unsigned long","double","bool"};
     }
     QString getType() const {
         QString res;
-        if(std::holds_alternative<short>(value)) res = "short";
-        else if(std::holds_alternative<long>(value)) res = "long";
+        if(std::holds_alternative<unsigned short>(value)) res = "unsigned short";
+        else if(std::holds_alternative<unsigned long>(value)) res = "unsigned long";
         else if(std::holds_alternative<double>(value)) res = "double";
         else if(std::holds_alternative<QString>(value)) res = "string";
         else if(std::holds_alternative<bool>(value)) res = "bool";
@@ -45,8 +45,8 @@ public:
     varType getValue() {return value;}
     void setValue(const varType &v) {value = v;}
     QString getStringValue() const {if(auto pval = std::get_if<QString>(&value)) return *pval;else return QString();}
-    int getIntValue() const {if(auto pval = std::get_if<short>(&value)) return *pval;else return 0;}
-    long getLongValue() const {if(auto pval = std::get_if<long>(&value)) return *pval;else return 0;}
+    unsigned int getIntValue() const {if(auto pval = std::get_if<unsigned short>(&value)) return *pval;else return 0;}
+    unsigned long getLongValue() const {if(auto pval = std::get_if<unsigned long>(&value)) return *pval;else return 0;}
     double getDoubleValue() const {if(auto pval = std::get_if<double>(&value)) return *pval;else return 0;}
     bool getBoolvalue() const {if(auto pval = std::get_if<bool>(&value)) return *pval;else return false;}
 };

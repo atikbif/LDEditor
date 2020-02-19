@@ -5,8 +5,8 @@
 
 class ConstVar: public LDElement
 {
-    PLCVar::varType value=static_cast<short>(0);
-    QString constVarType = "short";
+    PLCVar::varType value=static_cast<unsigned short>(0);
+    QString constVarType = "unsigned short";
 
 public:
     ConstVar(qreal cell_width, qreal cell_height);

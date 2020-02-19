@@ -204,8 +204,8 @@ void readPLCVarContainer(QDataStream &stream) {
 
                         PLCVar v(varName,groupName);
                         v.setComment(varComment);
-                        if(varType=="short") {v.setValue(static_cast<short>(0));}
-                        else if(varType=="long") {v.setValue(0l);}
+                        if(varType=="unsigned short") {v.setValue(static_cast<unsigned short>(0));}
+                        else if(varType=="unsigned long") {v.setValue(static_cast<unsigned long>(0));}
                         else if(varType=="double") {v.setValue(0.0);}
                         else if(varType=="bool") {v.setValue(false);}
                         v.setReadable(true);
@@ -280,6 +280,8 @@ std::pair<LDElement *, QString> readLDelement(QDataStream &stream)
                     QString varValue;
                     stream >> varType;
                     stream >> varValue;
+                    if(varType=="short") varType="unsigned short";
+                    else if(varType=="long") varType="unsigned long";
                     el->setConstVartype(varType);
                     el->setStringValue(varValue);
                 }

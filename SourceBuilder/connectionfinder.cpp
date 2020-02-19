@@ -164,7 +164,7 @@ PageCode ConnectionFinder::scanCircuits()
     }
 
     std::map<int,QString> vTypes;
-    for(int v:vars) vTypes[v]="short";
+    for(int v:vars) vTypes[v]="unsigned short";
 
     std::vector<QString> intTimers;
     int tmrNum=0;
@@ -233,7 +233,7 @@ PageCode ConnectionFinder::scanCircuits()
                     QString tmrVar = "p"+QString::number(page_num)+"_ms_tmr"+QString::number(tmrNum);
                     QString prevIP = "p"+QString::number(page_num)+"_filter_on"+QString::number(tmrNum);
                     intTimers.push_back(tmrVar);
-                    varBody.push_back("short " + prevIP + "=0;");
+                    varBody.push_back("unsigned short " + prevIP + "=0;");
                     funcName+="&"+tmrVar+", " + "&"+prevIP+", ";
 
                 }
@@ -259,7 +259,7 @@ PageCode ConnectionFinder::scanCircuits()
 
 
     for(const QString &t:intTimers) {
-        varBody.push_back("short " + t + "=0;");
+        varBody.push_back("unsigned short " + t + "=0;");
         page.functionsBody.push_back(t+"++;if("+t+">30000) "+t+"=0;");
     }
 
