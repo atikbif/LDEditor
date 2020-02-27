@@ -1,5 +1,12 @@
 #include "modbusvarsstorage.h"
 #include <algorithm>
+#include <QDataStream>
+
+ModbusVarsStorage &ModbusVarsStorage::getInstance()
+{
+    static ModbusVarsStorage instance;
+    return instance;
+}
 
 ModbusVarsStorage::ModbusVarsStorage()
 {
@@ -108,13 +115,98 @@ void ModbusVarsStorage::setModbusCanals(ModbusCanals value)
     canals = value;
 }
 
-QByteArray ModbusVarsStorage::toBytes() const
+void ModbusVarsStorage::reset()
+{
+    canals = ModbusCanals();
+    vars.clear();
+}
+
+QByteArray ModbusVarsStorage::toBytes()
 {
     QByteArray res;
+    QDataStream out(&res,QIODevice::WriteOnly);
+    int code = 12148;
+    out << code;
+    int version = 1;
+    out << version;
+    int cnt = getVarCnt();
+    out << cnt;
+    for(int i=0;i<cnt;i++) {
+        auto v = getModbusVarByIndex(i);
+        int vType = static_cast<int>(v->getType());
+        out << vType;
+        out << v->getNumber();
+        out << v->getComment();
+        out << v->getMemAddr();
+        out << v->getWriteFlag();
+        out << v->getActiveFlag();
+        out << v->getNetAddress();
+        out << v->getCanalNumber();
+    }
+    int canNums = canals.getCanNums();
+    out << canNums;
+    for(int i=0;i<canNums;i++) {
+        out << canals.getPeriod(i+1);
+        out << canals.getMaxLength(i+1);
+        out << canals.getMaxUnusedSpace(i+1);
+    }
+
     return res;
 }
 
 void ModbusVarsStorage::fromBytes(QByteArray &value)
 {
-    Q_UNUSED(value)
+    QDataStream in(&value,QIODevice::ReadOnly);
+    reset();
+    int code = 0;
+    in >> code;
+    int version = 0;
+    in >> version;
+    if(code==12148) {
+        if(version==1) {
+            int cnt = 0;
+            in >> cnt;
+            for(int i=0;i<cnt;i++) {
+                ModbusVar v;
+                int vType = 0;
+                in >> vType;
+                v.setType(static_cast<ModbusVar::memType>(vType));
+                int vNum = 0;
+                in >> vNum;
+                v.setNumber(vNum);
+                QString vComment;
+                in >> vComment;
+                v.setComment(vComment);
+                int vMemAddr = 0;
+                in >> vMemAddr;
+                v.setMemAddress(vMemAddr);
+                bool vWrFlag = false;
+                in >> vWrFlag;
+                v.setWriteFlag(vWrFlag);
+                bool vActFlag = false;
+                in >> vActFlag;
+                v.setActiveFlag(vActFlag);
+                int vNetAddr = 0;
+                in >> vNetAddr;
+                v.setNetAddress(vNetAddr);
+                int vCanNum = 0;
+                in >> vCanNum;
+                v.setCanNumber(vCanNum);
+                addModbusVar(v);
+            }
+            int canCnt = 0;
+            in >> canCnt;
+            for(int i=0;i<canCnt;i++) {
+                int period = 0;
+                in >> period;
+                canals.setPeriod(i+1,period);
+                int maxLength = 0;
+                in >> maxLength;
+                canals.setMaxLength(i+1,maxLength);
+                int maxUnusedSpace = 0;
+                in >> maxUnusedSpace;
+                canals.setMaxUnusedSpace(i+1,maxUnusedSpace);
+            }
+        }
+    }
 }

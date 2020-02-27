@@ -634,6 +634,10 @@ void MainWindow::saveProject()
                 QByteArray config = plcConfig.toBytes();
                 out << config;
             }
+            if(PLCUtils::isPLCSupportModbusMaster(plcType->currentText())) {
+                QByteArray config = ModbusVarsStorage::getInstance().toBytes();
+                out << config;
+            }
             prChanged = false;
             QFileInfo fInfo(file);
             prDir = fInfo.canonicalPath()+"/";
@@ -690,6 +694,10 @@ void MainWindow::saveAsProject()
             }
             if(plcType->currentText()!="MKU") {
                 QByteArray config = plcConfig.toBytes();
+                out << config;
+            }
+            if(PLCUtils::isPLCSupportModbusMaster(plcType->currentText())) {
+                QByteArray config = ModbusVarsStorage::getInstance().toBytes();
                 out << config;
             }
             prChanged = false;
@@ -766,6 +774,11 @@ void MainWindow::openProjectByName(const QString &fName) {
                 in >> config;
                 plcConfig.fromBytes(config);
             }else plcConfig = PLCConfig();
+            if(PLCUtils::isPLCSupportModbusMaster(plcType->currentText())) {
+                QByteArray config;
+                in >> config;
+                ModbusVarsStorage::getInstance().fromBytes(config);
+            }
             plcChanged(plcName);
             setWindowTitle(fName);
             prChanged = false;
@@ -1105,6 +1118,50 @@ void MainWindow::plcChanged(const QString &plcName)
         PLCVarContainer::getInstance().addVar(regVar);
     }
 
+    if(plcName!="MKU") {
+        for(int i=0;i<16;i++) {
+            PLCVar bitVar("SC_BIT" + QString::number(i+1), "Скада биты");
+            if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+            bitVar.setReadable(true);
+            bitVar.setWriteable(true);
+            bitVar.setValue(false);
+            bitVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(bitVar);
+        }
+
+        for(int i=0;i<16;i++) {
+            PLCVar regVar("SC_REG" + QString::number(i+1), "Скада регистры");
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            regVar.setReadable(true);
+            regVar.setWriteable(true);
+            regVar.setValue(static_cast<unsigned short>(0));
+            regVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(regVar);
+        }
+    }
+
+    if(PLCUtils::isPLCSupportModbusMaster(plcName)) {
+        for(int i=0;i<64;i++) {
+            PLCVar regVar("MODB" + QString::number(i+1), "Modbus master регистры");
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            regVar.setReadable(true);
+            regVar.setWriteable(true);
+            regVar.setValue(static_cast<unsigned short>(0));
+            regVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(regVar);
+        }
+
+        for(int i=1;i<=254;i++) {
+            PLCVar regVar("MODB_ERR" + QString::number(i), "Modbus master ошибки");
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            regVar.setReadable(true);
+            regVar.setWriteable(false);
+            regVar.setValue(static_cast<unsigned short>(0));
+            regVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(regVar);
+        }
+    }
+
     PLCVar workTimeVar("work_time", "Системное время");
     workTimeVar.setReadable(true);
     workTimeVar.setWriteable(true);
@@ -1126,6 +1183,10 @@ void MainWindow::plcChanged(const QString &plcName)
         qDebug() << "ADC CONFIG CHECK";
         if(PLCUtils::isPLCSupportADC(plcName)) {configADCAction->setVisible(true);configADCAction->setEnabled(true);}
         else {configADCAction->setVisible(false);configADCAction->setEnabled(false);}
+    }
+    if(modbusAction) {
+        if(PLCUtils::isPLCSupportModbusMaster(plcName)) {modbusAction->setVisible(true);modbusAction->setEnabled(true);}
+        else {modbusAction->setVisible(false);modbusAction->setEnabled(false);}
     }
     plcConfig.setName(plcName);
 }

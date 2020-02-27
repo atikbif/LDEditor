@@ -10,6 +10,9 @@
 #include "plcvarcontainer.h"
 #include "plcparams.h"
 #include "adcmanager.h"
+#include "Modbus/modbusrequestlist.h"
+#include "plcutils.h"
+#include "Modbus/modbusvarsstorage.h"
 
 void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<QString> &prog, const std::vector<QString> &funcBody, PLCConfig config, int delay)
 {
@@ -38,9 +41,10 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
         QTextStream out(&progFile);
         out << "#include \"ld_prog.h\"\n";
         out << "#include \"elements.h\"\n";
-        out << "#include \"iodef.h\"\n\n";
-        out << "#include \"os_conf.h\"\n\n";
-        out << "#include \"lib_elements.h\"\n\n";
+        out << "#include \"iodef.h\"\n";
+        out << "#include \"os_conf.h\"\n";
+        out << "#include \"lib_elements.h\"\n";
+        out << "#include \"stdint.h\"\n";
 
         out << "unsigned short plc_cycle = " + QString::number(delay) + ";\n\n";
 
@@ -61,7 +65,32 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
         if(config.getName()!="MKU") {
             std::vector<QString> res = ADCManager::getConverterFunction(config,14);
             for(QString s:res) out << s;
+
+            out << "\n";
+            out << "extern unsigned char scada_bits[16];\n";
+            out << "extern unsigned short scada_regs[16];\n";
+            out << "\n";
         }
+
+        if(PLCUtils::isPLCSupportModbusMaster(config.getName())) {
+            ModbusRequestList reqList;
+
+            QStringList header = reqList.getHeader();
+            for(const QString &s:header) out << s + "\n";
+            out << "\n";
+
+            QStringList vNames = ModbusRequestList::getVarNames();
+            for(const QString &s:vNames) out << s + "\n";
+            out << "\n";
+
+            int canCnt = ModbusVarsStorage::getInstance().getModbusCanals().getCanNums();
+            for(int i=1;i<=canCnt;i++) {
+                QStringList res = reqList.getResult(i);
+                for(const QString &s:res) out << s + "\n";
+                out << "\n";
+            }
+        }
+
 
         out << "void ld_process(void) {\n";
         for(const QString &line:prog) out << "\t" << line << "\n";

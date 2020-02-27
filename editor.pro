@@ -53,6 +53,7 @@ SOURCES += \
     Modbus/dialogeditmodbusvar.cpp \
     Modbus/dialogmodbusmaster.cpp \
     Modbus/modbuscanals.cpp \
+    Modbus/modbusrequestlist.cpp \
     Modbus/modbusvar.cpp \
     Modbus/modbusvarsstorage.cpp \
     SourceBuilder/adcmanager.cpp \
@@ -132,6 +133,7 @@ HEADERS += \
     Modbus/dialogeditmodbusvar.h \
     Modbus/dialogmodbusmaster.h \
     Modbus/modbuscanals.h \
+    Modbus/modbusrequestlist.h \
     Modbus/modbusvar.h \
     Modbus/modbusvarsstorage.h \
     SourceBuilder/adcmanager.h \

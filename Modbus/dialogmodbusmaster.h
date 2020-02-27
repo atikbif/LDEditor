@@ -13,7 +13,7 @@ class DialogModbusMaster : public QDialog
 {
     Q_OBJECT
     ModbusVar var;
-    ModbusVarsStorage vars;
+    //ModbusVarsStorage vars;
 
 public:
     explicit DialogModbusMaster(QWidget *parent = nullptr);

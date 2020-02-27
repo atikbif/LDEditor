@@ -40,6 +40,10 @@ void DialogAddModbusVar::on_spinBoxCanNum_valueChanged(int arg1)
 void DialogAddModbusVar::on_comboBox_currentIndexChanged(int index)
 {
     var.setType(ModbusVar::memType(index));
+    if(ModbusVar::memType(index)==ModbusVar::INPUTS || ModbusVar::memType(index)==ModbusVar::INP_REG) {
+        var.setWriteFlag(false);
+        ui->radioButtonRead->setChecked(true);
+    }
 }
 
 void DialogAddModbusVar::on_spinBoxNetAddr_valueChanged(int arg1)
@@ -64,7 +68,12 @@ void DialogAddModbusVar::on_radioButtonRead_clicked()
 
 void DialogAddModbusVar::on_radioButtonWrite_clicked()
 {
-    var.setWriteFlag(true);
+    if(ModbusVar::memType(ui->comboBox->currentIndex())==ModbusVar::INPUTS || ModbusVar::memType(ui->comboBox->currentIndex())==ModbusVar::INP_REG) {
+        var.setWriteFlag(false);
+        ui->radioButtonRead->setChecked(true);
+    }else {
+        var.setWriteFlag(true);
+    }
 }
 
 void DialogAddModbusVar::on_checkBoxActive_clicked()

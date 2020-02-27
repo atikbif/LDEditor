@@ -4,6 +4,7 @@
 std::set<QString> PLCUtils::ethPLCNames = {"PC21-1 2019"};
 std::set<QString> PLCUtils::plcNames = {"PC21-1 2019"};
 std::set<QString> PLCUtils::adcPLCNames = {"PC21-1 2019"};
+std::set<QString> PLCUtils::modbVastPLCNames = {"PC21-1 2019"};
 
 PLCUtils::PLCUtils()
 {
@@ -19,6 +20,12 @@ bool PLCUtils::isPLCSupportEth(const QString &plcName)
 bool PLCUtils::isPLCSupportADC(const QString &plcName)
 {
     if(adcPLCNames.find(plcName)!=adcPLCNames.end()) return true;
+    return false;
+}
+
+bool PLCUtils::isPLCSupportModbusMaster(const QString &plcName)
+{
+    if(modbVastPLCNames.find(plcName)!=modbVastPLCNames.end()) return true;
     return false;
 }
 

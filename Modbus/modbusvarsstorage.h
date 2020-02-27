@@ -10,8 +10,11 @@ class ModbusVarsStorage
 {
     ModbusCanals canals;
     std::vector<QSharedPointer<ModbusVar>> vars;
-public:
+
+private:
     ModbusVarsStorage();
+public:
+    static ModbusVarsStorage& getInstance();
     int getVarCnt() const {return vars.size();}
     bool addModbusVar(const ModbusVar &v);
     bool replaceModbusVar(int varNum, const ModbusVar &v);
@@ -29,7 +32,8 @@ public:
     void setMaxUnusedSpace(int canNum, int value);
     void setPeriod(int canNum, int value);
     void setModbusCanals(ModbusCanals value);
-    QByteArray toBytes() const;
+    void reset();
+    QByteArray toBytes();
     void fromBytes(QByteArray &value);
 };
 

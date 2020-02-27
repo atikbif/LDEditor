@@ -22,6 +22,15 @@ DialogModbusMaster::DialogModbusMaster(QWidget *parent) :
     var.setMemAddress(0);
     var.setNetAddress(1);
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this,[this](){on_pushButtonEdit_clicked();});
+    int varCnt = ModbusVarsStorage::getInstance().getVarCnt();
+    for(int i=0;i<varCnt;i++) {
+        auto stVar = ModbusVarsStorage::getInstance().getModbusVarByIndex(i);
+        int row = ui->tableWidget->rowCount();
+        ui->tableWidget->insertRow(row);
+        updateRow(row,*stVar);
+        var.setNumber(stVar->getNumber()+1);
+        var.setMemAddress(stVar->getMemAddr()+1);
+    }
 }
 
 DialogModbusMaster::~DialogModbusMaster()
@@ -35,7 +44,7 @@ void DialogModbusMaster::on_pushButtonAddVar_clicked()
     dialog->setVar(var);
     if(dialog->exec()==QDialog::Accepted) {
         var = dialog->getVar();
-        if(!vars.addModbusVar(var)) {
+        if(!ModbusVarsStorage::getInstance().addModbusVar(var)) {
             QMessageBox::warning(this, "Неккоректные данные", "Переменная с таким номером уже используется!");
         }else {
             int row = ui->tableWidget->rowCount();
@@ -65,15 +74,15 @@ void DialogModbusMaster::on_pushButtonEdit_clicked()
             }
         }
         if(varNum>0) {
-            QSharedPointer<ModbusVar> selVar = vars.getModbusVarByNum(varNum);
+            QSharedPointer<ModbusVar> selVar = ModbusVarsStorage::getInstance().getModbusVarByNum(varNum);
             auto *dialog = new DialogEditModbusVar(this);
             dialog->setVar(*selVar);
             if(dialog->exec()==QDialog::Accepted) {
                 ModbusVar v = dialog->getVar();
-                if(v.getNumber()!= varNum && vars.isVarExists(v.getNumber())) QMessageBox::warning(this, "Неккоректные данные", "Переменная с таким номером уже используется!");
+                if(v.getNumber()!= varNum && ModbusVarsStorage::getInstance().isVarExists(v.getNumber())) QMessageBox::warning(this, "Неккоректные данные", "Переменная с таким номером уже используется!");
                 else {
                     var = v;
-                    vars.replaceModbusVar(varNum,var);
+                    ModbusVarsStorage::getInstance().replaceModbusVar(varNum,var);
                     updateRow(varRow,var);
                 }
 
@@ -87,7 +96,7 @@ void DialogModbusMaster::on_pushButtonEdit_clicked()
 
 void DialogModbusMaster::on_pushButtonturnOnAll_clicked()
 {
-    vars.enableAll();
+    ModbusVarsStorage::getInstance().enableAll();
     for(int i=0;i<ui->tableWidget->rowCount();++i) {
         ui->tableWidget->setItem(i,6,new QTableWidgetItem("вкл"));
     }
@@ -95,7 +104,7 @@ void DialogModbusMaster::on_pushButtonturnOnAll_clicked()
 
 void DialogModbusMaster::on_pushButtonturnOffAll_clicked()
 {
-    vars.disableAll();
+    ModbusVarsStorage::getInstance().disableAll();
     for(int i=0;i<ui->tableWidget->rowCount();++i) {
         ui->tableWidget->setItem(i,6,new QTableWidgetItem("откл"));
     }
@@ -122,7 +131,7 @@ void DialogModbusMaster::on_pushButtonDeleteVar_clicked()
                                                                       "Удалить переменную MODB" + QString::number(varNum) + "?",
                                         QMessageBox::Yes|QMessageBox::No);
             if (reply == QMessageBox::Yes) {
-                vars.deleteModbusVar(varNum);
+                ModbusVarsStorage::getInstance().deleteModbusVar(varNum);
                 ui->tableWidget->removeRow(varRow);
             }
         }
@@ -134,9 +143,9 @@ void DialogModbusMaster::on_pushButtonDeleteVar_clicked()
 void DialogModbusMaster::on_pushButtonCanal_clicked()
 {
     auto *dialog = new DialogConfigModbusCanal(this);
-    dialog->setCanals(vars.getModbusCanals());
+    dialog->setCanals(ModbusVarsStorage::getInstance().getModbusCanals());
     if(dialog->exec()==QDialog::Accepted) {
-        vars.setModbusCanals(dialog->getCanals());
+        ModbusVarsStorage::getInstance().setModbusCanals(dialog->getCanals());
     }
     delete dialog;
 }
@@ -159,4 +168,6 @@ void DialogModbusMaster::updateRow(int row, const ModbusVar &v)
     ui->tableWidget->setItem(row,5,new QTableWidgetItem(v.getWriteFlag()?"запись":"чтение"));
     ui->tableWidget->setItem(row,6,new QTableWidgetItem(v.getActiveFlag()?"вкл":"откл"));
     ui->tableWidget->setItem(row,7,new QTableWidgetItem(v.getComment()));
+    if(v.getActiveFlag()) ui->tableWidget->item(row,6)->setBackground(Qt::white);
+    else ui->tableWidget->item(row,6)->setBackground(Qt::red);
 }
