@@ -2,6 +2,7 @@
 #include "checksum.h"
 #include <QUdpSocket>
 #include <QThread>
+#include <QDebug>
 
 QByteArray EthconfigReaderThread::createGetConfigRequest()
 {
@@ -13,7 +14,7 @@ QByteArray EthconfigReaderThread::createGetConfigRequest()
     res.append('\0');
     res.append('\0');
     res.append('\0');
-    res.append(0x08);
+    res.append(10);
     int crc = CheckSum::getCRC16(res);
     res.append(static_cast<char>(crc & 0xFF));
     res.append(static_cast<char>(crc >> 8));
@@ -49,7 +50,7 @@ void EthconfigReaderThread::startRead()
             }
             if(cnt>0) {
                 if(CheckSum::getCRC16(receiveBuf,cnt)==0) {
-                    if((cnt==2+1+1+16+2) && receiveBuf[3]==0x01) funcRes = true;
+                    if((cnt==2+1+1+20+2) && receiveBuf[3]==0x01) funcRes = true;
                     else emit info("Ошибка при чтении конфигурации");
                     break;
                 }
@@ -64,7 +65,7 @@ void EthconfigReaderThread::startRead()
     }
     if(funcRes) {
         std::vector<quint16> config;
-        for(int i=0;i<8;i++) {
+        for(int i=0;i<10;i++) {
             quint16 reg = static_cast<quint8>(receiveBuf[4+i*2]);
             reg = static_cast<quint16>(reg << 8);
             reg |= static_cast<quint8>(receiveBuf[5+i*2]);

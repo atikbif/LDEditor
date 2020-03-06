@@ -6,6 +6,7 @@
 #include "dialogeditnotsystemvar.h"
 #include "dialogeditsystemvar.h"
 #include "dialogrenamegroup.h"
+#include <QRegExp>
 
 DialogVarConfig::DialogVarConfig(QWidget *parent) :
     QDialog(parent),
@@ -137,6 +138,22 @@ void DialogVarConfig::on_pushButtonEditVar_clicked()
                 if(dialog->exec()==QDialog::Accepted) {
                     QString newComment = dialog->getComment();
                     PLCVarContainer::getInstance().updateComment(var->getGroup(),var->getName(),newComment);
+
+                    QRegExp aiExp("AI\\d+");
+                    if(aiExp.exactMatch(varName)) {
+                        PLCVarContainer::getInstance().updateComment(group+" (авария)",varName+"_ALARM",newComment+"_ALARM");
+                        PLCVarContainer::getInstance().updateComment(group+" (выше порога)",varName+"_OVER",newComment+"_OVER");
+                        PLCVarContainer::getInstance().updateComment(group+" (ниже порога)",varName+"_UNDER",newComment+"_UNDER");
+                        PLCVarContainer::getInstance().updateComment(group+" (необраб)",varName+"_RAW",newComment+"_RAW");
+                    }else {
+                        QRegExp diExp("DI\\d+");
+                        if(diExp.exactMatch(varName)) {
+                            PLCVarContainer::getInstance().updateComment(group+" (кор. замыкание)",varName+"_SHORT",newComment+"_SHORT");
+                            PLCVarContainer::getInstance().updateComment(group+" (обрыв)",varName+"_BREAK",newComment+"_BREAK");
+                            PLCVarContainer::getInstance().updateComment(group+" (ошибка)",varName+"_FAULT",newComment+"_FAULT");
+                        }
+                    }
+
                     drawVarTree(var->getGroup(),var->getName());
                 }
                 delete dialog;

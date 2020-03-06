@@ -9,6 +9,7 @@ class PLCConfig
 {
     std::vector<bool> input_type;
     std::vector<int> sensor_type;
+    QByteArray settings;
     QString name;
 public:
     PLCConfig(const QString &name="", int input_cnt=64, int ai_cnt=64);
@@ -19,6 +20,8 @@ public:
     bool getInputType(int num) const;
     int getSensorType(int num) const;
     QByteArray toBytes() const;
+    QByteArray getSettings() const {return settings;}
+    void setSettings(const QByteArray &inp) {settings = inp;}
     void fromBytes(QByteArray &value);
 };
 

@@ -28,6 +28,8 @@ private slots:
 
     void on_buttonBox_accepted();
 
+    void on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
+
 private:
     Ui::DialogLDElementProperties *ui;
 };

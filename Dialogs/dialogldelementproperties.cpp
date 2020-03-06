@@ -1,6 +1,7 @@
 #include "dialogldelementproperties.h"
 #include "ui_dialogldelementproperties.h"
 #include <QDebug>
+#include <QRegExp>
 
 DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *parent) :
     QDialog(parent),el(el),
@@ -88,9 +89,33 @@ void DialogLDElementProperties::on_buttonBox_accepted()
         auto v = PLCVarContainer::getInstance().getVarByGroupAndName(grName,varName);
         if(v) {
             PLCVarContainer::getInstance().updateComment(grName,varName,ui->lineEditName->text());
+            QRegExp aiExp("AI\\d+");
+            if(aiExp.exactMatch(varName)) {
+                PLCVarContainer::getInstance().updateComment(grName+" (авария)",varName+"_ALARM",ui->lineEditName->text()+"_ALARM");
+                PLCVarContainer::getInstance().updateComment(grName+" (выше порога)",varName+"_OVER",ui->lineEditName->text()+"_OVER");
+                PLCVarContainer::getInstance().updateComment(grName+" (ниже порога)",varName+"_UNDER",ui->lineEditName->text()+"_UNDER");
+                PLCVarContainer::getInstance().updateComment(grName+" (необраб)",varName+"_RAW",ui->lineEditName->text()+"_RAW");
+            }else {
+                QRegExp diExp("DI\\d+");
+                if(diExp.exactMatch(varName)) {
+                    PLCVarContainer::getInstance().updateComment(grName+" (кор. замыкание)",varName+"_SHORT",ui->lineEditName->text()+"_SHORT");
+                    PLCVarContainer::getInstance().updateComment(grName+" (обрыв)",varName+"_BREAK",ui->lineEditName->text()+"_BREAK");
+                    PLCVarContainer::getInstance().updateComment(grName+" (ошибка)",varName+"_FAULT",ui->lineEditName->text()+"_FAULT");
+                }
+            }
+
         }
         el->setName(ui->lineEditName->text());
         el->setComment(ui->lineEditComment->text());
         if(!comment.isEmpty()) el->setName(comment);
+    }
+}
+
+void DialogLDElementProperties::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+    if(item && item->parent() && el) {
+        on_treeWidget_itemClicked(item,column);
+        on_buttonBox_accepted();
+        accept();
     }
 }

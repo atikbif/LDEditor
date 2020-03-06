@@ -401,6 +401,7 @@ MainWindow::MainWindow(QWidget *parent) :
         dialog->setIP(progIP);
         dialog->setIPasDefault(ethAsDefault);
         if(dialog->exec()==QDialog::Accepted) {
+            if(progIP != dialog->getIP()) prChanged = true;
             baudrate = dialog->getBaudrate();
             netAddr = dialog->getNetAddress();
             parity = dialog->getParity();
@@ -425,6 +426,7 @@ MainWindow::MainWindow(QWidget *parent) :
             for(int i=0;i<result.size();i++) {
                 plcConfig.setSensorType(i,result.at(i));
             }
+            prChanged = true;
         }
     });
 
@@ -1194,7 +1196,11 @@ void MainWindow::plcChanged(const QString &plcName)
 void MainWindow::readWriteConfig()
 {
     if(PLCUtils::isPLCSupportEth(plcType->currentText())) {
-        DialogPLCConfig *dialog = new DialogPLCConfig();
+        DialogPLCConfig *dialog = new DialogPLCConfig(plcConfig);
+
+        qDebug() << "CONF SIZE" <<  plcConfig.getSettings().size();
+
+        connect(dialog,&DialogPLCConfig::saveConf,[this](const QByteArray &conf){plcConfig.setSettings(conf);prChanged=true;});
         dialog->setCurrentIP(progIP);
         dialog->exec();
         delete dialog;
