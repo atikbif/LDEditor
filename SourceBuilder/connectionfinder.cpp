@@ -260,7 +260,9 @@ PageCode ConnectionFinder::scanCircuits()
 
     for(const QString &t:intTimers) {
         varBody.push_back("unsigned short " + t + "=0;");
-        page.functionsBody.push_back(t+"++;if("+t+">30000) "+t+"=0;");
+        QString frontVar = t;
+        frontVar.replace(QString("_ms_tmr"),QString("_filter_on"));
+        page.functionsBody.push_back("if(" + frontVar + ") " + t + "++;");
     }
 
     std::vector<LDElement*> usedElements;

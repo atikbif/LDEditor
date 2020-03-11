@@ -83,5 +83,7 @@
         <file>images/grey.png</file>
         <file>images/white.png</file>
         <file>images/modbus.ico</file>
+        <file>images/right.png</file>
+        <file>images/left.png</file>
     </qresource>
 </RCC>

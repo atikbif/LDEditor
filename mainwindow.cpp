@@ -69,6 +69,7 @@
 #include "Modbus/dialogmodbusmaster.h"
 
 #include <QSettings>
+#include <QtConcurrent/QtConcurrent>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -189,7 +190,7 @@ MainWindow::MainWindow(QWidget *parent) :
     horToolBar->addSeparator();
     horToolBar->addAction(QIcon(":/images/variable.png"),"Конфигурация переменных",[this](){auto *dialog = new DialogVarConfig();if(dialog->exec()==QDialog::Accepted) prChanged=true;delete dialog;});
     horToolBar->addSeparator();
-    horToolBar->addAction(QIcon(":/images/compile2.png"),"Собрать проект",this,&MainWindow::build);
+    buildAction = horToolBar->addAction(QIcon(":/images/compile2.png"),"Собрать проект",this,&MainWindow::build);
 
     horToolBar->addSeparator();
     horToolBar->addAction(QIcon(":/images/program_flash.png"),"Загрузить программу в ПЛК",[this](){
@@ -225,6 +226,37 @@ MainWindow::MainWindow(QWidget *parent) :
     horToolBar->addSeparator();
 
     pageNumWidget = new QSpinBox(this);
+
+    QString stSheet = "QSpinBox {"
+            "border: 1px solid #ABABAB;"
+            "border-radius: 12px;"
+            "height: 24px;"
+            "width: 48px;"
+          "}"
+
+          "QSpinBox::down-button  {"
+            "subcontrol-origin: margin;"
+            "subcontrol-position: center left;"
+            "image: url(:/images/left.png);"
+            "left: 1px;"
+            "height: 24px;"
+            "width: 24px;"
+          "}"
+
+          "QSpinBox::up-button  {"
+            "subcontrol-origin: margin;"
+            "subcontrol-position: center right;"
+            "image: url(:/images/right.png);"
+            "right: 1px;"
+            "height: 24px;"
+            "width: 24px;"
+          "}";
+
+
+    pageNumWidget->setStyleSheet(stSheet);
+    pageNumWidget->setAlignment(Qt::AlignHCenter);
+
+
     pageNumWidget->setValue(1);
     pageNumWidget->setMinimum(1);
     pageNumWidget->setMaximum(page_count);
@@ -345,11 +377,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusbar->addWidget(itemInfo,2);
 
     buttonMin = new QPushButton(QIcon(":/images/minimize.png"),"");
-    buttonMax = new QPushButton(QIcon(":/images/maximize.png"),"");
+    //buttonMax = new QPushButton(QIcon(":/images/maximize.png"),"");
     ui->statusbar->addWidget(buttonMin);
-    ui->statusbar->addWidget(buttonMax);
-    connect(buttonMin,&QPushButton::clicked,[this](){ui->textBrowser->setVisible(false);});
-    connect(buttonMax,&QPushButton::clicked,[this](){ui->textBrowser->setVisible(true);});
+    //ui->statusbar->addWidget(buttonMax);
+    connect(buttonMin,&QPushButton::clicked,[this](){
+        if(ui->textBrowser->isVisible()) ui->textBrowser->setVisible(false);
+        else ui->textBrowser->setVisible(true);
+    });
+    //connect(buttonMax,&QPushButton::clicked,[this](){ui->textBrowser->setVisible(true);});
     buttonMin->clicked();
 
     for(std::pair<LDScene*,CmdStack*> p:prPages) { connectScene(p.first); }
@@ -379,9 +414,9 @@ MainWindow::MainWindow(QWidget *parent) :
     background->addAction(QIcon(":/images/blue.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xE0,0xF5,0xFD));}});
     background->addAction(QIcon(":/images/red.png"),"",[this](){for(auto &page:prPages){page.first->setBackgroundBrush(QColor(0xFA,0xDF,0xCC));}});
 
-    QAction *nameAction = new QAction("показать имена");
+    nameAction = new QAction("показать имена");
     nameAction->setCheckable(true);
-    connect(nameAction,&QAction::triggered,[this,nameAction](){for(auto &page:prPages) {page.first->setNamesFlag(nameAction->isChecked());}});
+    connect(nameAction,&QAction::triggered,[this](){for(auto &page:prPages) {page.first->setNamesFlag(nameAction->isChecked());}});
     viewMenu->addAction(nameAction);
 
     QAction *libAction = new QAction("показать библиотеку");
@@ -512,6 +547,7 @@ void MainWindow::createPageBefore()
     sc->setStack(st);
     sc->setCopyBuf(new CopyBufItem(page.cell_width,page.cell_height));
     sc->empty_page();
+    sc->setNamesFlag(nameAction->isChecked());
 
     connectScene(sc);
 
@@ -534,6 +570,7 @@ void MainWindow::createPageAfter()
     sc->setStack(st);
     sc->setCopyBuf(new CopyBufItem(page.cell_width,page.cell_height));
     sc->empty_page();
+    sc->setNamesFlag(nameAction->isChecked());
 
     connectScene(sc);
 
@@ -645,13 +682,13 @@ void MainWindow::saveProject()
             prDir = fInfo.canonicalPath()+"/";
             file.close();
             bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
             if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно сохранён");
             ui->textBrowser->repaint();
         }else {
             bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
             if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для записи");
             ui->textBrowser->repaint();
@@ -709,13 +746,13 @@ void MainWindow::saveAsProject()
             prDir = fInfo.canonicalPath()+"/";
             file.close();
             bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
             if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно сохранён");
             ui->textBrowser->repaint();
         }else {
             bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
             if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для записи");
             ui->textBrowser->repaint();
@@ -790,14 +827,14 @@ void MainWindow::openProjectByName(const QString &fName) {
             prDir = fInfo.canonicalPath()+"/";
 
             bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) buttonMax->click();
+            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
             if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект открыт");
             ui->textBrowser->repaint();
         }
     }else {
         bool isSysInfoVisible = ui->textBrowser->isVisible();
-        if(!isSysInfoVisible) buttonMax->click();
+        if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
         if(!isSysInfoVisible) QTimer::singleShot(1000, this, [this](){buttonMin->click();});
         ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка открытия файла для чтения");
         ui->textBrowser->repaint();
@@ -854,8 +891,8 @@ void MainWindow::previewAction()
 void MainWindow::build()
 {
     ui->textBrowser->clear();
-    bool isSysInfoVisible = ui->textBrowser->isVisible();
-    buttonMax->click();
+    //bool isSysInfoVisible = ui->textBrowser->isVisible();
+    ui->textBrowser->setVisible(true);
     ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проверка схемы");
     ui->textBrowser->repaint();
     int pageNum = 1;
@@ -925,7 +962,30 @@ void MainWindow::build()
         ui->textBrowser->repaint();
         ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Компиляция и линковка");
         ui->textBrowser->repaint();
-        std::vector<QString> compileResult = Compiler::compile(plcType->currentText(),prDir);
+
+        buildAction->setEnabled(false);
+        QFutureWatcher<std::vector<QString>> *watcher = new QFutureWatcher<std::vector<QString>>();
+        QFuture<std::vector<QString>> future = QtConcurrent::run(&Compiler::compile,plcType->currentText(),prDir);
+        watcher->setFuture(future);
+
+        connect(watcher,&QFutureWatcher<std::vector<QString>>::finished,
+                [this,watcher,future](){
+            std::vector<QString> compileResult =  future.result();
+            if(!compileResult.empty()) {
+                buttonMax->click();
+                for(const QString &s:compileResult) {
+                    ui->textBrowser->append(s+"\n");
+                }
+            }else {
+                bool isSysInfoVisible = ui->textBrowser->isVisible();
+                if(isSysInfoVisible) QTimer::singleShot(500, this, [this](){buttonMin->click();});
+                ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно собран");
+            }
+            buildAction->setEnabled(true);
+            delete watcher;
+        });
+
+        /*std::vector<QString> compileResult = Compiler::compile(plcType->currentText(),prDir);
         if(!compileResult.empty()) {
             buttonMax->click();
             for(const QString &s:compileResult) {
@@ -934,7 +994,7 @@ void MainWindow::build()
         }else {
             if(!isSysInfoVisible) QTimer::singleShot(500, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Проект успешно собран");
-        }
+        }*/
     }else {
         this->update();
     }

@@ -14,6 +14,9 @@
 #include <QStringList>
 #include "plcconfig.h"
 
+#include <QFutureWatcher>
+#include <QFuture>
+
 namespace Ui {
 class MainWindow;
 }
@@ -64,9 +67,11 @@ class MainWindow : public QMainWindow
 
     int page_count = 1;
 
+    QAction *nameAction = nullptr;
     QAction *configAction = nullptr;
     QAction *configADCAction = nullptr;
     QAction *modbusAction = nullptr;
+    QAction *buildAction = nullptr;
 
     QStringList getPrevProjects(void);
     void updatePrevProjects(const QStringList &prNames);
