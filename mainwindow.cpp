@@ -471,6 +471,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->menubar->addMenu(confMenu);
 
+
+    QMenu *cmdMenu = new QMenu("Операции");
+    cmdMenu->addAction("Обновить имена",[this](){
+        std::vector<LDScene*> scenes;
+        for(auto &prPage:prPages) scenes.push_back(prPage.first);
+        for(LDScene *scene:scenes) {
+            std::vector<LDElement*> elements = scene->getAllelements();
+            for(LDElement *el:elements) {
+                QString varName = el->connectedVar.name;
+                if(!varName.isEmpty()) {
+                    std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(el->connectedVar.group, varName);
+                    if(v && (!v->getComment().isEmpty())) {
+                        el->setName(v->getComment());
+                    }
+                }
+            }
+            scene->update();
+        }
+    });
+
+    ui->menubar->addMenu(cmdMenu);
+
+
     prDir = QCoreApplication::applicationDirPath() + "/new_project/";
     prFileName = QCoreApplication::applicationDirPath() + "/new_project/default.ldp";
     setWindowTitle(prFileName);
