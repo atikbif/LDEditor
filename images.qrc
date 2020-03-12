@@ -85,5 +85,6 @@
         <file>images/modbus.ico</file>
         <file>images/right.png</file>
         <file>images/left.png</file>
+        <file>images/search.png</file>
     </qresource>
 </RCC>

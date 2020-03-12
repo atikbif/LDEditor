@@ -599,7 +599,10 @@ void LDScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 auto *menu= new QMenu();
                 LDElement *el = getElementByPos(last_x,last_y);
                 if(el) {
-                    if(selectedElements.size()<=1) menu->addAction(QIcon(":/images/config.png"),"свойства",[el](){el->updateProperties();});
+                    if(selectedElements.size()<=1) {
+                        menu->addAction(QIcon(":/images/config.png"),"свойства",[el](){el->updateProperties();});
+                        if(!el->connectedVar.name.isEmpty()) menu->addAction(QIcon(":/images/search.png"),"поиск в проекте",[this,el](){emit searchElement(el->connectedVar.group,el->connectedVar.name);});
+                    }
                     menu->addAction(QIcon(":/images/disable.ico"),"закомментировать",[el,this](){
                         if(selectedElements.empty()) {
                             el->setEnabled(false);

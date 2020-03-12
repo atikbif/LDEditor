@@ -115,7 +115,7 @@ void Finder::search(const SearchConfig &conf, int &pageNum, int &col, int &row)
 
             (*it)->setSelected(true);
             (*it)->getItem()->update();
-            QString elString = "страница:"+ QString::number(pageNum)+" строка:"+QString::number((*it)->getRowNum()) + " колонка:" + QString::number((*it)->getColNum()) + " " + (*it)->getName();
+            QString elString = "страница:"+ QString::number(pageNum+1)+" строка:"+QString::number((*it)->getRowNum()) + " колонка:" + QString::number((*it)->getColNum()) + " " + (*it)->getName();
             findResult.push_back(elString);
         }else {
             scene->setLastRow(1);

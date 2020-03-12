@@ -37,7 +37,7 @@ QTableWidget QTableCornerButton::section {
          border: 2px outset black;
      }
 
-QTableView { gridline-color: green; }</string>
+QTableView { gridline-color: lightGray; }</string>
      </property>
      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
       <bool>true</bool>

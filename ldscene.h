@@ -121,6 +121,7 @@ signals:
     void createPageAfter();
     void deletePage(bool confirmation);
     void sceneChanged();
+    void searchElement(const QString &grName, const QString &varName);
 
     // QGraphicsScene interface
 protected:

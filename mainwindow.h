@@ -97,6 +97,7 @@ private slots:
     void plcChanged(const QString &plcName);
     void readWriteConfig();
     void openPrevProject();
+    void searchVar(const QString &grName, const QString &varName);
 
 private:
     void connectScene(LDScene *sc);

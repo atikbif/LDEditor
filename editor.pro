@@ -37,6 +37,7 @@ SOURCES += \
     Dialogs/dialogadcconfig.cpp \
     Dialogs/dialogcycleconfig.cpp \
     Dialogs/dialogplcconfig.cpp \
+    Dialogs/dialogsearchvar.cpp \
     Loader/ethconfigreader.cpp \
     Loader/ethconfigreaderthread.cpp \
     Loader/ethconfigwriter.cpp \
@@ -117,6 +118,7 @@ HEADERS += \
     Dialogs/dialogadcconfig.h \
     Dialogs/dialogcycleconfig.h \
     Dialogs/dialogplcconfig.h \
+    Dialogs/dialogsearchvar.h \
     Loader/ethconfigreader.h \
     Loader/ethconfigreaderthread.h \
     Loader/ethconfigwriter.h \
@@ -199,6 +201,7 @@ FORMS += \
     Dialogs/dialogadcconfig.ui \
     Dialogs/dialogcycleconfig.ui \
     Dialogs/dialogplcconfig.ui \
+    Dialogs/dialogsearchvar.ui \
     Modbus/dialogaddmodbusvar.ui \
     Modbus/dialogconfigmodbuscanal.ui \
     Modbus/dialogeditmodbusvar.ui \

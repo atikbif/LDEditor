@@ -71,6 +71,8 @@
 #include <QSettings>
 #include <QtConcurrent/QtConcurrent>
 
+#include "dialogsearchvar.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -502,6 +504,49 @@ void MainWindow::openPrevProject()
         QString fName = a->text();
         openProjectByName(fName);
     }
+}
+
+void MainWindow::searchVar(const QString &grName, const QString &varName)
+{
+    auto *dialog = new DialogSearchVar(grName, varName);
+
+    connect(dialog, &DialogSearchVar::goToElement,[this](int pageNum, int row, int col){
+        if(pageNum<=prPages.size() && pageNum) {
+            pageNumWidget->setValue(pageNum);
+            LDScene* scene = prPages.at(pageNum-1).first;
+            scene->setLastRow(0);
+            scene->setLastCol(0);
+            std::vector<LDElement*> elements = scene->getAllelements();
+            for(LDElement *el:elements) {
+                if(el->getRowNum()==row && el->getColNum()==col) {
+                    el->getItem()->ensureVisible();
+                    scene->update();
+                    break;
+                }
+            }
+        }
+    });
+
+    std::vector<LDScene*> scenes;
+    for(auto &prPage:prPages) scenes.push_back(prPage.first);
+    int pageNum=1;
+    for(LDScene *scene:scenes) {
+        scene->setLastRow(0);
+        scene->setLastCol(0);
+        std::vector<LDElement*> elements = scene->getAllelements();
+        for(LDElement *el:elements) {
+            el->setSelected(false);
+            if(el->connectedVar.group==grName && el->connectedVar.name==varName) {
+                el->setSelected(true);
+                LDInfo ldInfo(*el);
+                dialog->addElement(pageNum, el->getRowNum(),el->getColNum(),ldInfo.type);
+            }
+        }
+        scene->update();pageNum++;
+    }
+
+    dialog->exec();
+    delete dialog;
 }
 
 QStringList MainWindow::getPrevProjects()
@@ -1274,6 +1319,7 @@ void MainWindow::connectScene(LDScene *sc)
     connect(sc,&LDScene::createPageAfter,this,&MainWindow::createPageAfter);
     connect(sc,&LDScene::deletePage,this,&MainWindow::deletePage);
     connect(sc,&LDScene::sceneChanged,[this](){prChanged=true;});
+    connect(sc,&LDScene::searchElement,this,&MainWindow::searchVar);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
