@@ -189,7 +189,6 @@ void EthLoaderThread::startLoad()
         try_num = 0;
         emit info("стирание Flash памяти");
         for(auto sectNum=startSectNum;sectNum<=endSectnum;sectNum++){
-            qDebug() << "SECTOR:" << sectNum;
             try_num=0;
 
             while(try_num<TRY_LIM) {
@@ -232,7 +231,6 @@ void EthLoaderThread::startLoad()
         quint32 addr = 0;
         auto dist=std::distance(curIt,endIt);
         while(dist!=0) {
-            qDebug() << dist;
             quint16 length = wr_size;
             if(dist<wr_size) length = dist;
             try_num=0;

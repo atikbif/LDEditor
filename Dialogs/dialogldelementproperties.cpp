@@ -91,16 +91,30 @@ void DialogLDElementProperties::on_buttonBox_accepted()
             PLCVarContainer::getInstance().updateComment(grName,varName,ui->lineEditName->text());
             QRegExp aiExp("AI\\d+");
             if(aiExp.exactMatch(varName)) {
-                PLCVarContainer::getInstance().updateComment(grName+" (авария)",varName+"_ALARM",ui->lineEditName->text()+"_ALARM");
-                PLCVarContainer::getInstance().updateComment(grName+" (выше порога)",varName+"_OVER",ui->lineEditName->text()+"_OVER");
-                PLCVarContainer::getInstance().updateComment(grName+" (ниже порога)",varName+"_UNDER",ui->lineEditName->text()+"_UNDER");
-                PLCVarContainer::getInstance().updateComment(grName+" (необраб)",varName+"_RAW",ui->lineEditName->text()+"_RAW");
+                if(!ui->lineEditName->text().isEmpty()) {
+                    PLCVarContainer::getInstance().updateComment(grName+" (авария)",varName+"_ALARM",ui->lineEditName->text()+"_ALARM");
+                    PLCVarContainer::getInstance().updateComment(grName+" (выше порога)",varName+"_OVER",ui->lineEditName->text()+"_OVER");
+                    PLCVarContainer::getInstance().updateComment(grName+" (ниже порога)",varName+"_UNDER",ui->lineEditName->text()+"_UNDER");
+                    PLCVarContainer::getInstance().updateComment(grName+" (необраб)",varName+"_RAW",ui->lineEditName->text()+"_RAW");
+                }else {
+                    PLCVarContainer::getInstance().updateComment(grName+" (авария)",varName+"_ALARM","");
+                    PLCVarContainer::getInstance().updateComment(grName+" (выше порога)",varName+"_OVER","");
+                    PLCVarContainer::getInstance().updateComment(grName+" (ниже порога)",varName+"_UNDER","");
+                    PLCVarContainer::getInstance().updateComment(grName+" (необраб)",varName+"_RAW","");
+                }
+
             }else {
                 QRegExp diExp("DI\\d+");
                 if(diExp.exactMatch(varName)) {
-                    PLCVarContainer::getInstance().updateComment(grName+" (кор. замыкание)",varName+"_SHORT",ui->lineEditName->text()+"_SHORT");
-                    PLCVarContainer::getInstance().updateComment(grName+" (обрыв)",varName+"_BREAK",ui->lineEditName->text()+"_BREAK");
-                    PLCVarContainer::getInstance().updateComment(grName+" (ошибка)",varName+"_FAULT",ui->lineEditName->text()+"_FAULT");
+                    if(!ui->lineEditName->text().isEmpty()) {
+                        PLCVarContainer::getInstance().updateComment(grName+" (кор. замыкание)",varName+"_SHORT",ui->lineEditName->text()+"_SHORT");
+                        PLCVarContainer::getInstance().updateComment(grName+" (обрыв)",varName+"_BREAK",ui->lineEditName->text()+"_BREAK");
+                        PLCVarContainer::getInstance().updateComment(grName+" (ошибка)",varName+"_FAULT",ui->lineEditName->text()+"_FAULT");
+                    }else {
+                        PLCVarContainer::getInstance().updateComment(grName+" (кор. замыкание)",varName+"_SHORT","");
+                        PLCVarContainer::getInstance().updateComment(grName+" (обрыв)",varName+"_BREAK","");
+                        PLCVarContainer::getInstance().updateComment(grName+" (ошибка)",varName+"_FAULT","");
+                    }
                 }
             }
 

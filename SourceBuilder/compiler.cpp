@@ -63,6 +63,19 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
         out << "\n";
 
         if(config.getName()!="MKU") {
+
+            out << "const char* di_names[14] = {";
+            for(int i=0;i<14;i++) {
+                out << "\"" << PLCUtils::getDIName(i) <<  "\",";
+            }
+            out << "};\n\n";
+
+            out << "const char* do_names[6] = {";
+            for(int i=0;i<6;i++) {
+                out << "\"" << PLCUtils::getDOName(i) <<  "\",";
+            }
+            out << "};\n\n";
+
             std::vector<QString> res = ADCManager::getConverterFunction(config,14);
             for(QString s:res) out << s;
 
@@ -229,7 +242,6 @@ std::vector<QString> Compiler::compile(const QString &plcName, const QString &di
                         if(!res.isEmpty()) compOut.push_back(res.toStdString().c_str());
                     }
                 }
-                //if(compOut.size()) qDebug()<<compOut;
             }else compOut.push_back("сборка " + confName + " не найдена в файле конфигурации");
         }else {
             compOut.push_back("контроллер " + plcName + " не найден в файле конфигурации");

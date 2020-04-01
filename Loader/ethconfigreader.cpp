@@ -26,7 +26,6 @@ EthConfigReader::~EthConfigReader()
 
 void EthConfigReader::readResultDebug(std::vector<quint16> value)
 {
-    qDebug() << "READ OK" << value;
     emit readResult(value);
 }
 

@@ -169,7 +169,22 @@ void savePLCVarContainer(QDataStream &stream) {
             stream << var.getType();
         }
     }
-
+    stream << QString("system vars");
+    std::vector<QString> sysGroups = PLCVarContainer::getInstance().getSystemVarGroups();
+    auto sysGroupCnt = static_cast<int>(sysGroups.size());
+    stream << sysGroupCnt;
+    for(const QString &group:sysGroups) {
+        stream << QString("group");
+        stream << group;
+        std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup(group);
+        auto varCnt = static_cast<int>(vars.size());
+        stream << varCnt;
+        for(const PLCVar &var:vars) {
+            stream << QString("var");
+            stream << var.getName();
+            stream << var.getComment();
+        }
+    }
 }
 
 void readPLCVarContainer(QDataStream &stream) {
@@ -213,6 +228,44 @@ void readPLCVarContainer(QDataStream &stream) {
                         PLCVarContainer::getInstance().addVar(v);
                     }
                 }
+            }
+        }
+
+        // системные группы
+        stream.startTransaction();
+        QString codeword;
+        stream >> codeword;
+        if(codeword=="system vars") {
+            stream.commitTransaction();
+            stream >> groupCnt;
+            for(int groupNum=0;groupNum<groupCnt;groupNum++) {
+                stream >> tmpStr;
+                if(tmpStr=="group") {
+                    QString groupName;
+                    stream >> groupName;
+                    int varCnt = 0;
+                    stream >> varCnt;
+                    for(int i=0;i<varCnt;i++) {
+                        stream >> tmpStr;
+                        if(tmpStr=="var") {
+                            QString varName;
+                            QString varComment;
+                            stream >> varName;
+                            stream >> varComment;
+                            PLCVarContainer::getInstance().updateComment(groupName,varName,varComment);
+                        }
+                    }
+                }
+            }
+        }else { // очистка всех комментариев
+            stream.rollbackTransaction();
+            std::vector<QString> sysGroups = PLCVarContainer::getInstance().getSystemVarGroups();
+            for(QString group:sysGroups) {
+                auto vars = PLCVarContainer::getInstance().getVarsByGroup(group);
+                for(PLCVar var:vars) {
+                    PLCVarContainer::getInstance().updateComment(group,var.getName(),"");
+                }
+
             }
         }
         PLCVarContainer::getInstance().saveState();

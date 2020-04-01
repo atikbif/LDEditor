@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow
     QLineEdit *mouseRow;
 
     QPushButton *buttonMin;
-    QPushButton *buttonMax;
+    //QPushButton *buttonMax;
 
     QComboBox *plcType;
 
@@ -70,6 +70,8 @@ class MainWindow : public QMainWindow
     QAction *nameAction = nullptr;
     QAction *configAction = nullptr;
     QAction *configADCAction = nullptr;
+    QAction *configDIAction = nullptr;
+    QAction *configDOAction = nullptr;
     QAction *modbusAction = nullptr;
     QAction *buildAction = nullptr;
 

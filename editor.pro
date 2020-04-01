@@ -36,8 +36,11 @@ INCLUDEPATH += Dialogs
 SOURCES += \
     Dialogs/dialogadcconfig.cpp \
     Dialogs/dialogcycleconfig.cpp \
+    Dialogs/dialogdiconfig.cpp \
+    Dialogs/dialogdoconfig.cpp \
     Dialogs/dialogplcconfig.cpp \
     Dialogs/dialogsearchvar.cpp \
+    Dialogs/dialogsensorconfig.cpp \
     Loader/ethconfigreader.cpp \
     Loader/ethconfigreaderthread.cpp \
     Loader/ethconfigwriter.cpp \
@@ -58,6 +61,7 @@ SOURCES += \
     Modbus/modbusvar.cpp \
     Modbus/modbusvarsstorage.cpp \
     SourceBuilder/adcmanager.cpp \
+    ainsensor.cpp \
     checksum.cpp \
         main.cpp \
     mainwindow.cpp \
@@ -112,13 +116,17 @@ SOURCES += \
     SourceBuilder/finder.cpp \
     Dialogs/dialogprojectconfig.cpp \
     Elements/libraryelement.cpp \
-    elementlibrary.cpp
+    elementlibrary.cpp \
+    transcripter.cpp
 
 HEADERS += \
     Dialogs/dialogadcconfig.h \
     Dialogs/dialogcycleconfig.h \
+    Dialogs/dialogdiconfig.h \
+    Dialogs/dialogdoconfig.h \
     Dialogs/dialogplcconfig.h \
     Dialogs/dialogsearchvar.h \
+    Dialogs/dialogsensorconfig.h \
     Loader/ethconfigreader.h \
     Loader/ethconfigreaderthread.h \
     Loader/ethconfigwriter.h \
@@ -139,6 +147,7 @@ HEADERS += \
     Modbus/modbusvar.h \
     Modbus/modbusvarsstorage.h \
     SourceBuilder/adcmanager.h \
+    ainsensor.h \
     checksum.h \
         mainwindow.h \
     mainwindow.h \
@@ -195,13 +204,17 @@ HEADERS += \
     Dialogs/dialogprojectconfig.h \
     portconfig.h \
     Elements/libraryelement.h \
-    elementlibrary.h
+    elementlibrary.h \
+    transcripter.h
 
 FORMS += \
     Dialogs/dialogadcconfig.ui \
     Dialogs/dialogcycleconfig.ui \
+    Dialogs/dialogdiconfig.ui \
+    Dialogs/dialogdoconfig.ui \
     Dialogs/dialogplcconfig.ui \
     Dialogs/dialogsearchvar.ui \
+    Dialogs/dialogsensorconfig.ui \
     Modbus/dialogaddmodbusvar.ui \
     Modbus/dialogconfigmodbuscanal.ui \
     Modbus/dialogeditmodbusvar.ui \

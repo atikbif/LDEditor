@@ -15,7 +15,7 @@ private:
     ModbusVarsStorage();
 public:
     static ModbusVarsStorage& getInstance();
-    int getVarCnt() const {return vars.size();}
+    std::size_t getVarCnt() const {return vars.size();}
     bool addModbusVar(const ModbusVar &v);
     bool replaceModbusVar(int varNum, const ModbusVar &v);
     bool deleteModbusVar(int varNum);

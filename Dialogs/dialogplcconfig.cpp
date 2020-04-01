@@ -340,7 +340,7 @@ void DialogPLCConfig::on_pushButtonRead_clicked()
         ui->lineEditInfo->setText("Настройки успешно прочитаны");
         repaint();
     });
-    QTimer::singleShot(5000,this,[reader](){qDebug()<< "DELETE READER";delete reader;});
+    QTimer::singleShot(5000,this,[reader](){delete reader;});
 }
 
 
@@ -364,7 +364,7 @@ void DialogPLCConfig::on_pushButtonWrite_clicked()
                 ui->lineEditInfo->setText("Настройки успешно записаны");
                 repaint();
             });
-            QTimer::singleShot(5000,this,[writer](){qDebug()<< "DELETE WRITER";delete writer;});
+            QTimer::singleShot(5000,this,[writer](){delete writer;});
         }else {
             ui->lineEditInfo->setText("Не удалось распознать настройки");
         }

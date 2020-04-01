@@ -87,8 +87,8 @@ void ModbusRequestList::createRequests(int canNum)
 {
     reqs.clear();
     QVector<QSharedPointer<ModbusVar>> vars;
-    int cnt = ModbusVarsStorage::getInstance().getVarCnt();
-    for(int i=0;i<cnt;i++) {
+    std::size_t cnt = ModbusVarsStorage::getInstance().getVarCnt();
+    for(std::size_t i=0;i<cnt;i++) {
         auto v = ModbusVarsStorage::getInstance().getModbusVarByIndex(i);
         if(v->getCanalNumber()==canNum && v->getActiveFlag()) vars.push_back(v);
     }

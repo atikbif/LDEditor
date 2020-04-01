@@ -66,6 +66,8 @@
 #include "dialogplcconfig.h"
 #include "dialogcycleconfig.h"
 #include "dialogadcconfig.h"
+#include "dialogdiconfig.h"
+#include "dialogdoconfig.h"
 #include "Modbus/dialogmodbusmaster.h"
 
 #include <QSettings>
@@ -383,11 +385,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusbar->addWidget(buttonMin);
     //ui->statusbar->addWidget(buttonMax);
     connect(buttonMin,&QPushButton::clicked,[this](){
-        if(ui->textBrowser->isVisible()) ui->textBrowser->setVisible(false);
-        else ui->textBrowser->setVisible(true);
+        if(ui->textBrowser->isVisible()) {ui->textBrowser->setVisible(false);}
+        else {ui->textBrowser->setVisible(true);}
     });
     //connect(buttonMax,&QPushButton::clicked,[this](){ui->textBrowser->setVisible(true);});
-    buttonMin->clicked();
+    ui->textBrowser->setVisible(false);
 
     for(std::pair<LDScene*,CmdStack*> p:prPages) { connectScene(p.first); }
 
@@ -429,7 +431,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *confMenu = new QMenu("Настройки");
     confMenu->addAction(QIcon(":/images/plc_config.ico"),"Линия связи",[this](){
-        qDebug() << "TYPE:" << plcType->currentText();
         auto *dialog = new DialogProjectConfig(plcType->currentText(),this);
         dialog->setBaudrate(baudrate);
         dialog->setNetAddress(netAddr);
@@ -462,6 +463,52 @@ MainWindow::MainWindow(QWidget *parent) :
             std::vector<int> result = dialog->getSensorTypes();
             for(int i=0;i<result.size();i++) {
                 plcConfig.setSensorType(i,result.at(i));
+            }
+            std::vector<AINSensor> sensors = dialog->getAINSensors();
+            plcConfig.clearADCSensors();
+            for(AINSensor sensor:sensors) plcConfig.addADCSensor(sensor);
+            prChanged = true;
+        }
+    });
+
+    configDIAction = confMenu->addAction(QIcon(":/images/open_contact.png"),"Дискретные входы",[this](){
+        auto *dialog = new DialogDIConfig(this);
+        std::vector<QString> inputs;
+        auto vars = PLCVarContainer::getInstance().getVarsByGroup("Дискретные входы");
+        for(auto var:vars) inputs.push_back(var.getComment());
+        dialog->setInputs(inputs);
+        if(dialog->exec()==QDialog::Accepted) {
+            inputs = dialog->getInputs();
+            if(inputs.size()>=vars.size()) {
+                for(int i=0;i<vars.size();i++) {
+                    PLCVarContainer::getInstance().updateComment("Дискретные входы",vars.at(i).getName(),inputs.at(i));
+                    if(!inputs.at(i).isEmpty()) {
+                        PLCVarContainer::getInstance().updateComment("Дискретные входы (кор. замыкание)",vars.at(i).getName()+"_SHORT",inputs.at(i)+"_SHORT");
+                        PLCVarContainer::getInstance().updateComment("Дискретные входы (обрыв)",vars.at(i).getName()+"_BREAK",inputs.at(i)+"_BREAK");
+                        PLCVarContainer::getInstance().updateComment("Дискретные входы (ошибка)",vars.at(i).getName()+"_FAULT",inputs.at(i)+"_FAULT");
+                    }else {
+                        PLCVarContainer::getInstance().updateComment("Дискретные входы (кор. замыкание)",vars.at(i).getName()+"_SHORT","");
+                        PLCVarContainer::getInstance().updateComment("Дискретные входы (обрыв)",vars.at(i).getName()+"_BREAK","");
+                        PLCVarContainer::getInstance().updateComment("Дискретные входы (ошибка)",vars.at(i).getName()+"_FAULT","");
+                    }
+                }
+            }
+            prChanged = true;
+        }
+    });
+
+    configDOAction = confMenu->addAction(QIcon(":/images/rele.svg"),"Дискретные выходы",[this](){
+        auto *dialog = new DialogDOConfig(this);
+        std::vector<QString> outs;
+        auto vars = PLCVarContainer::getInstance().getVarsByGroup("Дискретные выходы");
+        for(auto var:vars) outs.push_back(var.getComment());
+        dialog->setOuts(outs);
+        if(dialog->exec()==QDialog::Accepted) {
+            outs = dialog->getOuts();
+            if(outs.size()>=vars.size()) {
+                for(int i=0;i<vars.size();i++) {
+                    PLCVarContainer::getInstance().updateComment("Дискретные выходы",vars.at(i).getName(),outs.at(i));
+                }
             }
             prChanged = true;
         }
@@ -934,7 +981,6 @@ void MainWindow::printPreview(QPrinter *printer)
     QPainter p;
     if( !p.begin(printer ) )
     {
-        qDebug() << "Error!";
         return;
     }
 
@@ -1040,7 +1086,7 @@ void MainWindow::build()
                 [this,watcher,future](){
             std::vector<QString> compileResult =  future.result();
             if(!compileResult.empty()) {
-                buttonMax->click();
+                //buttonMax->click();
                 for(const QString &s:compileResult) {
                     ui->textBrowser->append(s+"\n");
                 }
@@ -1310,10 +1356,20 @@ void MainWindow::plcChanged(const QString &plcName)
         else {configAction->setVisible(false);configAction->setEnabled(false);}
     }
     if(configADCAction) {
-        qDebug() << "ADC CONFIG CHECK";
         if(PLCUtils::isPLCSupportADC(plcName)) {configADCAction->setVisible(true);configADCAction->setEnabled(true);}
         else {configADCAction->setVisible(false);configADCAction->setEnabled(false);}
     }
+
+    if(configDIAction) {
+        if(PLCUtils::isPLCSupportDI(plcName)) {configDIAction->setVisible(true);configDIAction->setEnabled(true);}
+        else {configDIAction->setVisible(false);configDIAction->setEnabled(false);}
+    }
+
+    if(configDOAction) {
+        if(PLCUtils::isPLCSupportDO(plcName)) {configDOAction->setVisible(true);configDOAction->setEnabled(true);}
+        else {configDOAction->setVisible(false);configDOAction->setEnabled(false);}
+    }
+
     if(modbusAction) {
         if(PLCUtils::isPLCSupportModbusMaster(plcName)) {modbusAction->setVisible(true);modbusAction->setEnabled(true);}
         else {modbusAction->setVisible(false);modbusAction->setEnabled(false);}
@@ -1325,8 +1381,6 @@ void MainWindow::readWriteConfig()
 {
     if(PLCUtils::isPLCSupportEth(plcType->currentText())) {
         DialogPLCConfig *dialog = new DialogPLCConfig(plcConfig);
-
-        qDebug() << "CONF SIZE" <<  plcConfig.getSettings().size();
 
         connect(dialog,&DialogPLCConfig::saveConf,[this](const QByteArray &conf){plcConfig.setSettings(conf);prChanged=true;});
         dialog->setCurrentIP(progIP);

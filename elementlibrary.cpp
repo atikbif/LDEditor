@@ -53,7 +53,6 @@ std::vector<QString> ElementLibrary::getElementsByFolder(const QString &folderNa
            QByteArray saveData = file.readAll();
            QJsonDocument elDoc(QJsonDocument::fromJson(saveData));
            auto elOb = elDoc.object();
-           qDebug() << folderName << elOb["Folder"].toString();
            if(elOb.contains("Folder") && elOb["Folder"].isString() && elOb["Folder"].toString()==folderName) {
                if(elOb.contains("Name") && elOb["Name"].isString()) {
                     result.push_back(elOb["Name"].toString());
@@ -62,7 +61,6 @@ std::vector<QString> ElementLibrary::getElementsByFolder(const QString &folderNa
        }
     }
     std::sort(result.begin(),result.end());
-    qDebug()<<result.size();
     return result;
 }
 
