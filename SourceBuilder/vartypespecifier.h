@@ -9,8 +9,8 @@ class VarTypeSpecifier
 {
 public:
     VarTypeSpecifier() = default;
-    static QString getOuType(const LDElement &el, const std::vector<QString> inpTypes);
-    static QString getFuncName(const LDElement &el, const std::vector<QString> inpTypes);
+    static QString getOuType(const LDElement &el, const std::vector<QString> &inpTypes);
+    static QString getFuncName(const LDElement &el, const std::vector<QString> &inpTypes);
 };
 
 #endif // VARTYPESPECIFIER_H

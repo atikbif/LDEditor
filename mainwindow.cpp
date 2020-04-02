@@ -290,6 +290,17 @@ MainWindow::MainWindow(QWidget *parent) :
     horToolBar->addWidget(plcType);
     connect(plcType,&QComboBox::currentTextChanged,this,&MainWindow::plcChanged);
     horToolBar->addSeparator();
+
+    horToolBar->addWidget(new QLabel("APP CN: "));
+    appID = new QSpinBox(this);
+    appID->setRange(0,65535);
+    appID->setSingleStep(1);
+    connect(appID,qOverload<int>(&QSpinBox::valueChanged),[this](int value){plcConfig.setApplicationCN(static_cast<quint16>(value));prChanged=true;});
+    appID->setValue(0);
+
+    horToolBar->addWidget(appID);
+    horToolBar->addSeparator();
+
     horToolBar->addAction(QIcon(":/images/search.ico"),"Поиск",[this](){search();});
     horToolBar->addSeparator();
     horToolBar->addAction(QIcon(":/images/print.png"),"Печать",this,&MainWindow::previewAction);
@@ -792,6 +803,9 @@ void MainWindow::saveProject()
                 QByteArray config = ModbusVarsStorage::getInstance().toBytes();
                 out << config;
             }
+            if(PLCUtils::isPLCSupportCAN(plcType->currentText())) {
+                out << appID->value();
+            }
             prChanged = false;
             QFileInfo fInfo(file);
             prDir = fInfo.canonicalPath()+"/";
@@ -853,6 +867,9 @@ void MainWindow::saveAsProject()
             if(PLCUtils::isPLCSupportModbusMaster(plcType->currentText())) {
                 QByteArray config = ModbusVarsStorage::getInstance().toBytes();
                 out << config;
+            }
+            if(PLCUtils::isPLCSupportCAN(plcType->currentText())) {
+                out << appID->value();
             }
             prChanged = false;
             prFileName = fileName;
@@ -932,6 +949,11 @@ void MainWindow::openProjectByName(const QString &fName) {
                 QByteArray config;
                 in >> config;
                 ModbusVarsStorage::getInstance().fromBytes(config);
+            }
+            if(PLCUtils::isPLCSupportCAN(plcType->currentText())) {
+                int value = 0;
+                in >> value;
+                appID->setValue(value);
             }
             plcChanged(plcName);
             setWindowTitle(fName);
@@ -1373,6 +1395,10 @@ void MainWindow::plcChanged(const QString &plcName)
     if(modbusAction) {
         if(PLCUtils::isPLCSupportModbusMaster(plcName)) {modbusAction->setVisible(true);modbusAction->setEnabled(true);}
         else {modbusAction->setVisible(false);modbusAction->setEnabled(false);}
+    }
+    if(appID) {
+        if(PLCUtils::isPLCSupportCAN(plcName)) {appID->setEnabled(true);}
+        else {appID->setEnabled(false);}
     }
     plcConfig.setName(plcName);
 }

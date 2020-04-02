@@ -9,6 +9,7 @@ std::set<QString> PLCUtils::adcPLCNames = {"PC21-1 2019"};
 std::set<QString> PLCUtils::diPLCNames = {"PC21-1 2019"};
 std::set<QString> PLCUtils::doPLCNames = {"PC21-1 2019"};
 std::set<QString> PLCUtils::modbVastPLCNames = {"PC21-1 2019"};
+std::set<QString> PLCUtils::canPLCNames = {"PC21-1 2019"};
 
 PLCUtils::PLCUtils()
 {
@@ -42,6 +43,12 @@ bool PLCUtils::isPLCSupportDO(const QString &plcName)
 bool PLCUtils::isPLCSupportModbusMaster(const QString &plcName)
 {
     if(modbVastPLCNames.find(plcName)!=modbVastPLCNames.end()) return true;
+    return false;
+}
+
+bool PLCUtils::isPLCSupportCAN(const QString &plcName)
+{
+    if(canPLCNames.find(plcName)!=canPLCNames.end()) return true;
     return false;
 }
 

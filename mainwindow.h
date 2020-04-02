@@ -32,6 +32,8 @@ class MainWindow : public QMainWindow
     QLineEdit *mouseCol;
     QLineEdit *mouseRow;
 
+    QSpinBox *appID;
+
     QPushButton *buttonMin;
     //QPushButton *buttonMax;
 

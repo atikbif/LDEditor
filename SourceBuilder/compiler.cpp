@@ -64,6 +64,9 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
 
         if(config.getName()!="MKU") {
 
+            out << QString("uint16_t app_id = ") + QString::number(config.getApplicationCN()) + ";\n";
+            out << "uint8_t can_addr = 0x00;\n";
+
             out << "const char* di_names[14] = {";
             for(int i=0;i<14;i++) {
                 out << "\"" << PLCUtils::getDIName(i) <<  "\",";

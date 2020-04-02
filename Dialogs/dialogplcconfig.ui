@@ -13,8 +13,8 @@
   <property name="windowTitle">
    <string>Настройки контроллера</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_6">
-   <item row="0" column="0">
+  <layout class="QGridLayout" name="gridLayout_7">
+   <item row="0" column="0" rowspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>входы</string>
@@ -491,22 +491,8 @@
       <string>Ethernet</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>шлюз:</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="lineEditGate"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>маска:</string>
-        </property>
-       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_9">
@@ -517,6 +503,20 @@
       </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="lineEditIP"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>шлюз:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>маска:</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEditMask"/>
@@ -537,7 +537,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
+   <item row="2" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
       <string>RS485</string>
@@ -784,7 +784,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_10">
      <item>
       <widget class="QLabel" name="label_13">
@@ -819,7 +819,7 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="4" column="0">
     <widget class="QLineEdit" name="lineEditInfo">
      <property name="readOnly">
       <bool>true</bool>

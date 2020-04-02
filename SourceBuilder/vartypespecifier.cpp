@@ -2,7 +2,7 @@
 #include "Elements/constvar.h"
 #include "plcvarcontainer.h"
 
-QString VarTypeSpecifier::getOuType(const LDElement &el, const std::vector<QString> inpTypes)
+QString VarTypeSpecifier::getOuType(const LDElement &el, const std::vector<QString> &inpTypes)
 {
     std::map<QString,int> typeMap = {{"bool",0},{"unsigned short",1},{"unsigned long",2},{"double",3}};
     QString type = el.getType();
@@ -77,7 +77,7 @@ QString VarTypeSpecifier::getOuType(const LDElement &el, const std::vector<QStri
     return "unsigned short";
 }
 
-QString VarTypeSpecifier::getFuncName(const LDElement &el, const std::vector<QString> inpTypes)
+QString VarTypeSpecifier::getFuncName(const LDElement &el, const std::vector<QString> &inpTypes)
 {
     QString res = "empty(";
     QString type = el.getType();
