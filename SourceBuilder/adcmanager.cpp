@@ -63,6 +63,15 @@ std::vector<QString> ADCManager::getConverterFunction(PLCConfig config, int cnt)
                 result.push_back("\t\t\t\telse {ain[i]=(unsigned char)v;ain_alarm[i]=0;ain_under[i]=0;ain_over[i]=0;}\n");
                 //result.push_back("\t\t\t\t{ain[i]=100;ain_alarm[i]=0;ain_under[i]=0;ain_over[i]=0;}\n");
                 break;
+            case 1:
+                result.push_back("\t\t\t\tif(v>20000) v=20000;\n");
+                result.push_back("\t\t\t\tv = 255*v/20000+0.5;\n");
+                result.push_back("\t\t\t\tif(v>255) v=255;\n");
+                result.push_back("\t\t\t\tain[i]=(unsigned char)v;\n");
+                result.push_back("\t\t\t\tain_under[i]=0;\n");
+                result.push_back("\t\t\t\tain_over[i]=0;\n");
+                result.push_back("\t\t\t\tain_alarm[i]=0;\n");
+                break;
             default:
                 result.push_back("\t\t\t\tain[i]=0;\n");
                 result.push_back("\t\t\t\tain_under[i]=0;\n");
