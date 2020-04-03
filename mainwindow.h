@@ -106,6 +106,7 @@ private slots:
 private:
     void connectScene(LDScene *sc);
     Ui::MainWindow *ui;
+    std::vector<QString> checkADCconfig();
 
     // QWidget interface
 protected:

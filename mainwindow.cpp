@@ -1045,6 +1045,15 @@ void MainWindow::build()
         pageNum++;
     }
 
+    std::vector<QString> adcInfo = checkADCconfig();
+    if(adcInfo.size()) {
+        for(QString info:adcInfo) {
+            QString infoStr = QString("<b><font color=\"orange\">") + info + "</font></b>";
+            ui->textBrowser->append(infoStr);
+        }
+        ui->textBrowser->append("<b><font color=\"black\"></font></b>");
+    }
+
     if(checkResult) {
         ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Старт сборки проекта");
         ui->textBrowser->repaint();
@@ -1306,8 +1315,28 @@ void MainWindow::plcChanged(const QString &plcName)
         PLCVarContainer::getInstance().addVar(bitVar);
     }
 
+    for(int i=0;i<224;i++) {
+        PLCVar bitVar("CLBIT" + QString::number(i+17), "Биты кластера");
+        if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+        bitVar.setReadable(true);
+        bitVar.setWriteable(true);
+        bitVar.setValue(false);
+        bitVar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(bitVar);
+    }
+
     for(int i=0;i<PLCParams::ireg_cnt;i++) {
         PLCVar regVar("IR" + QString::number(i+1), "Регистры");
+        if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+        regVar.setReadable(true);
+        regVar.setWriteable(true);
+        regVar.setValue(static_cast<unsigned short>(0));
+        regVar.setSystem(true);
+        PLCVarContainer::getInstance().addVar(regVar);
+    }
+
+    for(int i=0;i<64;i++) {
+        PLCVar regVar("CLREG" + QString::number(i+17), "Регистры кластера");
         if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
         regVar.setReadable(true);
         regVar.setWriteable(true);
@@ -1423,6 +1452,27 @@ void MainWindow::connectScene(LDScene *sc)
     connect(sc,&LDScene::deletePage,this,&MainWindow::deletePage);
     connect(sc,&LDScene::sceneChanged,[this](){prChanged=true;});
     connect(sc,&LDScene::searchElement,this,&MainWindow::searchVar);
+}
+
+std::vector<QString> MainWindow::checkADCconfig()
+{
+    std::vector<QString> result;
+    if(PLCUtils::isPLCSupportADC(plcType->currentText())) {
+        int cnt = 14;
+        for(int i=0;i<cnt;i++) {
+            bool inpType = static_cast<bool>(plcConfig.getSettings().at(i));
+            int sensType = plcConfig.getSensorTypeCode(i);
+            qDebug() << "ADC " << i+1 << inpType << sensType;
+            if(sensType>=0) {
+                if(inpType) {
+                    if(sensType==0 || sensType==4) result.push_back("Аналоговый вход " + QString::number(i+1) + ": Тип датчика не соответствует типу входа");
+                }else {
+                    if(sensType==1 || sensType==2 || sensType==3) result.push_back("Аналоговый вход " + QString::number(i+1) + ": Тип датчика не соответствует типу входа");
+                }
+            }
+        }
+    }
+    return result;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
