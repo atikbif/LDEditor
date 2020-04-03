@@ -72,6 +72,37 @@ std::vector<QString> ADCManager::getConverterFunction(PLCConfig config, int cnt)
                 result.push_back("\t\t\t\tain_over[i]=0;\n");
                 result.push_back("\t\t\t\tain_alarm[i]=0;\n");
                 break;
+            case 2:
+                result.push_back("\t\t\t\tif(v>20000) v=20000;\n");
+                result.push_back("\t\t\t\tif(v<4000) v=4000;\n");
+                result.push_back("\t\t\t\tv = 255*v/16000-255/4.0+0.5;\n");
+                result.push_back("\t\t\t\tif(v>255) v=255;\n");
+                result.push_back("\t\t\t\tif(ain_raw[i]<=2000) {ain[i]=0;ain_alarm[i]=1;ain_under[i]=1;ain_over[i]=0;}\n");
+                result.push_back("\t\t\t\telse if(ain_raw[i]<=3400) {ain[i]=0;ain_alarm[i]=0;ain_under[i]=1;ain_over[i]=0;}\n");
+                result.push_back("\t\t\t\telse if(ain_raw[i]>=22000) {ain[i]=255;ain_alarm[i]=1;ain_under[i]=0;ain_over[i]=1;}\n");
+                result.push_back("\t\t\t\telse if(ain_raw[i]>=20500) {ain[i]=255;ain_alarm[i]=0;ain_under[i]=0;ain_over[i]=1;}\n");
+                result.push_back("\t\t\t\telse {ain[i]=(unsigned char)v;ain_alarm[i]=0;ain_under[i]=0;ain_over[i]=0;}\n");
+                break;
+            case 3:
+                result.push_back("\t\t\t\tif(v>20000) v=20000;\n");
+                result.push_back("\t\t\t\tif(v<4000) v=4000;\n");
+                result.push_back("\t\t\t\tv = 255*v/8000-255/4.0+0.5;\n");
+                result.push_back("\t\t\t\tif(v>255) v=255;\n");
+                result.push_back("\t\t\t\tif(ain_raw[i]<=1000) {ain[i]=0;ain_alarm[i]=1;ain_under[i]=1;ain_over[i]=0;}\n");
+                result.push_back("\t\t\t\telse if(ain_raw[i]<=1700) {ain[i]=0;ain_alarm[i]=0;ain_under[i]=1;ain_over[i]=0;}\n");
+                result.push_back("\t\t\t\telse if(ain_raw[i]>=11000) {ain[i]=255;ain_alarm[i]=1;ain_under[i]=0;ain_over[i]=1;}\n");
+                result.push_back("\t\t\t\telse if(ain_raw[i]>=10250) {ain[i]=255;ain_alarm[i]=0;ain_under[i]=0;ain_over[i]=1;}\n");
+                result.push_back("\t\t\t\telse {ain[i]=(unsigned char)v;ain_alarm[i]=0;ain_under[i]=0;ain_over[i]=0;}\n");
+                break;
+            case 4:
+                result.push_back("\t\t\t\tif(v>2500) v=2500;\n");
+                result.push_back("\t\t\t\tv = 255*v/2500+0.5;\n");
+                result.push_back("\t\t\t\tif(v>255) v=255;\n");
+                result.push_back("\t\t\t\tain[i]=(unsigned char)v;\n");
+                result.push_back("\t\t\t\tain_under[i]=0;\n");
+                result.push_back("\t\t\t\tain_over[i]=0;\n");
+                result.push_back("\t\t\t\tain_alarm[i]=0;\n");
+                break;
             default:
                 result.push_back("\t\t\t\tain[i]=0;\n");
                 result.push_back("\t\t\t\tain_under[i]=0;\n");

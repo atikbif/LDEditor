@@ -1462,7 +1462,6 @@ std::vector<QString> MainWindow::checkADCconfig()
         for(int i=0;i<cnt;i++) {
             bool inpType = static_cast<bool>(plcConfig.getSettings().at(i));
             int sensType = plcConfig.getSensorTypeCode(i);
-            qDebug() << "ADC " << i+1 << inpType << sensType;
             if(sensType>=0) {
                 if(inpType) {
                     if(sensType==0 || sensType==4) result.push_back("Аналоговый вход " + QString::number(i+1) + ": Тип датчика не соответствует типу входа");
