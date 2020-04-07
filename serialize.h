@@ -33,6 +33,7 @@
 
 QDataStream &operator<<(QDataStream &stream, const LDElement &item);
 std::pair<LDElement*,QString> readLDelement(QDataStream &stream);
+void checkLDElement(LDElement* el);
 
 QDataStream &operator<<(QDataStream &stream, const CommentElement &item);
 QDataStream &operator<<(QDataStream &stream, const ConstVar &item);

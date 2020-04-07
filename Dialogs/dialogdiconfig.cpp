@@ -6,6 +6,7 @@ DialogDIConfig::DialogDIConfig(QWidget *parent) :
     ui(new Ui::DialogDIConfig)
 {
     ui->setupUi(this);
+    ui->lineEdit_DI1->setFocus();
 }
 
 DialogDIConfig::~DialogDIConfig()

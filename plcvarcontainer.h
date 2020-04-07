@@ -13,15 +13,16 @@ class PLCVarContainer final
 public:
     static PLCVarContainer& getInstance();
     void addVar(const PLCVar &var);
-    void deleteVar(const QString &group, const QString &name);
-    void updateComment(const QString &group, const QString &name,const QString &comment);
-    void renameGroup(const QString &group, const QString &newName);
-    void delGroup(const QString &group);
-    std::vector<QString> getVarGroups() const;
+    void deleteVar(const QString &group, const QString &name, QString parentGroup="");
+    void updateComment(const QString &group, const QString &name,const QString &comment, QString parentGroup="");
+    void renameGroup(const QString &group, const QString &newName, QString parentGroup="");
+    void delGroup(const QString &group, QString parentGroup="");
+    std::vector<QString> getVarGroups(QString parentGroup="") const;
+    std::vector<QString> getParentGroups() const;
     std::vector<QString> getNotSystemVarGroups() const;
-    std::vector<QString> getSystemVarGroups() const;
-    std::vector<PLCVar> getVarsByGroup(const QString &grName) const;
-    std::optional<PLCVar> getVarByGroupAndName(const QString &grName, const QString &name) const;
+    std::vector<QString> getSystemVarGroups(QString parentGroup="") const;
+    std::vector<PLCVar> getVarsByGroup(const QString &grName,QString parentGroup="") const;
+    std::optional<PLCVar> getVarByGroupAndName(const QString &grName, const QString &name,QString parentGroup="") const;
     std::optional<PLCVar> getVarByName(const QString &name) const;
     void saveState();
     void recoveryState();

@@ -36,7 +36,7 @@ private slots:
 
 private:
     Ui::DialogVarConfig *ui;
-    void drawVarTree(const QString &grName="", const QString &varName="");
+    void drawVarTree(const QString &grName="", const QString &varName="", const QString &parGroup="");
 };
 
 #endif // DIALOGVARCONFIG_H

@@ -15,6 +15,7 @@ class DialogLDElementProperties : public QDialog
     Q_OBJECT
 
     LDElement *el = nullptr;
+    QString parGrName;
     QString grName;
     QString varName;
     QString comment;

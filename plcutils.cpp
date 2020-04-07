@@ -67,7 +67,7 @@ bool PLCUtils::checkPLCCode(const QString &plcName, int code)
 QString PLCUtils::getADCName(int adcNum)
 {
     QString res;
-    std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("Аналоговые входы");
+    std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("состояние","Аналоговые входы");
     if(adcNum>=0 && adcNum<static_cast<int>(vars.size())) {
         res = vars.at(static_cast<std::size_t>(adcNum)).getComment();
         res = Transcripter::getTranscriptedWord(res);
@@ -79,7 +79,7 @@ QString PLCUtils::getADCName(int adcNum)
 QString PLCUtils::getDIName(int diNum)
 {
     QString res;
-    std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("Дискретные входы");
+    std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("состояние","Дискретные входы");
     if(diNum>=0 && diNum < static_cast<int>(vars.size())) {
         res = vars.at(static_cast<std::size_t>(diNum)).getComment();
         res = Transcripter::getTranscriptedWord(res);
@@ -98,4 +98,36 @@ QString PLCUtils::getDOName(int doNum)
         if(res.size()>16) res.resize(16);
     }
     return res;
+}
+
+void PLCUtils::updateSystemVarComment(const QString &vName, const QString &vGroup, const QString &vComment, const QString &parentGroup)
+{
+    PLCVarContainer::getInstance().updateComment(vGroup, vName, vComment, parentGroup);
+    QRegExp aiExp("AI\\d+");
+    if(parentGroup=="Аналоговые входы" && vGroup=="состояние" && aiExp.exactMatch(vName)) {
+        if(!vComment.isEmpty()) {
+            PLCVarContainer::getInstance().updateComment("авария",vName+"_ALARM",vComment+"_ALARM",parentGroup);
+            PLCVarContainer::getInstance().updateComment("выше порога",vName+"_OVER",vComment+"_OVER",parentGroup);
+            PLCVarContainer::getInstance().updateComment("ниже порога",vName+"_UNDER",vComment+"_UNDER",parentGroup);
+            PLCVarContainer::getInstance().updateComment("необраб",vName+"_RAW",vComment+"_RAW",parentGroup);
+        }else {
+            PLCVarContainer::getInstance().updateComment("авария",vName+"_ALARM","",parentGroup);
+            PLCVarContainer::getInstance().updateComment("выше порога",vName+"_OVER","",parentGroup);
+            PLCVarContainer::getInstance().updateComment("ниже порога",vName+"_UNDER","",parentGroup);
+            PLCVarContainer::getInstance().updateComment("необраб",vName+"_RAW","",parentGroup);
+        }
+
+    }
+    QRegExp diExp("DI\\d+");
+    if(parentGroup=="Дискретные входы" && vGroup=="состояние" && diExp.exactMatch(vName)) {
+        if(!vComment.isEmpty()) {
+            PLCVarContainer::getInstance().updateComment("кор. замыкание",vName+"_SHORT",vComment+"_SHORT",parentGroup);
+            PLCVarContainer::getInstance().updateComment("обрыв",vName+"_BREAK",vComment+"_BREAK",parentGroup);
+            PLCVarContainer::getInstance().updateComment("ошибка",vName+"_FAULT",vComment+"_FAULT",parentGroup);
+        }else {
+            PLCVarContainer::getInstance().updateComment("кор. замыкание",vName+"_SHORT","",parentGroup);
+            PLCVarContainer::getInstance().updateComment("обрыв",vName+"_BREAK","",parentGroup);
+            PLCVarContainer::getInstance().updateComment("ошибка",vName+"_FAULT","",parentGroup);
+        }
+    }
 }

@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <algorithm>
 #include "plcvarcontainer.h"
+#include "plcutils.h"
 
 DialogADCconfig::DialogADCconfig(PLCConfig config, QWidget *parent) :
     QDialog(parent), config(config),
@@ -24,7 +25,7 @@ DialogADCconfig::DialogADCconfig(PLCConfig config, QWidget *parent) :
         ui->lineEdit_AIN8, ui->lineEdit_AIN9, ui->lineEdit_AIN10, ui->lineEdit_AIN11, ui->lineEdit_AIN12, ui->lineEdit_AIN13, ui->lineEdit_AIN14
     };
 
-    std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("Аналоговые входы");
+    std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("состояние","Аналоговые входы");
     if(vars.size()>=inputsNames.size()) {
         for(std::size_t i=0;i<inputsNames.size();i++) {
             inputsNames[i]->setValidator(new QRegExpValidator(QRegExp("^[\\w\\s]{0,16}$"), this));
@@ -328,21 +329,10 @@ void DialogADCconfig::accept()
     bool wasUnique = (it == names.end() );
     if(!wasUnique) QMessageBox::warning(this, "Уведомление", "Обнаружены повторяющиеся имена датчиков");
     else {
-        std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("Аналоговые входы");
+        std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup("состояние","Аналоговые входы");
         if(vars.size()>=inputsNames.size()) {
             for(std::size_t i=0;i<inputsNames.size();i++) {
-                PLCVarContainer::getInstance().updateComment("Аналоговые входы",vars.at(i).getName(),inputsNames[i]->text());
-                if(!inputsNames[i]->text().isEmpty()) {
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (авария)",vars.at(i).getName()+"_ALARM",inputsNames[i]->text()+"_ALARM");
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (выше порога)",vars.at(i).getName()+"_OVER",inputsNames[i]->text()+"_OVER");
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (ниже порога)",vars.at(i).getName()+"_UNDER",inputsNames[i]->text()+"_UNDER");
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (необраб)",vars.at(i).getName()+"_RAW",inputsNames[i]->text()+"_RAW");
-                }else {
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (авария)",vars.at(i).getName()+"_ALARM","");
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (выше порога)",vars.at(i).getName()+"_OVER","");
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (ниже порога)",vars.at(i).getName()+"_UNDER","");
-                    PLCVarContainer::getInstance().updateComment("Аналоговые входы (необраб)",vars.at(i).getName()+"_RAW","");
-                }
+                PLCUtils::updateSystemVarComment(vars.at(i).getName(),"состояние",inputsNames[i]->text(),"Аналоговые входы");
             }
         }
         QDialog::accept();

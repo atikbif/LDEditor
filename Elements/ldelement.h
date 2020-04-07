@@ -30,6 +30,7 @@ public:
     struct {
         QString name;
         QString group;
+        QString parentGroup;
     }connectedVar;
     LDElement(qreal cell_width=0, qreal cell_height=0);
     QGraphicsWidget* getItem();
@@ -68,7 +69,8 @@ struct LDInfo{
         if(types.find(el.getType())!=types.end()) type = types.at(el.getType());
         else type = el.getType();
         name = el.getName();
-        info = el.connectedVar.group.isEmpty()?el.connectedVar.name: el.connectedVar.group + ": " + el.connectedVar.name;
+        if(el.connectedVar.parentGroup.isEmpty()) info=""; else info = el.connectedVar.parentGroup+": ";
+        info += el.connectedVar.group.isEmpty()?el.connectedVar.name: el.connectedVar.group + ": " + el.connectedVar.name;
         std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(el.connectedVar.group,el.connectedVar.name);
         if(v && !v->getComment().isEmpty()) info+= " (" + v->getComment() + ")";
         comment = el.getComment();

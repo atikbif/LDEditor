@@ -12,19 +12,22 @@ public:
 private:
     QString group;
     QString name;
+    QString parentGroup;
     QString comment;
     bool readable=false;
     bool writeable=false;
     varType value;
     bool system=false;
 public:
-    PLCVar(const QString &vName,QString vGroup=""):group(vGroup),name(vName) {value=static_cast<unsigned short>(0);}
+    PLCVar(const QString &vName,QString vGroup="",QString vParentGroup=""):group(vGroup),name(vName),parentGroup(vParentGroup) {value=static_cast<unsigned short>(0);}
     void setComment(const QString &vComment) {comment = vComment;}
     void setGroup(const QString &name) {group=name;}
+    void setParentGroup(const QString &name) {parentGroup=name;}
     void setSystem(bool value) {system = value;}
     bool isSystem() const {return system;}
     QString getComment() const {return comment;}
     QString getGroup() const {return group;}
+    QString getParentGroup() const {return parentGroup;}
     QString getName() const {return name;}
     static std::vector<QString> getSupportedTypes() {
         return {"unsigned short","unsigned long","double","bool"};

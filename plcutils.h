@@ -25,6 +25,7 @@ public:
     static QString getADCName(int adcNum);
     static QString getDIName(int diNum);
     static QString getDOName(int doNum);
+    static void updateSystemVarComment(const QString &vName, const QString &vGroup, const QString &vComment, const QString &parentGroup="");
 };
 
 #endif // PLCUTILS_H

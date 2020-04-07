@@ -2,6 +2,7 @@
 #include "ui_dialogldelementproperties.h"
 #include <QDebug>
 #include <QRegExp>
+#include "plcutils.h"
 
 DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *parent) :
     QDialog(parent),el(el),
@@ -9,12 +10,12 @@ DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *par
 {
     ui->setupUi(this);
 
-
     ui->lineEditName->setText(el->getName());
     ui->lineEditVarName->setReadOnly(true);
 
     grName = el->connectedVar.group;
     varName = el->connectedVar.name;
+    parGrName = el->connectedVar.parentGroup;
 
     ui->lineEditComment->setText(el->getComment());
     if(!el->isNeedConnect()) {
@@ -22,43 +23,59 @@ DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *par
         setFixedHeight(minimumSizeHint().height());
     }else {
 
-        std::optional<PLCVar> cVar = PLCVarContainer::getInstance().getVarByGroupAndName(el->connectedVar.group,el->connectedVar.name);
+        std::optional<PLCVar> cVar = PLCVarContainer::getInstance().getVarByGroupAndName(el->connectedVar.group,el->connectedVar.name,el->connectedVar.parentGroup);
         if(cVar) {
             ui->lineEditVarName->setText(grName + ": " + varName);
         }
-
-        ui->treeWidget->setHeaderLabels({"имя","тип","комментарий"});
-        std::vector<QString> groups = PLCVarContainer::getInstance().getVarGroups();
         QTreeWidgetItem *curItem = nullptr;
-        for(const QString &gr:groups) {
-            QTreeWidgetItem *grItem = new QTreeWidgetItem(QStringList{gr});
+        std::vector<QTreeWidgetItem*> topLevelItems;
+        ui->treeWidget->clear();
+        ui->treeWidget->setHeaderLabels({"имя","тип","комментарий"});
+        std::vector<QString> parGroups = PLCVarContainer::getInstance().getParentGroups();
+        QTreeWidgetItem *parGrItem = nullptr;
+        for(const QString &parGroup:parGroups) {
+            if(!parGroup.isEmpty()) parGrItem = new QTreeWidgetItem(QStringList{parGroup});
+                std::vector<QString> groups = PLCVarContainer::getInstance().getVarGroups(parGroup);
 
-            for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr)) {
-                bool blockVar = false;
-                if(el->isOnlyRead() && !var.isReadable()) blockVar = true;
-                if(el->isOnlyWrite() && !var.isWriteable()) blockVar = true;
-                if(!blockVar) {
-                    QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment()});
-                    grItem->addChild(varItem);
-                    if(cVar) {
-                        if(cVar->getName()==var.getName() && cVar->getGroup()==var.getGroup()) curItem=varItem;
+                for(const QString &gr:groups) {
+                    QTreeWidgetItem *grItem = new QTreeWidgetItem(QStringList{gr});
+
+                    for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr,parGroup)) {
+                        QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment()});
+                        bool blockVar = false;
+                        if(el->isOnlyRead() && !var.isReadable()) blockVar = true;
+                        if(el->isOnlyWrite() && !var.isWriteable()) blockVar = true;
+                        if(!blockVar) {
+                            grItem->addChild(varItem);
+                            if(cVar) {
+                                if(cVar->getName()==var.getName() && cVar->getGroup()==var.getGroup() && cVar->getParentGroup()==var.getParentGroup()) curItem=varItem;
+                            }
+                        }
+
                     }
+                    if(parGrItem) {
+                        if(grItem->childCount()) {parGrItem->addChild(grItem);}
+                    }else {
+                        if(grItem->childCount()) topLevelItems.push_back(grItem);
+                    }
+
                 }
+                if(parGrItem && parGrItem->childCount()) {topLevelItems.push_back(parGrItem);}
             }
-            if(grItem->childCount()) {
-                ui->treeWidget->addTopLevelItem(grItem);
+            std::sort(topLevelItems.begin(),topLevelItems.end(),[](QTreeWidgetItem *item1, QTreeWidgetItem *item2){return item1->text(0)<item2->text(0);});
+            for(QTreeWidgetItem *item:topLevelItems) {ui->treeWidget->addTopLevelItem(item);}
+
+            if(curItem) {
+                ui->treeWidget->expandItem(curItem);
+                ui->treeWidget->setCurrentItem(curItem);
             }
         }
+
         ui->treeWidget->resizeColumnToContents(0);
         ui->treeWidget->resizeColumnToContents(1);
         ui->treeWidget->resizeColumnToContents(2);
         ui->treeWidget->setMinimumWidth(ui->treeWidget->columnWidth(0)+ui->treeWidget->columnWidth(1)+ui->treeWidget->columnWidth(2));
 
-        if(curItem) {
-            ui->treeWidget->expandItem(curItem);
-            ui->treeWidget->setCurrentItem(curItem);
-        }
-    }
 }
 
 DialogLDElementProperties::~DialogLDElementProperties()
@@ -69,11 +86,15 @@ DialogLDElementProperties::~DialogLDElementProperties()
 void DialogLDElementProperties::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
     Q_UNUSED(column)
-    if(item && item->parent() && el) {
+    if(item && (item->childCount()==0) && el) {
+        parGrName = "";
         grName = item->parent()->text(0);
         varName = item->text(0);
         comment = item->text(2);
-        ui->lineEditVarName->setText(grName + ": " + varName);
+        if(item->parent()->parent()) parGrName = item->parent()->parent()->text(0);
+        if(parGrName.isEmpty()) ui->lineEditVarName->setText(grName + ": " + varName);
+        else ui->lineEditVarName->setText(parGrName + ": " + grName + ": " + varName);
+
         if(!comment.isEmpty()) ui->lineEditName->setText(comment);
         //el->connectedVar.group = grName;
         //el->connectedVar.name = varName;
@@ -85,39 +106,12 @@ void DialogLDElementProperties::on_buttonBox_accepted()
     if(el) {
         el->connectedVar.group = grName;
         el->connectedVar.name = varName;
+        el->connectedVar.parentGroup = parGrName;
         QString name = ui->lineEditName->text();
-        auto v = PLCVarContainer::getInstance().getVarByGroupAndName(grName,varName);
+        auto v = PLCVarContainer::getInstance().getVarByGroupAndName(grName,varName,parGrName);
         if(v) {
-            PLCVarContainer::getInstance().updateComment(grName,varName,ui->lineEditName->text());
-            QRegExp aiExp("AI\\d+");
-            if(aiExp.exactMatch(varName)) {
-                if(!ui->lineEditName->text().isEmpty()) {
-                    PLCVarContainer::getInstance().updateComment(grName+" (авария)",varName+"_ALARM",ui->lineEditName->text()+"_ALARM");
-                    PLCVarContainer::getInstance().updateComment(grName+" (выше порога)",varName+"_OVER",ui->lineEditName->text()+"_OVER");
-                    PLCVarContainer::getInstance().updateComment(grName+" (ниже порога)",varName+"_UNDER",ui->lineEditName->text()+"_UNDER");
-                    PLCVarContainer::getInstance().updateComment(grName+" (необраб)",varName+"_RAW",ui->lineEditName->text()+"_RAW");
-                }else {
-                    PLCVarContainer::getInstance().updateComment(grName+" (авария)",varName+"_ALARM","");
-                    PLCVarContainer::getInstance().updateComment(grName+" (выше порога)",varName+"_OVER","");
-                    PLCVarContainer::getInstance().updateComment(grName+" (ниже порога)",varName+"_UNDER","");
-                    PLCVarContainer::getInstance().updateComment(grName+" (необраб)",varName+"_RAW","");
-                }
-
-            }else {
-                QRegExp diExp("DI\\d+");
-                if(diExp.exactMatch(varName)) {
-                    if(!ui->lineEditName->text().isEmpty()) {
-                        PLCVarContainer::getInstance().updateComment(grName+" (кор. замыкание)",varName+"_SHORT",ui->lineEditName->text()+"_SHORT");
-                        PLCVarContainer::getInstance().updateComment(grName+" (обрыв)",varName+"_BREAK",ui->lineEditName->text()+"_BREAK");
-                        PLCVarContainer::getInstance().updateComment(grName+" (ошибка)",varName+"_FAULT",ui->lineEditName->text()+"_FAULT");
-                    }else {
-                        PLCVarContainer::getInstance().updateComment(grName+" (кор. замыкание)",varName+"_SHORT","");
-                        PLCVarContainer::getInstance().updateComment(grName+" (обрыв)",varName+"_BREAK","");
-                        PLCVarContainer::getInstance().updateComment(grName+" (ошибка)",varName+"_FAULT","");
-                    }
-                }
-            }
-
+            if(v->isSystem()) PLCUtils::updateSystemVarComment(varName,grName,ui->lineEditName->text(),parGrName);
+            else PLCVarContainer::getInstance().updateComment(grName,varName,ui->lineEditName->text(),parGrName);
         }
         el->setName(ui->lineEditName->text());
         el->setComment(ui->lineEditComment->text());
@@ -127,7 +121,7 @@ void DialogLDElementProperties::on_buttonBox_accepted()
 
 void DialogLDElementProperties::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
-    if(item && item->parent() && el) {
+    if(item && (item->childCount()==0) && el) {
         on_treeWidget_itemClicked(item,column);
         on_buttonBox_accepted();
         accept();
