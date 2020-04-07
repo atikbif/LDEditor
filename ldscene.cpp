@@ -661,6 +661,28 @@ void LDScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         drawCopyBuf(xx,yy);
                         emit sceneChanged();
                     });
+
+                    menu->addAction(QIcon(":/images/paste.png"),"специальная вставка",[this,xx=event->scenePos().x(),yy=event->scenePos().y()](){
+                        deselectAll();
+                        setInsertElement(nullptr);
+                        std::vector<LDElement*> elements = copyItem->getElements();
+                        for(LDElement* el:elements) {
+                            if(el->isNeedConnect() && !el->connectedVar.name.isEmpty()) {
+                                QRegExp nameExp("^(\\D+)(\\d+)$");
+                                if(nameExp.indexIn(el->connectedVar.name)!=-1) {
+                                    QString name = nameExp.cap(1);
+                                    QString num = nameExp.cap(2);
+                                    bool check = false;
+                                    QString res = name + QString::number(num.toInt(&check)+1);
+                                    qDebug() << "PASTE" << res;
+                                    copyItem->updateElementVarName(el,res);
+                                }
+                            }
+                        }
+                        copyItem->setVisible(true);
+                        drawCopyBuf(xx,yy);
+                        emit sceneChanged();
+                    });
                 }
                 menu->addAction(QIcon(":/images/go_top.png"),"Добавить страницу перед",[this](){emit createPageBefore();});
                 menu->addAction(QIcon(":/images/go_bottom.png"),"Добавить страницу после",[this](){emit createPageAfter();});

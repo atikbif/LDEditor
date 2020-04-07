@@ -34,6 +34,7 @@ public:
     std::size_t count() const {return buf.elements.size();}
     int getWidthInColumns() const {return buf.rightCol-buf.leftCol+1;}
     int getHeightInRow() const {return buf.bottomRow-buf.topRow+1;}
+    void updateElementVarName(LDElement *el, const QString &newVarName);
 
     // QGraphicsItem interface
 public:

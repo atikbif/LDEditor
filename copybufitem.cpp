@@ -1,5 +1,6 @@
 #include "copybufitem.h"
 #include <QPainter>
+#include "plcvarcontainer.h"
 
 BufData CopyBufItem::buf;
 
@@ -46,6 +47,19 @@ std::vector<LDElement*> CopyBufItem::getElements() {
         res.push_back(el->clone());
     }
     return  res;
+}
+
+void CopyBufItem::updateElementVarName(LDElement *el, const QString &newVarName)
+{
+    for(LDElement *element:buf.elements) {
+        if(element->isNeedConnect()) {
+            if(element->getColNum()==el->getColNum() && element->getRowNum()==el->getRowNum()) {
+                element->connectedVar.name = newVarName;
+                auto var = PLCVarContainer::getInstance().getVarByName(newVarName);
+                if(var) element->setName(var->getComment());
+            }
+        }
+    }
 }
 
 QRectF CopyBufItem::boundingRect() const
