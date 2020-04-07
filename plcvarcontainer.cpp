@@ -65,7 +65,7 @@ std::vector<QString> PLCVarContainer::getVarGroups(QString parentGroup) const
     }
     std::vector<QString> result;
     std::copy(groups.begin(), groups.end(), std::back_inserter(result));
-    std::sort(result.begin(),result.end());
+    //std::sort(result.begin(),result.end());
     return result;
 }
 
@@ -77,7 +77,7 @@ std::vector<QString> PLCVarContainer::getParentGroups() const
     }
     std::vector<QString> result;
     std::copy(groups.begin(), groups.end(), std::back_inserter(result));
-    std::sort(result.begin(),result.end());
+    //std::sort(result.begin(),result.end());
     return result;
 }
 
@@ -89,7 +89,7 @@ std::vector<QString> PLCVarContainer::getNotSystemVarGroups() const
     }
     std::vector<QString> result;
     std::copy(groups.begin(), groups.end(), std::back_inserter(result));
-    std::sort(result.begin(),result.end());
+    //std::sort(result.begin(),result.end());
     return result;
 }
 
@@ -101,7 +101,7 @@ std::vector<QString> PLCVarContainer::getSystemVarGroups(QString parentGroup) co
     }
     std::vector<QString> result;
     std::copy(groups.begin(), groups.end(), std::back_inserter(result));
-    std::sort(result.begin(),result.end());
+    //std::sort(result.begin(),result.end());
     return result;
 }
 

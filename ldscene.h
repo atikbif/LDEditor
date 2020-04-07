@@ -28,6 +28,7 @@ struct LineMode {
     int secondPointCol = 0;
     int secondPointRow = 0;
     bool on_flag = false;
+    bool startFlag = false;
     QGraphicsLineItem *lineItem=nullptr;
     QGraphicsEllipseItem *firstPointItem=nullptr;
     QGraphicsEllipseItem *secondPointItem=nullptr;
@@ -89,6 +90,7 @@ class LDScene : public QGraphicsScene
     void getFreePlace(int colStart, int rowEnd, int colEnd, int rowStart);
     void toggleSelect(qreal x, qreal y);
     LDElement* getElementByPos(qreal x, qreal y);
+    std::vector<LDElement*> getElementsByPos(qreal x, qreal y);
 
 
 public:

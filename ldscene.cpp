@@ -184,6 +184,7 @@ void LDScene::drawConnectionLine(qreal x, qreal y, Qt::MouseButtons buttons, Qt:
                     lMode.secondPointRow = row;
                     createConnection(lMode.firsPointCol,lMode.firstPointRow,lMode.secondPointCol,lMode.secondPointRow,horMode);
                     lMode.clear();
+
                     lMode.firsPointCol = col;
                     lMode.firstPointRow = row;
                     lMode.firstPointItem->setRect(x-radius,y-radius,radius*2,radius*2);
@@ -273,6 +274,23 @@ LDElement *LDScene::getElementByPos(qreal x, qreal y)
         }
     }
     return cursorElement;
+}
+
+std::vector<LDElement *> LDScene::getElementsByPos(qreal x, qreal y)
+{
+    std::vector<LDElement*> res;
+    for(LDElement *el:elements) {
+        QPointF p1 = el->getItem()->boundingRect().topLeft();
+        QPointF scP1 = el->getItem()->mapToScene(p1);
+        QPointF p2 = el->getItem()->boundingRect().bottomRight();
+        QPointF scP2 = el->getItem()->mapToScene(p2);
+
+        QRectF itRect = QRectF(scP1,scP2);
+        if(itRect.contains(QPointF(x,y))) {
+              res.push_back(el);
+        }
+    }
+    return res;
 }
 
 void LDScene::setNamesFlag(bool value)
@@ -705,7 +723,19 @@ void LDScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     last_x = event->scenePos().x();
     last_y = event->scenePos().y();
-    if(lMode.on_flag) stack->stopGroupCmd();
+    if(lMode.on_flag)
+    {
+        std::vector<LDElement *> els = getElementsByPos(lMode.firstPointItem->rect().center().x(),lMode.firstPointItem->rect().center().y());
+        LDElement *el = nullptr;
+        for(LDElement *element:els) {
+            qDebug() << element->getType() << element->getName();
+            if(!(element->getType()=="comment" || element->getType().contains("line"))) {el=element;break;}
+        }
+
+        if(lMode.startFlag && (el || lMode.firsPointCol==0 || lMode.firsPointCol>=page.column_count)) {lMode.clear();lMode.startFlag=false;setLineInsertMode(true);}
+        else lMode.startFlag = true;
+        stack->stopGroupCmd();
+    }
     //if ((event->buttons() & Qt::LeftButton)&&(stack && stack->isGroupMode()))
     //{stack->stopGroupCmd();}
     selectAreaElements();

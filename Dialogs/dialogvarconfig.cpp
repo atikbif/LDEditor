@@ -49,6 +49,7 @@ void DialogVarConfig::drawVarTree(const QString &grName, const QString &varName,
         if(!parGroup.isEmpty()) parGrItem = new QTreeWidgetItem(QStringList{parGroup});
 
         std::vector<QString> groups = PLCVarContainer::getInstance().getVarGroups(parGroup);
+        qDebug() << groups;
 
         for(const QString &gr:groups) {
             QTreeWidgetItem *grItem = new QTreeWidgetItem(QStringList{gr});
