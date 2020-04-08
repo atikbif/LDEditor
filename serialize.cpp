@@ -554,7 +554,6 @@ void checkLDElement(LDElement *el)
 {
     auto check = PLCVarContainer::getInstance().getVarByGroupAndName(el->connectedVar.group,el->connectedVar.name,el->connectedVar.parentGroup);
     if(!check) {
-        //if(!el->connectedVar.name.isEmpty()) qDebug() << "CHECK FALL" << el->connectedVar.group << el->connectedVar.name << el->connectedVar.parentGroup;
         check = PLCVarContainer::getInstance().getVarByName(el->connectedVar.name);
         if(check) {
 

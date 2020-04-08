@@ -692,7 +692,6 @@ void LDScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                                     QString num = nameExp.cap(2);
                                     bool check = false;
                                     QString res = name + QString::number(num.toInt(&check)+1);
-                                    qDebug() << "PASTE" << res;
                                     copyItem->updateElementVarName(el,res);
                                 }
                             }
@@ -728,7 +727,6 @@ void LDScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         std::vector<LDElement *> els = getElementsByPos(lMode.firstPointItem->rect().center().x(),lMode.firstPointItem->rect().center().y());
         LDElement *el = nullptr;
         for(LDElement *element:els) {
-            qDebug() << element->getType() << element->getName();
             if(!(element->getType()=="comment" || element->getType().contains("line"))) {el=element;break;}
         }
 
