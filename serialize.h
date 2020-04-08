@@ -29,6 +29,7 @@
 #include "notelement.h"
 #include "plcvarcontainer.h"
 #include "libraryelement.h"
+#include "counterelement.h"
 
 
 QDataStream &operator<<(QDataStream &stream, const LDElement &item);

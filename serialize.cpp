@@ -31,6 +31,11 @@ static void setLDElementProperties(LDElement &item, const LDElementProperties &p
 }
 
 static std::map<QString,std::function<LDElement*(const LDElementProperties&)>> ld_map {
+    {"counter",[](const LDElementProperties &properties){
+        auto *item = new CounterElement(cell_width,cell_height);
+        setLDElementProperties(*item,properties);
+        return item;
+    }},
     {"closed contact",[](const LDElementProperties &properties){
         auto *item = new ClosedContact(cell_width,cell_height);
         setLDElementProperties(*item,properties);

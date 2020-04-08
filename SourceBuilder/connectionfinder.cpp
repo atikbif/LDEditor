@@ -168,6 +168,8 @@ PageCode ConnectionFinder::scanCircuits()
 
     std::vector<QString> intTimers;
     int tmrNum=0;
+    std::vector<QString> counterVars;
+    int counterNum=0;
 
     std::sort(circuits.begin(),circuits.end(),[](const std::vector<CircuitElement> &c1, const std::vector<CircuitElement> &c2){return  c1[0].ptr->getRowNum()<c2[0].ptr->getRowNum();});
 
@@ -236,6 +238,11 @@ PageCode ConnectionFinder::scanCircuits()
                     varBody.push_back("unsigned short " + prevIP + "=0;");
                     funcName+="&"+tmrVar+", " + "&"+prevIP+", ";
 
+                }else if(funcName.contains("counter")) {
+                    counterNum++;
+                    QString cVar = "struct counter_state p"+QString::number(page_num)+"_c_st" + QString::number(counterNum) + "={0,0,0};";
+                    counterVars.push_back(cVar);
+                    funcName+="&p"+QString::number(page_num)+"_c_st" + QString::number(counterNum) + ",";
                 }
                 res+=funcName;
                 for(int i=0;i<static_cast<int>(el.inputCircuits.size());i++) {
@@ -256,6 +263,8 @@ PageCode ConnectionFinder::scanCircuits()
         vStr += " p"+QString::number(page_num)+"_v" + QString::number(v) + "=" + ((v==startCircuitNum)?"1;":"0;");
         varBody.push_back(vStr);
     }
+
+    for(const QString &s:counterVars) varBody.push_back(s);
 
 
     for(const QString &t:intTimers) {

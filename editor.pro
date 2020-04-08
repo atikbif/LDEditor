@@ -41,6 +41,7 @@ SOURCES += \
     Dialogs/dialogplcconfig.cpp \
     Dialogs/dialogsearchvar.cpp \
     Dialogs/dialogsensorconfig.cpp \
+    Elements/counterelement.cpp \
     Loader/ethconfigreader.cpp \
     Loader/ethconfigreaderthread.cpp \
     Loader/ethconfigwriter.cpp \
@@ -127,6 +128,7 @@ HEADERS += \
     Dialogs/dialogplcconfig.h \
     Dialogs/dialogsearchvar.h \
     Dialogs/dialogsensorconfig.h \
+    Elements/counterelement.h \
     Loader/ethconfigreader.h \
     Loader/ethconfigreaderthread.h \
     Loader/ethconfigwriter.h \

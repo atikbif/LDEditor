@@ -73,6 +73,8 @@ QString VarTypeSpecifier::getOuType(const LDElement &el, const std::vector<QStri
         return "bool";
     }else if(type=="not") {
         return "bool";
+    }else if(type=="counter") {
+        return "unsigned long";
     }
     return "unsigned short";
 }
@@ -174,6 +176,8 @@ QString VarTypeSpecifier::getFuncName(const LDElement &el, const std::vector<QSt
         res="rs_trig(";
     }else if(type=="sr trigger") {
         res="sr_trig(";
+    }else if(type=="counter") {
+        res="counter(";
     }else if(type=="not") {
         int maxValue = 0;
         QString maxType = "bool";

@@ -86,5 +86,6 @@
         <file>images/right.png</file>
         <file>images/left.png</file>
         <file>images/search.png</file>
+        <file>images/counter.svg</file>
     </qresource>
 </RCC>

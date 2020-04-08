@@ -36,6 +36,7 @@
 #include "notelement.h"
 #include "libraryelement.h"
 #include "elementlibrary.h"
+#include "counterelement.h"
 
 #include <QScrollBar>
 #include <QLineEdit>
@@ -157,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("RS",[this](){auto *item = new RSTrigger(page.cell_width,page.cell_height);scene->setInsertElement(item);});
     ui->toolBar->addAction("SR",[this](){auto *item = new SRTrigger(page.cell_width,page.cell_height);scene->setInsertElement(item);});
+    ui->toolBar->addAction("CTR",[this](){auto *item = new CounterElement(page.cell_width,page.cell_height);scene->setInsertElement(item);});
     ui->toolBar->addAction(QIcon(":/images/delayOnIcon.svg"),"Delay ON",[this](){auto *item = new DelayOn(page.cell_width,page.cell_height);scene->setInsertElement(item);});
     ui->toolBar->addAction(QIcon(":/images/delayOffIcon.svg"),"Delay OFF",[this](){auto *item = new DelayOff(page.cell_width,page.cell_height);scene->setInsertElement(item);});
     ui->toolBar->addSeparator();
