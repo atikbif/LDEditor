@@ -71,7 +71,7 @@ struct LDInfo{
         name = el.getName();
         if(el.connectedVar.parentGroup.isEmpty()) info=""; else info = el.connectedVar.parentGroup+": ";
         info += el.connectedVar.group.isEmpty()?el.connectedVar.name: el.connectedVar.group + ": " + el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(el.connectedVar.group,el.connectedVar.name);
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(el.connectedVar.group,el.connectedVar.name,el.connectedVar.parentGroup);
         if(v && !v->getComment().isEmpty()) info+= " (" + v->getComment() + ")";
         comment = el.getComment();
         col = el.getColNum();

@@ -250,6 +250,7 @@ PageCode ConnectionFinder::scanCircuits()
                     if(i!=static_cast<int>(el.inputCircuits.size())-1) res+=",";
                 }
                 res+=");";
+
                 progBody.push_back(res);
             }
             it++;

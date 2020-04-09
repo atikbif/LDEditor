@@ -169,6 +169,5 @@ void PLCConfig::fromBytes(QByteArray &value)
     }
     if(version>=2) {
         in >> settings;
-        qDebug() << "READ SETTINGS" << settings.size();
     }
 }

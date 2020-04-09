@@ -1,6 +1,7 @@
 #include "vartypespecifier.h"
 #include "Elements/constvar.h"
 #include "plcvarcontainer.h"
+#include <QDebug>
 
 QString VarTypeSpecifier::getOuType(const LDElement &el, const std::vector<QString> &inpTypes)
 {
@@ -51,17 +52,20 @@ QString VarTypeSpecifier::getOuType(const LDElement &el, const std::vector<QStri
     }else if(type=="relay") {
         QString vGroup = el.connectedVar.group;
         QString vName = el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName);
+        QString vParent = el.connectedVar.parentGroup;
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName,vParent);
         if(v) return v->getType();
     }else if(type=="relay_enabled") {
         QString vGroup = el.connectedVar.group;
         QString vName = el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName);
+        QString vParent = el.connectedVar.parentGroup;
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName,vParent);
         if(v) return v->getType();
     }else if(type=="variable") {
         QString vGroup = el.connectedVar.group;
         QString vName = el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName);
+        QString vParent = el.connectedVar.parentGroup;
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName,vParent);
         if(v) return v->getType();
     }else if(type=="delay on") {
         if(!inpTypes.empty()) return inpTypes[0];
@@ -148,7 +152,8 @@ QString VarTypeSpecifier::getFuncName(const LDElement &el, const std::vector<QSt
     }else if(type=="relay") {
         QString vGroup = el.connectedVar.group;
         QString vName = el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName);
+        QString vParent = el.connectedVar.parentGroup;
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName,vParent);
         if(v) {
             res = "relay_"+ v->getType().replace(" ","_") + "(&" + vName + ",";
         }
@@ -156,7 +161,8 @@ QString VarTypeSpecifier::getFuncName(const LDElement &el, const std::vector<QSt
     }else if(type=="relay_enabled") {
         QString vGroup = el.connectedVar.group;
         QString vName = el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName);
+        QString vParent = el.connectedVar.parentGroup;
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName,vParent);
         if(v) {
             res = "relay_enabled_"+ v->getType().replace(" ","_") + "(&" + vName + ",";
         }
@@ -164,7 +170,8 @@ QString VarTypeSpecifier::getFuncName(const LDElement &el, const std::vector<QSt
     }else if(type=="variable") {
         QString vGroup = el.connectedVar.group;
         QString vName = el.connectedVar.name;
-        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName);
+        QString vParent = el.connectedVar.parentGroup;
+        std::optional<PLCVar> v = PLCVarContainer::getInstance().getVarByGroupAndName(vGroup,vName,vParent);
         if(v) {
             res = "variable_"+ v->getType().replace(" ","_") + "(" + vName + ",";
         }
