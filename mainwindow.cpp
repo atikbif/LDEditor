@@ -1357,6 +1357,50 @@ void MainWindow::plcChanged(const QString &plcName)
             regVar.setSystem(true);
             PLCVarContainer::getInstance().addVar(regVar);
         }
+
+        for(int i=0;i<16;i++) {
+            PLCVar bitVar("NBIT" + QString::number(i+241), "TX","Сетевые биты");
+            if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+            bitVar.setReadable(true);
+            bitVar.setWriteable(true);
+            bitVar.setValue(false);
+            bitVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(bitVar);
+        }
+
+        for(int clust=0;clust<8;clust++) {
+            for(int i=0;i<16;i++) {
+                PLCVar bitVar("NBIT" + QString::number(clust*16+i+257), "CLUSTER"+QString::number(clust),"Сетевые биты");
+                if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+                bitVar.setReadable(true);
+                bitVar.setWriteable(false);
+                bitVar.setValue(false);
+                bitVar.setSystem(true);
+                PLCVarContainer::getInstance().addVar(bitVar);
+            }
+        }
+
+        for(int i=0;i<16;i++) {
+            PLCVar regVar("NREG" + QString::number(i+81), "TX","Сетевые регистры");
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            regVar.setReadable(true);
+            regVar.setWriteable(true);
+            regVar.setValue(false);
+            regVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(regVar);
+        }
+
+        for(int clust=0;clust<8;clust++) {
+            for(int i=0;i<16;i++) {
+                PLCVar regVar("NREG" + QString::number(clust*16+i+97), "CLUSTER"+QString::number(clust),"Сетевые регистры");
+                if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+                regVar.setReadable(true);
+                regVar.setWriteable(false);
+                regVar.setValue(false);
+                regVar.setSystem(true);
+                PLCVarContainer::getInstance().addVar(regVar);
+            }
+        }
     }
 
     if(plcName!="MKU") {

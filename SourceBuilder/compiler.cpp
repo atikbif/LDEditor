@@ -48,10 +48,23 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
 
         out << "unsigned short plc_cycle = " + QString::number(delay) + ";\n\n";
 
-        out << "uint16_t cluster_regs[64]={0};\n";
-        out << "uint16_t prev_cluster_regs[64]={0};\n";
-        out << "uint8_t cluster_bits[224]={0};\n";
-        out << "uint8_t prev_cluster_bits[224]={0};\n";
+        if(PLCUtils::isPLCSupportCAN(config.getName())) {
+            out << "uint16_t cluster_regs[64]={0};\n";
+            out << "uint16_t prev_cluster_regs[64]={0};\n";
+            out << "uint8_t cluster_bits[224]={0};\n";
+            out << "uint8_t prev_cluster_bits[224]={0};\n";
+
+            out << "uint8_t net_bits[128]={0};\n";
+            out << "uint8_t net_bits_tx[16]={0};\n";
+            out << "uint8_t prev_net_bits_tx[16]={0};\n";
+            out << "uint16_t net_regs[128]={0};\n";
+            out << "uint16_t net_regs_tx[16]={0};\n";
+            out << "uint16_t prev_net_regs_tx[16]={0};\n";
+        }
+
+
+
+
 
         std::vector<QString> intVars = getInternalVars();
         for(const QString &v:intVars) {
