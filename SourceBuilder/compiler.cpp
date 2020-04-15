@@ -60,6 +60,33 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
             out << "uint16_t net_regs[128]={0};\n";
             out << "uint16_t net_regs_tx[16]={0};\n";
             out << "uint16_t prev_net_regs_tx[16]={0};\n";
+
+            out << "// SS1..SS8 (nodes online offline)\n";
+            out << "extern uint16_t node_link[8];\n";
+            out << "\n";
+            out << "// SS9 PC21 Network Can\n";
+            out << "extern uint16_t can_link;\n";
+            out << "\n";
+            out << "// SS10 startup impulse\n";
+            out << "extern uint16_t start_up;\n";
+            out << "\n";
+            out << "// SS11 seconds since power up\n";
+            out << "extern uint32_t seconds;\n";
+            out << "\n";
+            out << "// SS12 minutes since power up\n";
+            out << "extern uint32_t minutes;\n";
+            out << "\n";
+            out << "// SS13 cluster status (not used)\n";
+            out << "extern uint16_t cluster_state;\n";
+            out << "\n";
+            out << "// SS14 telemetry status\n";
+            out << "extern uint16_t telemetry_state;\n";
+            out << "\n";
+            out << "// SS15 cluster number\n";
+            out << "extern uint16_t cluster_num;\n";
+            out << "\n";
+            out << "// SS16..SS23 clusters online offline\n";
+            out << "extern uint16_t cluster_link[8];\n";
         }
 
 

@@ -1401,6 +1401,28 @@ void MainWindow::plcChanged(const QString &plcName)
                 PLCVarContainer::getInstance().addVar(regVar);
             }
         }
+
+        std::vector<QString> comments = {"Node 0 online","Node 1 online","Node 2 online","Node 3 online",
+                                         "Node 4 online","Node 5 online","Node 6 online","Node 7 online",
+                                        "CAN Network", "Start up", "Seconds", "Minutes", "not used", "Telemetry state","Cluster num",
+                                        "Cluster 0 online","Cluster 1 online","Cluster 2 online","Cluster 3 online",
+                                        "Cluster 4 online","Cluster 5 online","Cluster 4 online","Cluster 7 online"};
+        for(std::size_t i=0;i<23;i++) {
+            PLCVar regVar("SS" + QString::number(i+1), "Системные переменные");
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            else {
+                if(i<comments.size()) regVar.setComment(comments.at(i));
+            }
+            regVar.setReadable(true);
+            regVar.setWriteable(false);
+            if(i==10 || i==11) {
+                regVar.setValue(static_cast<unsigned long>(0));
+            }else {
+                regVar.setValue(static_cast<unsigned short>(0));
+            }
+            regVar.setSystem(true);
+            PLCVarContainer::getInstance().addVar(regVar);
+        }
     }
 
     if(plcName!="MKU") {
