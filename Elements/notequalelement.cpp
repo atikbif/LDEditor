@@ -16,12 +16,12 @@ public:
 public:
     QRectF boundingRect() const override
     {
-        return QRectF(0,0,width,height*2);
+        return QRectF(0,-height,width,height*2);
     }
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
     {
         QSvgRenderer renderer(QString(":/images/not_equal.svg"),this);
-        renderer.render(painter,QRectF(0,0,width,height*2));
+        renderer.render(painter,QRectF(0,-height,width,height*2));
         if(el.isSelected() || !el.isEnabled()) {
             QBrush br = painter->brush();
             if(!el.isEnabled()) {
@@ -38,7 +38,7 @@ public:
             }
 
             painter->setOpacity(0.3);
-            painter->drawRect(QRectF(0,0,width,height));
+            painter->drawRect(QRectF(0,-height,width,height*2));
             painter->setBrush(br);
         }
         painter->setOpacity(1);
@@ -47,7 +47,7 @@ public:
         font.setPixelSize(static_cast<int>(height*0.4));
         painter->setFont(font);
         painter->setPen(Qt::darkBlue);
-        painter->drawText(QRectF(width*0.1,height*0,width*0.8,height*0.9), Qt::AlignLeft, el.getName());
+        painter->drawText(QRectF(width*0.1,height*-1,width*0.8,height*0.9), Qt::AlignLeft, el.getName());
 
         Q_UNUSED(option);
         Q_UNUSED(widget);

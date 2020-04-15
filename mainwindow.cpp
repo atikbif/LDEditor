@@ -1385,7 +1385,7 @@ void MainWindow::plcChanged(const QString &plcName)
             if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
             regVar.setReadable(true);
             regVar.setWriteable(true);
-            regVar.setValue(false);
+            regVar.setValue(static_cast<unsigned short>(0));
             regVar.setSystem(true);
             PLCVarContainer::getInstance().addVar(regVar);
         }
@@ -1396,7 +1396,7 @@ void MainWindow::plcChanged(const QString &plcName)
                 if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
                 regVar.setReadable(true);
                 regVar.setWriteable(false);
-                regVar.setValue(false);
+                regVar.setValue(static_cast<unsigned short>(0));
                 regVar.setSystem(true);
                 PLCVarContainer::getInstance().addVar(regVar);
             }
