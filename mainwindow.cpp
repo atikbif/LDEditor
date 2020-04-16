@@ -1406,7 +1406,7 @@ void MainWindow::plcChanged(const QString &plcName)
                                          "Node 4 online","Node 5 online","Node 6 online","Node 7 online",
                                         "CAN Network", "Start up", "Seconds", "Minutes", "not used", "Telemetry state","Cluster num",
                                         "Cluster 0 online","Cluster 1 online","Cluster 2 online","Cluster 3 online",
-                                        "Cluster 4 online","Cluster 5 online","Cluster 4 online","Cluster 7 online"};
+                                        "Cluster 4 online","Cluster 5 online","Cluster 6 online","Cluster 7 online"};
         for(std::size_t i=0;i<23;i++) {
             PLCVar regVar("SS" + QString::number(i+1), "Системные переменные");
             if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
