@@ -13,7 +13,7 @@ class PLCConfig
     std::vector<AINSensor> adcSensors;
     QByteArray settings;
     QString name;
-    quint16 appCN;
+    quint16 appCN=0;
 public:
     PLCConfig(const QString &name="", int input_cnt=64, int ai_cnt=64);
     void setName(const QString &name);
@@ -35,6 +35,9 @@ public:
     void fromBytes(QByteArray &value);
     quint16 getApplicationCN() const {return appCN;}
     void setApplicationCN(quint16 value) {appCN = value;}
+    QString getIP() const;
+    QString getIPMask() const;
+    QString getIPGate() const;
 };
 
 #endif // PLCCONFIG_H

@@ -44,6 +44,7 @@ SOURCES += \
     Dialogs/dialogcycleconfig.cpp \
     Dialogs/dialogdiconfig.cpp \
     Dialogs/dialogdoconfig.cpp \
+    Dialogs/dialogmapcreator.cpp \
     Dialogs/dialogplcconfig.cpp \
     Dialogs/dialogsearchvar.cpp \
     Dialogs/dialogsensorconfig.cpp \
@@ -70,7 +71,7 @@ SOURCES += \
     SourceBuilder/adcmanager.cpp \
     ainsensor.cpp \
     checksum.cpp \
-        main.cpp \
+    main.cpp \
     mainwindow.cpp \
     ldscene.cpp \
     Elements\ldelement.cpp \
@@ -99,6 +100,7 @@ SOURCES += \
     Elements\delayon.cpp \
     Elements\delayoff.cpp \
     mapcontent.cpp \
+    mapcreator.cpp \
     plcconfig.cpp \
     plcutils.cpp \
     plcvarcontainer.cpp \
@@ -132,6 +134,7 @@ HEADERS += \
     Dialogs/dialogcycleconfig.h \
     Dialogs/dialogdiconfig.h \
     Dialogs/dialogdoconfig.h \
+    Dialogs/dialogmapcreator.h \
     Dialogs/dialogplcconfig.h \
     Dialogs/dialogsearchvar.h \
     Dialogs/dialogsensorconfig.h \
@@ -158,7 +161,6 @@ HEADERS += \
     SourceBuilder/adcmanager.h \
     ainsensor.h \
     checksum.h \
-        mainwindow.h \
     mainwindow.h \
     ldscene.h \
     Elements\ldelement.h \
@@ -187,6 +189,7 @@ HEADERS += \
     Elements\delayon.h \
     Elements\delayoff.h \
     mapcontent.h \
+    mapcreator.h \
     plcconfig.h \
     plcutils.h \
     plcvar.h \
@@ -222,6 +225,7 @@ FORMS += \
     Dialogs/dialogcycleconfig.ui \
     Dialogs/dialogdiconfig.ui \
     Dialogs/dialogdoconfig.ui \
+    Dialogs/dialogmapcreator.ui \
     Dialogs/dialogplcconfig.ui \
     Dialogs/dialogsearchvar.ui \
     Dialogs/dialogsensorconfig.ui \

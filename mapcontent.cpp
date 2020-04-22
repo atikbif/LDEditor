@@ -151,6 +151,36 @@ std::vector<MapContent::TelemetryInteger> MapContent::getTelemetryIntegers() con
     return telemetryIntegers;
 }
 
+void MapContent::addDigitalInput(const MapContent::DigitalInput &inp)
+{
+    digInputs.push_back(inp);
+}
+
+std::vector<MapContent::DigitalInput> MapContent::getDigitalInputs() const
+{
+    return digInputs;
+}
+
+void MapContent::addAnalogInput(const MapContent::AnalogInput &inp)
+{
+    anInputs.push_back(inp);
+}
+
+std::vector<MapContent::AnalogInput> MapContent::getAnalogInputs() const
+{
+    return anInputs;
+}
+
+void MapContent::addDigitalOut(MapContent::DigitalOutput &out)
+{
+    digOuts.push_back(out);
+}
+
+std::vector<MapContent::DigitalOutput> MapContent::getDigitalOuts() const
+{
+    return digOuts;
+}
+
 MapContent::MapContent()
 {
 
@@ -166,6 +196,8 @@ bool MapContent::addVar(const PLCVar &var)
         QRegExp netRegExp("^NReg(\\d+)$");
         QRegExp scadaBitExp("^SC_BIT(\\d+)$");
         QRegExp scadaRegExp("^SC_BIT(\\d+)$");
+        QRegExp diExp("^DI(\\d+)$");
+        QRegExp doExp("^DO(\\d+)$");
         if(clustBitExp.indexIn(name)!=-1) {
             const int minNum = 17;
             const int maxNum = 240;
@@ -281,6 +313,42 @@ bool MapContent::addVar(const PLCVar &var)
                 if(it!=telemetryIntegers.end()) {
                     addTelemetryInteger(reg);
                     return 1;
+                }
+            }
+        }else if(diExp.indexIn(name)!=-1){
+            int num = diExp.cap(1).toInt();
+            const int minNum = 1;
+            const int maxNum = 14;
+            if(num>=minNum && num<=maxNum) {
+                DigitalInput inp;
+                inp.name = var.getComment();
+                inp.inputNum = num;
+                inp.nodeNum = nodeNum;
+                inp.channelNum = num;
+                inp.trueName = "CLOSED";
+                inp.trueName = "OPEN";
+
+                auto it = std::find(digInputs.begin(),digInputs.end(),inp);
+                if(it!=digInputs.end()) {
+                    addDigitalInput(inp);
+                    return true;
+                }
+            }
+        }else if(doExp.indexIn(name)!=-1){
+            int num = doExp.cap(1).toInt();
+            const int minNum = 1;
+            const int maxNum = 6;
+            if(num>=minNum && num<=maxNum) {
+                DigitalOutput out;
+                out.name = var.getComment();
+                out.outNum = num;
+                out.nodeNum = nodeNum;
+                out.channelNum = 64 + num;
+
+                auto it = std::find(digOuts.begin(),digOuts.end(),out);
+                if(it!=digOuts.end()) {
+                    addDigitalOut(out);
+                    return true;
                 }
             }
         }

@@ -77,6 +77,39 @@ public:
         }
     };
 
+    struct AnalogInput {
+        int channelNum;
+        int nodeNum;
+        int inputNum;
+        QString name;
+        QString tdu;
+        bool operator==(const AnalogInput &inp) {
+            return this->inputNum==inp.inputNum && this->nodeNum==inp.nodeNum;
+        }
+    };
+
+    struct DigitalInput {
+        int channelNum;
+        int nodeNum;
+        int inputNum;
+        QString name;
+        QString falseName;
+        QString trueName;
+        bool operator==(const DigitalInput &inp) {
+            return this->inputNum==inp.inputNum && this->nodeNum==inp.nodeNum;
+        }
+    };
+
+    struct DigitalOutput {
+        int channelNum;
+        int nodeNum;
+        int outNum;
+        QString name;
+        bool operator==(const DigitalOutput &out) {
+            return this->outNum==out.outNum && this->nodeNum==out.nodeNum;
+        }
+    };
+
 private:
     QString appName;
     QString appVersion;
@@ -93,6 +126,9 @@ private:
     std::vector<NetGlobalInteger> netGlIntegers;
     std::vector<TelemetryBit> telemetryBits;
     std::vector<TelemetryInteger> telemetryIntegers;
+    std::vector<DigitalInput> digInputs;
+    std::vector<AnalogInput> anInputs;
+    std::vector<DigitalOutput> digOuts;
 public:
     MapContent();
     bool addVar(const PLCVar &var);
@@ -126,6 +162,12 @@ public:
     std::vector<TelemetryBit> getTelemetryBits() const;
     void addTelemetryInteger(const TelemetryInteger &reg);
     std::vector<TelemetryInteger> getTelemetryIntegers() const;
+    void addDigitalInput(const DigitalInput &inp);
+    std::vector<DigitalInput> getDigitalInputs() const;
+    void addAnalogInput(const AnalogInput &inp);
+    std::vector<AnalogInput> getAnalogInputs() const;
+    void addDigitalOut(DigitalOutput &out);
+    std::vector<DigitalOutput> getDigitalOuts() const;
 };
 
 #endif // MAPCONTENT_H

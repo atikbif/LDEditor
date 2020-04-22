@@ -75,62 +75,17 @@
 #include <QtConcurrent/QtConcurrent>
 
 #include "dialogsearchvar.h"
+#include "dialogmapcreator.h"
+#include "mapcontent.h"
+#include "mapcreator.h"
 
-#include "xlsxdocument.h"
-#include "xlsxchartsheet.h"
-#include "xlsxcellrange.h"
-#include "xlsxchart.h"
-#include "xlsxrichstring.h"
-#include "xlsxworkbook.h"
-#include "xlsxformat.h"
-using namespace QXlsx;
-
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    QXlsx::Document xlsx;
-    QXlsx::Format format1;
-    format1.setFontColor(QColor(Qt::red));
-    format1.setFontSize(15);
-    format1.setHorizontalAlignment(QXlsx::Format::AlignHCenter);
-    format1.setBorderStyle(QXlsx::Format::BorderDashDotDot);
-    xlsx.write("A1", "Hello Qt!", format1);
-    xlsx.write("B3", 12345, format1);
-
-    QXlsx::Format format2;
-    format2.setFontBold(true);
-    format2.setFontUnderline(QXlsx::Format::FontUnderlineDouble);
-    format2.setFillPattern(QXlsx::Format::PatternLightUp);
-    xlsx.write("C5", "=44+33", format2);
-    xlsx.write("D7", true, format2);
-
-    QXlsx::Format format3;
-    format3.setFontBold(true);
-    format3.setFontColor(QColor(Qt::blue));
-    format3.setFontSize(20);
-    xlsx.write(11, 1, "Hello Row Style");
-    xlsx.write(11, 6, "Blue Color");
-    xlsx.setRowFormat(11, 41, format3);
-
-    QXlsx::Format format4;
-    format4.setFontBold(true);
-    format4.setFontColor(QColor(Qt::magenta));
-    for (int row=21; row<=40; row++)
-        for (int col=9; col<16; col++)
-            xlsx.write(row, col, row+col);
-    xlsx.setColumnFormat(9, 16, format4);
-
-    xlsx.write("A5", QDate(2013, 8, 29));
-
-    QXlsx::Format format6;
-    format6.setPatternBackgroundColor(QColor(Qt::green));
-    xlsx.write("A6", "Background color: green", format6);
-
-    xlsx.saveAs("style1.xlsx");
 
     auto *horToolBar = new QToolBar(this);
     addToolBar(Qt::ToolBarArea::TopToolBarArea,horToolBar);
@@ -589,6 +544,79 @@ MainWindow::MainWindow(QWidget *parent) :
             }
             scene->update();
         }
+    });
+
+    cmdMenu->addAction("Создать карту памяти",[this](){
+        DialogMapCreator *dialog = new DialogMapCreator(this);
+        if(dialog->exec()==QDialog::Accepted) {
+            MapContent content;
+            content.setAppName(dialog->getApplicationName());
+            content.setClusterNum(dialog->getClusterNum());
+            content.setNodeNum(dialog->getNodeNum());
+            content.setAppVersion(dialog->getApplicationVersion());
+            content.setAppCN(plcConfig.getApplicationCN());
+            content.setIp(plcConfig.getIP());
+            content.setMask(plcConfig.getIPMask());
+            content.setGateway(plcConfig.getIPGate());
+            std::vector<LDScene*> scenes;
+            for(auto &prPage:prPages) scenes.push_back(prPage.first);
+            for(LDScene *scene:scenes) {
+                std::vector<LDElement*> elements = scene->getAllelements();
+                for(LDElement *el:elements) {
+                    if(el->isNeedConnect()) {
+                        auto var = el->connectedVar;
+                        QString varName = var.name;
+                        QString varGroup = var.group;
+                        QString varParentGroup = var.parentGroup;
+                        auto plcVar = PLCVarContainer::getInstance().getVarByGroupAndName(varGroup,varName,varParentGroup);
+                        if(plcVar && plcVar->isSystem()) {
+                            QRegExp aiExp("^AI(\\d+)$");
+                            if(aiExp.indexIn(varName)!=-1) {
+
+                                int num = aiExp.cap(1).toInt();
+                                int sensCount = plcConfig.getADCSensorsCount();
+                                int sensNum = plcConfig.getSensorType(num-1);
+                                if(sensNum && sensNum<=sensCount) {
+
+                                    auto sens = plcConfig.getADCSensor(sensNum-1);
+                                    QString tdu = sens.getName() + "\t" + sens.getLowLimit() + "-" + sens.getHighLimit();
+                                    QString measUnit = sens.getUnit();
+                                    if(!measUnit.isEmpty()) tdu += " " + measUnit;
+                                    int sensType = plcConfig.getSensorTypeCode(num-1);
+                                    switch(sensType) {
+                                        case 0: tdu+=" (0.4-2В)";break;
+                                        case 1: tdu+=" (0-20мА)";break;
+                                        case 2: tdu+=" (4-20мА)";break;
+                                        case 3: tdu+=" (2-10мА)";break;
+                                        case 4:tdu+=" (0-2.5В)";break;
+                                    }
+                                    MapContent::AnalogInput inp;
+                                    inp.tdu = tdu;
+                                    inp.name = plcVar->getComment();
+                                    inp.nodeNum = dialog->getNodeNum();
+                                    inp.inputNum = num;
+                                    inp.channelNum = num;
+                                    content.addAnalogInput(inp);
+                                }
+                            }else {
+                                content.addVar(plcVar.value());
+                            }
+
+                        }
+                    }
+                }
+            }
+            MapCreator creator(content);
+            bool res = creator.createFile("test");
+
+            bool isSysInfoVisible = ui->textBrowser->isVisible();
+            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
+            if(res) {
+                QTimer::singleShot(2000, this, [this](){buttonMin->click();});
+                ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Файл " + "test" + ".xslx успешно создан");
+            }else ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка записи файла карты памяти. Возможно файл открыт или нет прав на запись.");
+        }
+        delete dialog;
     });
 
     ui->menubar->addMenu(cmdMenu);

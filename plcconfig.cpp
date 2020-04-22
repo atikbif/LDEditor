@@ -1,6 +1,7 @@
 #include "plcconfig.h"
 #include <QDataStream>
 #include <QDebug>
+#include <array>
 
 PLCConfig::PLCConfig(const QString &name, int input_cnt, int ai_cnt):name(name)
 {
@@ -170,4 +171,52 @@ void PLCConfig::fromBytes(QByteArray &value)
     if(version>=2) {
         in >> settings;
     }
+}
+
+QString PLCConfig::getIP() const
+{
+    QString res = "192.168.1.2";
+    const int ip_offset = 15;
+    if(settings.size()>=ip_offset+4) {
+        std::array<quint8,4> ip;
+        for(int i=0;i<4;i++) {
+            ip[i] = static_cast<quint8>(settings.at(ip_offset+i));
+        }
+        res = QString::number(ip[0]) + "." + QString::number(ip[1]) +
+                "." + QString::number(ip[2]) + "." + QString::number(ip[3]);
+
+    }
+    return res;
+}
+
+QString PLCConfig::getIPMask() const
+{
+    QString res="255.255.255.0";
+    const int ip_offset = 19;
+    if(settings.size()>=ip_offset+4) {
+        std::array<quint8,4> ip;
+        for(int i=0;i<4;i++) {
+            ip[i] = static_cast<quint8>(settings.at(ip_offset+i));
+        }
+        res = QString::number(ip[0]) + "." + QString::number(ip[1]) +
+                "." + QString::number(ip[2]) + "." + QString::number(ip[3]);
+
+    }
+    return res;
+}
+
+QString PLCConfig::getIPGate() const
+{
+    QString res="192.168.1.1";
+    const int ip_offset = 23;
+    if(settings.size()>=ip_offset+4) {
+        std::array<quint8,4> ip;
+        for(int i=0;i<4;i++) {
+            ip[i] = static_cast<quint8>(settings.at(ip_offset+i));
+        }
+        res = QString::number(ip[0]) + "." + QString::number(ip[1]) +
+                "." + QString::number(ip[2]) + "." + QString::number(ip[3]);
+
+    }
+    return res;
 }
