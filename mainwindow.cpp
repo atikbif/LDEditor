@@ -558,6 +558,30 @@ MainWindow::MainWindow(QWidget *parent) :
             content.setIp(plcConfig.getIP());
             content.setMask(plcConfig.getIPMask());
             content.setGateway(plcConfig.getIPGate());
+
+            MapContent::ClusterGlobalBit bit;
+            bit.name = "Node" + QString::number(dialog->getNodeNum());
+            bit.nodeNum = 8;
+            bit.trueName = "Online";
+            bit.falseName = "Offline";
+            bit.channelNum = dialog->getNodeNum() + 1;
+            bit.bitNum = 0; // PC21-1
+            content.addClusterGlobalBit(bit);
+            bit.name = "Node 7";
+            bit.nodeNum = 8;
+            bit.trueName = "Online";
+            bit.falseName = "Offline";
+            bit.channelNum = 8;
+            bit.bitNum = 7; // PC21-FE
+            content.addClusterGlobalBit(bit);
+
+            for(int i=0;i<8;i++) {
+                MapContent::NetGlobalBit bit;
+                bit.bitNum = i;
+                bit.nodeNum = 0;
+                content.addNetGlobalBit(bit);
+            }
+
             std::vector<LDScene*> scenes;
             for(auto &prPage:prPages) scenes.push_back(prPage.first);
             for(LDScene *scene:scenes) {

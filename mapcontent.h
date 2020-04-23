@@ -15,8 +15,15 @@ public:
         QString name;
         QString falseName;
         QString trueName;
-        bool operator==(const ClusterGlobalBit &bit) {
+        bool operator==(const ClusterGlobalBit &bit) const{
             return this->bitNum==bit.bitNum;
+        }
+        bool operator<(const ClusterGlobalBit &bit) const {
+            if(this->nodeNum < bit.nodeNum) return true;
+            if(this->nodeNum == bit.nodeNum) {
+                return this->bitNum < bit.bitNum;
+            }
+            return false;
         }
     };
 
@@ -28,6 +35,13 @@ public:
         int initialValue;
         bool operator==(const ClusterGlobalInteger &reg) {
             return this->regNum==reg.regNum;
+        }
+        bool operator<(const ClusterGlobalInteger &reg) const {
+            if(this->nodeNum < reg.nodeNum) return true;
+            if(this->nodeNum == reg.nodeNum) {
+                return this->regNum < reg.regNum;
+            }
+            return false;
         }
     };
 
@@ -42,6 +56,13 @@ public:
         bool operator==(const NetGlobalBit &bit) {
             return this->bitNum==bit.bitNum;
         }
+        bool operator<(const NetGlobalBit &bit) const {
+            if(this->nodeNum < bit.nodeNum) return true;
+            if(this->nodeNum == bit.nodeNum) {
+                return this->bitNum < bit.bitNum;
+            }
+            return false;
+        }
     };
 
     struct NetGlobalInteger {
@@ -54,6 +75,13 @@ public:
         bool operator==(const NetGlobalInteger &reg) {
             return this->regNum==reg.regNum;
         }
+        bool operator<(const NetGlobalInteger &reg) const {
+            if(this->nodeNum < reg.nodeNum) return true;
+            if(this->nodeNum == reg.nodeNum) {
+                return this->regNum < reg.regNum;
+            }
+            return false;
+        }
     };
 
     struct TelemetryBit {
@@ -63,6 +91,13 @@ public:
         QString funcName;
         bool operator==(const TelemetryBit &bit) {
             return this->channelNum==bit.channelNum;
+        }
+        bool operator<(const TelemetryBit &bit) const {
+            if(this->nodeNum < bit.nodeNum) return true;
+            if(this->nodeNum == bit.nodeNum) {
+                return this->channelNum < bit.channelNum;
+            }
+            return false;
         }
     };
 
@@ -75,6 +110,13 @@ public:
         bool operator==(const TelemetryInteger &reg) {
             return this->channelNum==reg.channelNum;
         }
+        bool operator<(const TelemetryInteger &reg) const {
+            if(this->nodeNum < reg.nodeNum) return true;
+            if(this->nodeNum == reg.nodeNum) {
+                return this->channelNum < reg.channelNum;
+            }
+            return false;
+        }
     };
 
     struct AnalogInput {
@@ -85,6 +127,13 @@ public:
         QString tdu;
         bool operator==(const AnalogInput &inp) {
             return this->inputNum==inp.inputNum && this->nodeNum==inp.nodeNum;
+        }
+        bool operator<(const AnalogInput &reg) const {
+            if(this->nodeNum < reg.nodeNum) return true;
+            if(this->nodeNum == reg.nodeNum) {
+                return this->inputNum < reg.inputNum;
+            }
+            return false;
         }
     };
 
@@ -98,6 +147,13 @@ public:
         bool operator==(const DigitalInput &inp) {
             return this->inputNum==inp.inputNum && this->nodeNum==inp.nodeNum;
         }
+        bool operator<(const DigitalInput &bit) const {
+            if(this->nodeNum < bit.nodeNum) return true;
+            if(this->nodeNum == bit.nodeNum) {
+                return this->inputNum < bit.inputNum;
+            }
+            return false;
+        }
     };
 
     struct DigitalOutput {
@@ -107,6 +163,13 @@ public:
         QString name;
         bool operator==(const DigitalOutput &out) {
             return this->outNum==out.outNum && this->nodeNum==out.nodeNum;
+        }
+        bool operator<(const DigitalOutput &bit) const {
+            if(this->nodeNum < bit.nodeNum) return true;
+            if(this->nodeNum == bit.nodeNum) {
+                return this->outNum < bit.outNum;
+            }
+            return false;
         }
     };
 

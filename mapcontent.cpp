@@ -1,5 +1,6 @@
 #include "mapcontent.h"
 #include <QRegExp>
+#include <QDebug>
 
 QString MapContent::getAppName() const
 {
@@ -193,9 +194,9 @@ bool MapContent::addVar(const PLCVar &var)
         QRegExp clustBitExp("^CLBIT(\\d+)$");
         QRegExp clustRegExp("^CLREG(\\d+)$");
         QRegExp netBitExp("^NBIT(\\d+)$");
-        QRegExp netRegExp("^NReg(\\d+)$");
+        QRegExp netRegExp("^NREG(\\d+)$");
         QRegExp scadaBitExp("^SC_BIT(\\d+)$");
-        QRegExp scadaRegExp("^SC_BIT(\\d+)$");
+        QRegExp scadaRegExp("^SC_REG(\\d+)$");
         QRegExp diExp("^DI(\\d+)$");
         QRegExp doExp("^DO(\\d+)$");
         if(clustBitExp.indexIn(name)!=-1) {
@@ -209,7 +210,7 @@ bool MapContent::addVar(const PLCVar &var)
                 bit.nodeNum = 8; // FE Node num
                 bit.channelNum = num;
                 bit.trueName = "ON";
-                bit.trueName = "OFF";
+                bit.falseName = "OFF";
                 auto it = std::find(clustGlBits.begin(),clustGlBits.end(),bit);
                 if(it==clustGlBits.end()) {
                     addClusterGlobalBit(bit);
@@ -225,7 +226,7 @@ bool MapContent::addVar(const PLCVar &var)
                 reg.name = var.getComment();
                 reg.regNum = num;
                 reg.nodeNum = 8;
-                reg.channelNum = num-1;
+                reg.channelNum = num-16;
                 reg.initialValue = 0;
                 auto it = std::find(clustGlIntegers.begin(),clustGlIntegers.end(),reg);
                 if(it==clustGlIntegers.end()) {
@@ -239,8 +240,9 @@ bool MapContent::addVar(const PLCVar &var)
             const int maxNum = 384;
             const int txMinNum = 241;
             const int txMaxNum = 256;
-            if(num>txMinNum && num<=txMaxNum && nodeNum>=0 && nodeNum<=7) {
-                num+=nodeNum*16;
+            if(num>=txMinNum && num<=txMaxNum && clusterNum>=0 && clusterNum<=7) {
+                qDebug() << "TX" << num << num+16+clusterNum*16;
+                num+=16+clusterNum*16;
             }
             if(num>=minNum && num<=maxNum) {
                 NetGlobalBit bit;
@@ -252,7 +254,7 @@ bool MapContent::addVar(const PLCVar &var)
                 bit.falseName = "OFF";
                 bit.clusterNum = (num-minNum)/16;
                 auto it = std::find(netGlBits.begin(),netGlBits.end(),bit);
-                if(it!=netGlBits.end()) {
+                if(it==netGlBits.end()) {
                     addNetGlobalBit(bit);
                     return true;
                 }
@@ -263,8 +265,8 @@ bool MapContent::addVar(const PLCVar &var)
             const int maxNum = 224;
             const int txMinNum = 81;
             const int txMaxNum = 96;
-            if(num>txMinNum && num<=txMaxNum && nodeNum>=0 && nodeNum<=7) {
-                num+=nodeNum*16;
+            if(num>=txMinNum && num<=txMaxNum && clusterNum>=0 && clusterNum<=7) {
+                num+=16+clusterNum*16;
             }
             if(num>=minNum && num<=maxNum) {
                 NetGlobalInteger reg;
@@ -272,10 +274,10 @@ bool MapContent::addVar(const PLCVar &var)
                 reg.regNum = num;
                 reg.nodeNum = 9;
                 reg.channelNum = num - minNum + 1;
-                reg.clusterNum = reg.channelNum / 16;
+                reg.clusterNum = (reg.channelNum-1) / 16;
                 reg.initialValue = 0;
                 auto it = std::find(netGlIntegers.begin(),netGlIntegers.end(),reg);
-                if(it!=netGlIntegers.end()) {
+                if(it==netGlIntegers.end()) {
                     addNetGlobalInteger(reg);
                     return true;
                 }
@@ -292,7 +294,7 @@ bool MapContent::addVar(const PLCVar &var)
                 if(nodeNum>=0 && nodeNum<=7) bit.usedByNode = nodeNum;
                 else bit.usedByNode = 0;
                 auto it = std::find(telemetryBits.begin(),telemetryBits.end(),bit);
-                if(it!=telemetryBits.end()) {
+                if(it==telemetryBits.end()) {
                     addTelemetryBit(bit);
                     return true;
                 }
@@ -310,7 +312,7 @@ bool MapContent::addVar(const PLCVar &var)
                 else reg.usedByNode = 0;
                 reg.initialValue = 0;
                 auto it = std::find(telemetryIntegers.begin(),telemetryIntegers.end(),reg);
-                if(it!=telemetryIntegers.end()) {
+                if(it==telemetryIntegers.end()) {
                     addTelemetryInteger(reg);
                     return 1;
                 }
@@ -326,10 +328,10 @@ bool MapContent::addVar(const PLCVar &var)
                 inp.nodeNum = nodeNum;
                 inp.channelNum = num;
                 inp.trueName = "CLOSED";
-                inp.trueName = "OPEN";
+                inp.falseName = "OPEN";
 
                 auto it = std::find(digInputs.begin(),digInputs.end(),inp);
-                if(it!=digInputs.end()) {
+                if(it==digInputs.end()) {
                     addDigitalInput(inp);
                     return true;
                 }
@@ -346,7 +348,7 @@ bool MapContent::addVar(const PLCVar &var)
                 out.channelNum = 64 + num;
 
                 auto it = std::find(digOuts.begin(),digOuts.end(),out);
-                if(it!=digOuts.end()) {
+                if(it==digOuts.end()) {
                     addDigitalOut(out);
                     return true;
                 }
