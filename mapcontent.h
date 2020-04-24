@@ -180,6 +180,7 @@ private:
     int clusterNum;
     bool displayUsed;
     int appCN;
+    QString appTime;
     QString ip;
     QString mask;
     QString gateway;
@@ -231,6 +232,8 @@ public:
     std::vector<AnalogInput> getAnalogInputs() const;
     void addDigitalOut(DigitalOutput &out);
     std::vector<DigitalOutput> getDigitalOuts() const;
+    QString getAppTime() const;
+    void setAppTime(const QString &value);
 };
 
 #endif // MAPCONTENT_H

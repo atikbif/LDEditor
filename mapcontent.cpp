@@ -182,6 +182,16 @@ std::vector<MapContent::DigitalOutput> MapContent::getDigitalOuts() const
     return digOuts;
 }
 
+QString MapContent::getAppTime() const
+{
+    return appTime;
+}
+
+void MapContent::setAppTime(const QString &value)
+{
+    appTime = value;
+}
+
 MapContent::MapContent()
 {
 

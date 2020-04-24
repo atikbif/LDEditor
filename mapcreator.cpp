@@ -34,6 +34,7 @@ bool MapCreator::createFile(const QString &fName)
     xlsx.write("A4","Версия приложения");
     xlsx.write("B4","  " + content.getAppVersion());
     xlsx.write("A5","Дата приложения");
+    xlsx.write("B5","  " + content.getAppTime());
     xlsx.write("A7","Номер кластера");
     xlsx.write("B7","  Cluster " + QString::number(content.getClusterNum()));
 
@@ -284,7 +285,7 @@ bool MapCreator::createFile(const QString &fName)
     }
 
     str+=2;
-    xlsx.write("A"+QString::number(str),"Telemetry Bit Integers",format1);
+    xlsx.write("A"+QString::number(str),"Telemetry Int Controls",format1);
     str+=2;
     xlsx.write("A"+QString::number(str),"  Channel",format2);
     xlsx.write("B"+QString::number(str),"  Node",format2);

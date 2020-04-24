@@ -32,8 +32,6 @@ class MainWindow : public QMainWindow
     QLineEdit *mouseCol;
     QLineEdit *mouseRow;
 
-    QSpinBox *appID;
-
     QPushButton *buttonMin;
     //QPushButton *buttonMax;
 
@@ -76,6 +74,8 @@ class MainWindow : public QMainWindow
     QAction *configDOAction = nullptr;
     QAction *modbusAction = nullptr;
     QAction *buildAction = nullptr;
+    QAction *createMapAction = nullptr;
+    QAction *applConfigAction = nullptr;
 
     QStringList getPrevProjects(void);
     void updatePrevProjects(const QStringList &prNames);

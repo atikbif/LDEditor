@@ -80,6 +80,8 @@
 #include "mapcreator.h"
 
 #include <QMessageBox>
+#include <QDateTime>
+#include <dialogapplicationconfig.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -297,16 +299,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(plcType,&QComboBox::currentTextChanged,this,&MainWindow::plcChanged);
     horToolBar->addSeparator();
 
-    horToolBar->addWidget(new QLabel("APP CN: "));
-    appID = new QSpinBox(this);
-    appID->setRange(0,65535);
-    appID->setSingleStep(1);
-    connect(appID,qOverload<int>(&QSpinBox::valueChanged),[this](int value){plcConfig.setApplicationCN(static_cast<quint16>(value));prChanged=true;});
-    appID->setValue(0);
-
-    horToolBar->addWidget(appID);
-    horToolBar->addSeparator();
-
     horToolBar->addAction(QIcon(":/images/search.ico"),"Поиск",[this](){search();});
     horToolBar->addSeparator();
     horToolBar->addAction(QIcon(":/images/print.png"),"Печать",this,&MainWindow::previewAction);
@@ -474,6 +466,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     confMenu->addAction(configAction);
 
+    applConfigAction = confMenu->addAction(QIcon(":/images/appl_config.png"),"Настройки приложения",[this](){
+        auto *dialog = new DialogApplicationConfig(plcConfig, this);
+        if(dialog->exec()==QDialog::Accepted) {
+            plcConfig.setAppName(dialog->getApplicationName());
+            plcConfig.setApplicationCN(static_cast<quint16>(dialog->getAppCN()));
+            plcConfig.setAppVersion(dialog->getApplicationVersion());
+            plcConfig.setNodeNum(dialog->getNodeNum());
+            plcConfig.setClusterNum(dialog->getClusterNum());
+        }
+    });
+
     configADCAction = confMenu->addAction(QIcon(":/images/analogue.png"),"Аналоговые входы",[this](){
         auto *dialog = new DialogADCconfig(plcConfig, this);
         if(dialog->exec()==QDialog::Accepted) {
@@ -528,7 +531,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     QMenu *cmdMenu = new QMenu("Операции");
-    cmdMenu->addAction("Обновить имена",[this](){
+    cmdMenu->addAction(QIcon(":/images/update_names.png"),"Обновить имена",[this](){
         std::vector<LDScene*> scenes;
         for(auto &prPage:prPages) scenes.push_back(prPage.first);
         for(LDScene *scene:scenes) {
@@ -546,101 +549,98 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
-    cmdMenu->addAction("Создать карту памяти",[this](){
-        DialogMapCreator *dialog = new DialogMapCreator(this);
-        if(dialog->exec()==QDialog::Accepted) {
-            MapContent content;
-            content.setAppName(dialog->getApplicationName());
-            content.setClusterNum(dialog->getClusterNum());
-            content.setNodeNum(dialog->getNodeNum());
-            content.setAppVersion(dialog->getApplicationVersion());
-            content.setAppCN(plcConfig.getApplicationCN());
-            content.setIp(plcConfig.getIP());
-            content.setMask(plcConfig.getIPMask());
-            content.setGateway(plcConfig.getIPGate());
+    createMapAction = cmdMenu->addAction(QIcon(":/images/map.png"),"Создать карту памяти",[this](){
+        MapContent content;
+        content.setAppName(plcConfig.getAppName());
+        content.setClusterNum(plcConfig.getClusterNum());
+        content.setNodeNum(plcConfig.getNodeNum());
+        content.setAppVersion(plcConfig.getAppVersion());
+        content.setAppCN(plcConfig.getApplicationCN());
+        content.setIp(plcConfig.getIP());
+        content.setMask(plcConfig.getIPMask());
+        content.setGateway(plcConfig.getIPGate());
+        content.setAppTime(plcConfig.getAppTime());
 
-            MapContent::ClusterGlobalBit bit;
-            bit.name = "Node" + QString::number(dialog->getNodeNum());
-            bit.nodeNum = 8;
-            bit.trueName = "Online";
-            bit.falseName = "Offline";
-            bit.channelNum = dialog->getNodeNum() + 1;
-            bit.bitNum = 0; // PC21-1
-            content.addClusterGlobalBit(bit);
-            bit.name = "Node 7";
-            bit.nodeNum = 8;
-            bit.trueName = "Online";
-            bit.falseName = "Offline";
-            bit.channelNum = 8;
-            bit.bitNum = 7; // PC21-FE
-            content.addClusterGlobalBit(bit);
+        MapContent::ClusterGlobalBit bit;
+        bit.name = "Node" + QString::number(plcConfig.getNodeNum());
+        bit.nodeNum = 8;
+        bit.trueName = "Online";
+        bit.falseName = "Offline";
+        bit.channelNum = plcConfig.getNodeNum() + 1;
+        bit.bitNum = 0; // PC21-1
+        content.addClusterGlobalBit(bit);
+        bit.name = "Node 7";
+        bit.nodeNum = 8;
+        bit.trueName = "Online";
+        bit.falseName = "Offline";
+        bit.channelNum = 8;
+        bit.bitNum = 7; // PC21-FE
+        content.addClusterGlobalBit(bit);
 
-            for(int i=0;i<8;i++) {
-                MapContent::NetGlobalBit bit;
-                bit.bitNum = i;
-                bit.nodeNum = 0;
-                content.addNetGlobalBit(bit);
-            }
+        for(int i=0;i<8;i++) {
+            MapContent::NetGlobalBit bit;
+            bit.bitNum = i;
+            bit.nodeNum = 0;
+            content.addNetGlobalBit(bit);
+        }
 
-            std::vector<LDScene*> scenes;
-            for(auto &prPage:prPages) scenes.push_back(prPage.first);
-            for(LDScene *scene:scenes) {
-                std::vector<LDElement*> elements = scene->getAllelements();
-                for(LDElement *el:elements) {
-                    if(el->isNeedConnect()) {
-                        auto var = el->connectedVar;
-                        QString varName = var.name;
-                        QString varGroup = var.group;
-                        QString varParentGroup = var.parentGroup;
-                        auto plcVar = PLCVarContainer::getInstance().getVarByGroupAndName(varGroup,varName,varParentGroup);
-                        if(plcVar && plcVar->isSystem()) {
-                            QRegExp aiExp("^AI(\\d+)$");
-                            if(aiExp.indexIn(varName)!=-1) {
+        std::vector<LDScene*> scenes;
+        for(auto &prPage:prPages) scenes.push_back(prPage.first);
+        for(LDScene *scene:scenes) {
+            std::vector<LDElement*> elements = scene->getAllelements();
+            for(LDElement *el:elements) {
+                if(el->isNeedConnect()) {
+                    auto var = el->connectedVar;
+                    QString varName = var.name;
+                    QString varGroup = var.group;
+                    QString varParentGroup = var.parentGroup;
+                    auto plcVar = PLCVarContainer::getInstance().getVarByGroupAndName(varGroup,varName,varParentGroup);
+                    if(plcVar && plcVar->isSystem()) {
+                        QRegExp aiExp("^AI(\\d+)$");
+                        if(aiExp.indexIn(varName)!=-1) {
 
-                                int num = aiExp.cap(1).toInt();
-                                int sensCount = plcConfig.getADCSensorsCount();
-                                int sensNum = plcConfig.getSensorType(num-1);
-                                if(sensNum && sensNum<=sensCount) {
+                            int num = aiExp.cap(1).toInt();
+                            int sensCount = plcConfig.getADCSensorsCount();
+                            int sensNum = plcConfig.getSensorType(num-1);
+                            if(sensNum && sensNum<=sensCount) {
 
-                                    auto sens = plcConfig.getADCSensor(sensNum-1);
-                                    QString tdu = sens.getName() + "\t" + sens.getLowLimit() + "-" + sens.getHighLimit();
-                                    QString measUnit = sens.getUnit();
-                                    if(!measUnit.isEmpty()) tdu += " " + measUnit;
-                                    int sensType = plcConfig.getSensorTypeCode(num-1);
-                                    switch(sensType) {
-                                        case 0: tdu+=" (0.4-2В)";break;
-                                        case 1: tdu+=" (0-20мА)";break;
-                                        case 2: tdu+=" (4-20мА)";break;
-                                        case 3: tdu+=" (2-10мА)";break;
-                                        case 4:tdu+=" (0-2.5В)";break;
-                                    }
-                                    MapContent::AnalogInput inp;
-                                    inp.tdu = tdu;
-                                    inp.name = plcVar->getComment();
-                                    inp.nodeNum = dialog->getNodeNum();
-                                    inp.inputNum = num;
-                                    inp.channelNum = num;
-                                    content.addAnalogInput(inp);
+                                auto sens = plcConfig.getADCSensor(sensNum-1);
+                                QString tdu = sens.getName() + "\t" + sens.getLowLimit() + "-" + sens.getHighLimit();
+                                QString measUnit = sens.getUnit();
+                                if(!measUnit.isEmpty()) tdu += " " + measUnit;
+                                int sensType = plcConfig.getSensorTypeCode(num-1);
+                                switch(sensType) {
+                                    case 0: tdu+=" (0.4-2В)";break;
+                                    case 1: tdu+=" (0-20мА)";break;
+                                    case 2: tdu+=" (4-20мА)";break;
+                                    case 3: tdu+=" (2-10мА)";break;
+                                    case 4:tdu+=" (0-2.5В)";break;
                                 }
-                            }else {
-                                content.addVar(plcVar.value());
+                                MapContent::AnalogInput inp;
+                                inp.tdu = tdu;
+                                inp.name = plcVar->getComment();
+                                inp.nodeNum = plcConfig.getNodeNum();
+                                inp.inputNum = num;
+                                inp.channelNum = num;
+                                content.addAnalogInput(inp);
                             }
-
+                        }else {
+                            content.addVar(plcVar.value());
                         }
+
                     }
                 }
             }
-            MapCreator creator(content);
-            bool res = creator.createFile("test");
-
-            bool isSysInfoVisible = ui->textBrowser->isVisible();
-            if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
-            if(res) {
-                QTimer::singleShot(2000, this, [this](){buttonMin->click();});
-                ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Файл " + "test" + ".xslx успешно создан");
-            }else ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка записи файла карты памяти. Возможно файл открыт или нет прав на запись.");
         }
-        delete dialog;
+        MapCreator creator(content);
+        bool res = creator.createFile(plcConfig.getAppName());
+
+        bool isSysInfoVisible = ui->textBrowser->isVisible();
+        if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
+        if(res) {
+            QTimer::singleShot(2000, this, [this](){buttonMin->click();});
+            ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Файл " + plcConfig.getAppName() + ".xslx успешно создан");
+        }else ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка записи файла карты памяти. Возможно файл открыт или нет прав на запись.");
     });
 
     ui->menubar->addMenu(cmdMenu);
@@ -890,6 +890,7 @@ void MainWindow::saveProject()
                 out << ethAsDefault;
             }
             if(plcType->currentText()!="MKU") {
+                plcConfig.setAppTime(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss"));
                 QByteArray config = plcConfig.toBytes();
                 out << config;
             }
@@ -898,7 +899,8 @@ void MainWindow::saveProject()
                 out << config;
             }
             if(PLCUtils::isPLCSupportCAN(plcType->currentText())) {
-                out << appID->value();
+                int value = 0;
+                out << value; // unused
             }
             prChanged = false;
             QFileInfo fInfo(file);
@@ -955,6 +957,7 @@ void MainWindow::saveAsProject()
                 out << ethAsDefault;
             }
             if(plcType->currentText()!="MKU") {
+                plcConfig.setAppTime(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss"));
                 QByteArray config = plcConfig.toBytes();
                 out << config;
             }
@@ -963,7 +966,8 @@ void MainWindow::saveAsProject()
                 out << config;
             }
             if(PLCUtils::isPLCSupportCAN(plcType->currentText())) {
-                out << appID->value();
+                int value = 0;
+                out << value; // unused
             }
             prChanged = false;
             prFileName = fileName;
@@ -1056,9 +1060,10 @@ void MainWindow::openProjectByName(const QString &fName) {
                 ModbusVarsStorage::getInstance().fromBytes(config);
             }
             if(PLCUtils::isPLCSupportCAN(plcType->currentText())) {
+                // support previous versions
                 int value = 0;
                 in >> value;
-                appID->setValue(value);
+                if(value) plcConfig.setApplicationCN(static_cast<quint16>(value));
             }
             plcChanged(plcName);
             setWindowTitle(fName);
@@ -1606,9 +1611,13 @@ void MainWindow::plcChanged(const QString &plcName)
         if(PLCUtils::isPLCSupportModbusMaster(plcName)) {modbusAction->setVisible(true);modbusAction->setEnabled(true);}
         else {modbusAction->setVisible(false);modbusAction->setEnabled(false);}
     }
-    if(appID) {
-        if(PLCUtils::isPLCSupportCAN(plcName)) {appID->setEnabled(true);}
-        else {appID->setEnabled(false);}
+    if(createMapAction) {
+        if(PLCUtils::isPLCSupportEth(plcName)) {createMapAction->setVisible(true);createMapAction->setEnabled(true);}
+        else {createMapAction->setVisible(false);createMapAction->setEnabled(false);}
+    }
+    if(applConfigAction) {
+        if(PLCUtils::isPLCSupportEth(plcName)) {applConfigAction->setVisible(true);applConfigAction->setEnabled(true);}
+        else {applConfigAction->setVisible(false);applConfigAction->setEnabled(false);}
     }
     plcConfig.setName(plcName);
 }
@@ -1640,6 +1649,7 @@ std::vector<QString> MainWindow::checkADCconfig()
     std::vector<QString> result;
     if(PLCUtils::isPLCSupportADC(plcType->currentText())) {
         int cnt = 14;
+        if(plcConfig.getSettings().size()>=cnt)
         for(int i=0;i<cnt;i++) {
             bool inpType = static_cast<bool>(plcConfig.getSettings().at(i));
             int sensType = plcConfig.getSensorTypeCode(i);

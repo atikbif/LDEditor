@@ -14,6 +14,12 @@ class PLCConfig
     QByteArray settings;
     QString name;
     quint16 appCN=0;
+    quint16 appCRC = 0;
+    QString appName;
+    int nodeNum;
+    int clusterNum;
+    QString appVersion;
+    QString appTime;
 public:
     PLCConfig(const QString &name="", int input_cnt=64, int ai_cnt=64);
     void setName(const QString &name);
@@ -38,6 +44,18 @@ public:
     QString getIP() const;
     QString getIPMask() const;
     QString getIPGate() const;
+    QString getAppName() const;
+    void setAppName(const QString &value);
+    int getNodeNum() const;
+    void setNodeNum(int value);
+    int getClusterNum() const;
+    void setClusterNum(int value);
+    QString getAppVersion() const;
+    void setAppVersion(const QString &value);
+    QString getAppTime() const;
+    void setAppTime(const QString &value);
+    quint16 getAppCRC() const;
+    void setAppCRC(const quint16 &value);
 };
 
 #endif // PLCCONFIG_H

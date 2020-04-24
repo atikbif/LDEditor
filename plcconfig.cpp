@@ -2,11 +2,78 @@
 #include <QDataStream>
 #include <QDebug>
 #include <array>
+#include <QDateTime>
+
+QString PLCConfig::getAppName() const
+{
+    return appName;
+}
+
+void PLCConfig::setAppName(const QString &value)
+{
+    appName = value;
+}
+
+int PLCConfig::getNodeNum() const
+{
+    return nodeNum;
+}
+
+void PLCConfig::setNodeNum(int value)
+{
+    nodeNum = value;
+}
+
+int PLCConfig::getClusterNum() const
+{
+    return clusterNum;
+}
+
+void PLCConfig::setClusterNum(int value)
+{
+    clusterNum = value;
+}
+
+QString PLCConfig::getAppVersion() const
+{
+    return appVersion;
+}
+
+void PLCConfig::setAppVersion(const QString &value)
+{
+    appVersion = value;
+}
+
+QString PLCConfig::getAppTime() const
+{
+    return appTime;
+}
+
+void PLCConfig::setAppTime(const QString &value)
+{
+    appTime = value;
+}
+
+quint16 PLCConfig::getAppCRC() const
+{
+    return appCRC;
+}
+
+void PLCConfig::setAppCRC(const quint16 &value)
+{
+    appCRC = value;
+}
 
 PLCConfig::PLCConfig(const QString &name, int input_cnt, int ai_cnt):name(name)
 {
     for(int i=0;i<input_cnt;i++) input_type.push_back(false);
     for(int i=0;i<ai_cnt;i++) sensor_type.push_back(0);
+    appCN = 0;
+    appName = "project";
+    appVersion = "1.0";
+    appTime = QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
+    nodeNum = 0;
+    clusterNum = 0;
 }
 
 void PLCConfig::setName(const QString &name)
@@ -51,9 +118,16 @@ QByteArray PLCConfig::toBytes() const
 {
     QByteArray result;
     QDataStream out(&result,QIODevice::WriteOnly);
-    int version = 3;
+    int version = 4;
     out << version;
     out << name;
+    out << appName;
+    out << appVersion;
+    out << appTime;
+    out << nodeNum;
+    out << clusterNum;
+    out << appCN;
+    out << appCRC;
     out << static_cast<int>(input_type.size());
     for(bool inp_type:input_type) out << inp_type;
     out << static_cast<int>(sensor_type.size());
@@ -128,6 +202,23 @@ void PLCConfig::fromBytes(QByteArray &value)
     int version = 0;
     in >> version;
     in >> name;
+    if(version>=4) {
+        in >> appName;
+        in >> appVersion;
+        in >> appTime;
+        in >> nodeNum;
+        in >> clusterNum;
+        in >> appCN;
+        in >> appCRC;
+    }else {
+        appName = "project";
+        appVersion = "1.0";
+        appTime = "не известно";
+        nodeNum = 0;
+        clusterNum = 0;
+        appCN = 0;
+        appCRC = 0;
+    }
     input_type.clear();
     int cnt = 0;
     in >> cnt;
