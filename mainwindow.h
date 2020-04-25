@@ -80,6 +80,8 @@ class MainWindow : public QMainWindow
     QStringList getPrevProjects(void);
     void updatePrevProjects(const QStringList &prNames);
 
+    //std::map<QString,QString> sysVarsComments;
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();

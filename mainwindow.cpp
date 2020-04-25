@@ -996,6 +996,7 @@ void MainWindow::openProjectByName(const QString &fName) {
     updatePrevProjects(prevPr);
     QFile file(fName);
     if(file.open(QIODevice::ReadOnly) ) {
+        PLCVarContainer::getInstance().clearSysVarsComments();
         QDataStream in(&file);
         QString tmpStr;
         in >> tmpStr;
@@ -1294,16 +1295,14 @@ void MainWindow::searchResults(const std::vector<QString> &res)
 
 void MainWindow::plcChanged(const QString &plcName)
 {
+    std::map<QString,QString> sysVarsComments = PLCVarContainer::getInstance().getSysVarsComments();
+
     std::vector<QString> parGroups = PLCVarContainer::getInstance().getParentGroups();
-    std::map<QString,QString> sysVarsComments;
+
     for(const QString &parGr:parGroups) {
         std::vector<QString> sysGroups = PLCVarContainer::getInstance().getSystemVarGroups(parGr);
 
         for(const QString &gr:sysGroups) {
-            std::vector<PLCVar> vars = PLCVarContainer::getInstance().getVarsByGroup(gr,parGr);
-            for(const auto &var:vars) {
-                if(!var.getComment().isEmpty()) sysVarsComments[var.getName()]=var.getComment();
-            }
             PLCVarContainer::getInstance().delGroup(gr,parGr);
         }
     }

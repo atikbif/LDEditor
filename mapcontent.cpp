@@ -216,6 +216,7 @@ bool MapContent::addVar(const PLCVar &var)
             if(num>=minNum && num<=maxNum) {
                 ClusterGlobalBit bit;
                 bit.name = var.getComment();
+                qDebug() << "BIT" << bit.name;
                 bit.bitNum = num;
                 bit.nodeNum = 8; // FE Node num
                 bit.channelNum = num;

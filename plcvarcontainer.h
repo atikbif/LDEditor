@@ -4,14 +4,19 @@
 #include "plcvar.h"
 #include <vector>
 #include <optional>
+#include <map>
 
 class PLCVarContainer final
 {
     static std::vector<PLCVar> vars;
     static std::vector<PLCVar> saveVars;
+    static std::map<QString,QString> sysVarsComments;
 
 public:
+
     static PLCVarContainer& getInstance();
+    void clearSysVarsComments();
+    std::map<QString,QString> getSysVarsComments() const {return sysVarsComments;}
     void addVar(const PLCVar &var);
     void deleteVar(const QString &group, const QString &name, QString parentGroup="");
     void updateComment(const QString &group, const QString &name,const QString &comment, QString parentGroup="");

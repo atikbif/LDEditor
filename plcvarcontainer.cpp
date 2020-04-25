@@ -4,6 +4,7 @@
 
 std::vector<PLCVar> PLCVarContainer::vars;
 std::vector<PLCVar> PLCVarContainer::saveVars;
+std::map<QString,QString> PLCVarContainer::sysVarsComments;
 
 
 PLCVarContainer &PLCVarContainer::getInstance()
@@ -12,9 +13,15 @@ PLCVarContainer &PLCVarContainer::getInstance()
     return instance;
 }
 
+void PLCVarContainer::clearSysVarsComments()
+{
+    sysVarsComments.clear();
+}
+
 void PLCVarContainer::addVar(const PLCVar &var)
 {
     vars.push_back(var);
+    if(var.isSystem()) sysVarsComments[var.getName()] = var.getComment();
 }
 
 void PLCVarContainer::deleteVar(const QString &group, const QString &name, QString parentGroup)
@@ -29,11 +36,17 @@ void PLCVarContainer::deleteVar(const QString &group, const QString &name, QStri
 
 void PLCVarContainer::updateComment(const QString &group, const QString &name, const QString &comment, QString parentGroup)
 {
+    //qDebug() << "UPDATE COMMENT";
     auto it = std::find_if(vars.begin(),vars.end(),[group,name,parentGroup](const PLCVar &var){
         return (var.getName()==name && var.getGroup()==group && var.getParentGroup()==parentGroup);
     });
     if(it!=vars.end()) {
+        if(it->isSystem()) {
+            sysVarsComments[it->getName()] = comment;
+            qDebug() << "SYS COMMENTS UPDATE" << it->getName() << comment;
+        }
         it->setComment(comment);
+        //qDebug() << "UPDATE OK";
     }
 }
 
