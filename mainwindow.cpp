@@ -82,6 +82,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <dialogapplicationconfig.h>
+#include "dialogvarinitlist.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -633,7 +634,7 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
         MapCreator creator(content);
-        bool res = creator.createFile(plcConfig.getAppName());
+        bool res = creator.createFile(prDir + "/" + plcConfig.getAppName());
 
         bool isSysInfoVisible = ui->textBrowser->isVisible();
         if(!isSysInfoVisible) ui->textBrowser->setVisible(true);
@@ -641,6 +642,23 @@ MainWindow::MainWindow(QWidget *parent) :
             QTimer::singleShot(2000, this, [this](){buttonMin->click();});
             ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Файл " + plcConfig.getAppName() + ".xslx успешно создан");
         }else ui->textBrowser->append(QDateTime::currentDateTime().time().toString() + ": Ошибка записи файла карты памяти. Возможно файл открыт или нет прав на запись.");
+    });
+
+    cmdMenu->addAction(QIcon(":/images/list.png"),"Иниц. переменные",[this](){
+        auto *dialog = new DialogVarInitList(this);
+        auto parGroups = PLCVarContainer::getInstance().getParentGroups();
+        for(const QString &parGroup:parGroups) {
+            std::vector<QString> groups = PLCVarContainer::getInstance().getVarGroups(parGroup);
+            for(const QString &gr:groups) {
+                for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr,parGroup)) {
+                    if(var.getValueAsString()!="0") {
+                        dialog->addVar(var.getName(), var.getComment(), var.getValueAsString());
+                    }
+                }
+            }
+        }
+        dialog->exec();
+
     });
 
     ui->menubar->addMenu(cmdMenu);
@@ -997,6 +1015,7 @@ void MainWindow::openProjectByName(const QString &fName) {
     QFile file(fName);
     if(file.open(QIODevice::ReadOnly) ) {
         PLCVarContainer::getInstance().clearSysVarsComments();
+        PLCVarContainer::getInstance().clearInitValues();
         QDataStream in(&file);
         QString tmpStr;
         in >> tmpStr;
@@ -1296,6 +1315,7 @@ void MainWindow::searchResults(const std::vector<QString> &res)
 void MainWindow::plcChanged(const QString &plcName)
 {
     std::map<QString,QString> sysVarsComments = PLCVarContainer::getInstance().getSysVarsComments();
+    std::map<QString,QString> initValues = PLCVarContainer::getInstance().getInitValues();
 
     std::vector<QString> parGroups = PLCVarContainer::getInstance().getParentGroups();
 
@@ -1310,133 +1330,161 @@ void MainWindow::plcChanged(const QString &plcName)
     PLCParams::readParamsByPLCName(plcName);
     for(int i=0;i<PLCParams::diCnt;i++) {
         PLCVar divar("DI"+QString::number(i+1),"состояние","Дискретные входы");
-        if(sysVarsComments.find(divar.getName())!=sysVarsComments.end()) divar.setComment(sysVarsComments[divar.getName()]);
         divar.setReadable(true);
         divar.setValue(false);
         divar.setSystem(true);
+        if(sysVarsComments.find(divar.getName())!=sysVarsComments.end()) divar.setComment(sysVarsComments[divar.getName()]);
+        if(initValues.find(divar.getName())!=initValues.end()) divar.setValueAsString(initValues[divar.getName()]);
 
         PLCVarContainer::getInstance().addVar(divar);
     }
 
     for(int i=0;i<PLCParams::diCnt;i++) {
         PLCVar divarFault("DI"+QString::number(i+1)+"_FAULT","ошибка","Дискретные входы");
-        if(sysVarsComments.find(divarFault.getName())!=sysVarsComments.end()) divarFault.setComment(sysVarsComments[divarFault.getName()]);
         divarFault.setReadable(true);
         divarFault.setValue(false);
         divarFault.setSystem(true);
+        if(sysVarsComments.find(divarFault.getName())!=sysVarsComments.end()) divarFault.setComment(sysVarsComments[divarFault.getName()]);
+        if(initValues.find(divarFault.getName())!=initValues.end()) divarFault.setValueAsString(initValues[divarFault.getName()]);
 
         PLCVarContainer::getInstance().addVar(divarFault);
     }
 
     for(int i=0;i<PLCParams::diCnt;i++) {
         PLCVar divarBreak("DI"+QString::number(i+1)+"_BREAK","обрыв","Дискретные входы");
-        if(sysVarsComments.find(divarBreak.getName())!=sysVarsComments.end()) divarBreak.setComment(sysVarsComments[divarBreak.getName()]);
         divarBreak.setReadable(true);
         divarBreak.setValue(false);
         divarBreak.setSystem(true);
+        if(sysVarsComments.find(divarBreak.getName())!=sysVarsComments.end()) divarBreak.setComment(sysVarsComments[divarBreak.getName()]);
+        if(initValues.find(divarBreak.getName())!=initValues.end()) divarBreak.setValueAsString(initValues[divarBreak.getName()]);
+
         PLCVarContainer::getInstance().addVar(divarBreak);
     }
 
     for(int i=0;i<PLCParams::diCnt;i++) {
         PLCVar divarShort("DI"+QString::number(i+1)+"_SHORT","кор. замыкание","Дискретные входы");
-        if(sysVarsComments.find(divarShort.getName())!=sysVarsComments.end()) divarShort.setComment(sysVarsComments[divarShort.getName()]);
         divarShort.setReadable(true);
         divarShort.setValue(false);
         divarShort.setSystem(true);
+        if(sysVarsComments.find(divarShort.getName())!=sysVarsComments.end()) divarShort.setComment(sysVarsComments[divarShort.getName()]);
+        if(initValues.find(divarShort.getName())!=initValues.end()) divarShort.setValueAsString(initValues[divarShort.getName()]);
+
         PLCVarContainer::getInstance().addVar(divarShort);
     }
 
     for(int i=0;i<PLCParams::doCnt;i++) {
         PLCVar dovar("DO"+QString::number(i+1),"Дискретные выходы");
-        if(sysVarsComments.find(dovar.getName())!=sysVarsComments.end()) dovar.setComment(sysVarsComments[dovar.getName()]);
         dovar.setReadable(true);
         dovar.setWriteable(true);
         dovar.setValue(false);
         dovar.setSystem(true);
+        if(sysVarsComments.find(dovar.getName())!=sysVarsComments.end()) dovar.setComment(sysVarsComments[dovar.getName()]);
+        if(initValues.find(dovar.getName())!=initValues.end()) {
+            dovar.setValueAsString(initValues[dovar.getName()]);
+        }
+
         PLCVarContainer::getInstance().addVar(dovar);
     }
 
     for(int i=0;i<PLCParams::aiCnt;i++) {
         PLCVar aivar("AI"+QString::number(i+1),"состояние","Аналоговые входы");
-        if(sysVarsComments.find(aivar.getName())!=sysVarsComments.end()) aivar.setComment(sysVarsComments[aivar.getName()]);
         aivar.setReadable(true);
         aivar.setValue(static_cast<unsigned short>(0));
         aivar.setSystem(true);
+        if(sysVarsComments.find(aivar.getName())!=sysVarsComments.end()) aivar.setComment(sysVarsComments[aivar.getName()]);
+        if(initValues.find(aivar.getName())!=initValues.end()) aivar.setValueAsString(initValues[aivar.getName()]);
+
         PLCVarContainer::getInstance().addVar(aivar);
     }
 
     if(plcName!="MKU") {
         for(int i=0;i<PLCParams::aiCnt;i++) {
             PLCVar aivarRaw("AI"+QString::number(i+1)+"_RAW","необраб","Аналоговые входы");
-            if(sysVarsComments.find(aivarRaw.getName())!=sysVarsComments.end()) aivarRaw.setComment(sysVarsComments[aivarRaw.getName()]);
             aivarRaw.setReadable(true);
             aivarRaw.setValue(static_cast<unsigned short>(0));
             aivarRaw.setSystem(true);
+            if(sysVarsComments.find(aivarRaw.getName())!=sysVarsComments.end()) aivarRaw.setComment(sysVarsComments[aivarRaw.getName()]);
+            if(initValues.find(aivarRaw.getName())!=initValues.end()) aivarRaw.setValueAsString(initValues[aivarRaw.getName()]);
+
             PLCVarContainer::getInstance().addVar(aivarRaw);
         }
 
         for(int i=0;i<PLCParams::aiCnt;i++) {
             PLCVar aivarUnder("AI"+QString::number(i+1)+"_UNDER","ниже порога","Аналоговые входы");
-            if(sysVarsComments.find(aivarUnder.getName())!=sysVarsComments.end()) aivarUnder.setComment(sysVarsComments[aivarUnder.getName()]);
             aivarUnder.setReadable(true);
             aivarUnder.setValue(static_cast<unsigned short>(0));
             aivarUnder.setSystem(true);
+            if(sysVarsComments.find(aivarUnder.getName())!=sysVarsComments.end()) aivarUnder.setComment(sysVarsComments[aivarUnder.getName()]);
+            if(initValues.find(aivarUnder.getName())!=initValues.end()) aivarUnder.setValueAsString(initValues[aivarUnder.getName()]);
+
             PLCVarContainer::getInstance().addVar(aivarUnder);
         }
         for(int i=0;i<PLCParams::aiCnt;i++) {
             PLCVar aivarOver("AI"+QString::number(i+1)+"_OVER","выше порога","Аналоговые входы");
-            if(sysVarsComments.find(aivarOver.getName())!=sysVarsComments.end()) aivarOver.setComment(sysVarsComments[aivarOver.getName()]);
             aivarOver.setReadable(true);
             aivarOver.setValue(static_cast<unsigned short>(0));
             aivarOver.setSystem(true);
+            if(sysVarsComments.find(aivarOver.getName())!=sysVarsComments.end()) aivarOver.setComment(sysVarsComments[aivarOver.getName()]);
+            if(initValues.find(aivarOver.getName())!=initValues.end()) aivarOver.setValueAsString(initValues[aivarOver.getName()]);
+
             PLCVarContainer::getInstance().addVar(aivarOver);
         }
         for(int i=0;i<PLCParams::aiCnt;i++) {
             PLCVar aivarAlarm("AI"+QString::number(i+1)+"_ALARM","авария","Аналоговые входы");
-            if(sysVarsComments.find(aivarAlarm.getName())!=sysVarsComments.end()) aivarAlarm.setComment(sysVarsComments[aivarAlarm.getName()]);
             aivarAlarm.setReadable(true);
             aivarAlarm.setValue(static_cast<unsigned short>(0));
             aivarAlarm.setSystem(true);
+            if(sysVarsComments.find(aivarAlarm.getName())!=sysVarsComments.end()) aivarAlarm.setComment(sysVarsComments[aivarAlarm.getName()]);
+            if(initValues.find(aivarAlarm.getName())!=initValues.end()) aivarAlarm.setValueAsString(initValues[aivarAlarm.getName()]);
+
             PLCVarContainer::getInstance().addVar(aivarAlarm);
         }
     }
 
     for(int i=0;i<PLCParams::tmrms_cnt;i++) {
         PLCVar tmrvar("TMRms"+QString::number(i+1),"мс","Таймеры");
-        if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
         tmrvar.setReadable(true);
         tmrvar.setWriteable(true);
         tmrvar.setValue(static_cast<unsigned short>(0));
         tmrvar.setSystem(true);
+        if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
+        if(initValues.find(tmrvar.getName())!=initValues.end()) tmrvar.setValueAsString(initValues[tmrvar.getName()]);
+
         PLCVarContainer::getInstance().addVar(tmrvar);
     }
     for(int i=0;i<PLCParams::tmrs_cnt;i++) {
         PLCVar tmrvar("TMRs"+QString::number(i+1),"сек","Таймеры");
-        if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
         tmrvar.setReadable(true);
         tmrvar.setWriteable(true);
         tmrvar.setValue(static_cast<unsigned short>(0));
         tmrvar.setSystem(true);
+        if(sysVarsComments.find(tmrvar.getName())!=sysVarsComments.end()) tmrvar.setComment(sysVarsComments[tmrvar.getName()]);
+        if(initValues.find(tmrvar.getName())!=initValues.end()) tmrvar.setValueAsString(initValues[tmrvar.getName()]);
+
         PLCVarContainer::getInstance().addVar(tmrvar);
     }
 
     for(int i=0;i<PLCParams::ibit_cnt;i++) {
         PLCVar bitVar("IB" + QString::number(i+1), "Биты");
-        if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
         bitVar.setReadable(true);
         bitVar.setWriteable(true);
         bitVar.setValue(false);
         bitVar.setSystem(true);
+        if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+        if(initValues.find(bitVar.getName())!=initValues.end()) bitVar.setValueAsString(initValues[bitVar.getName()]);
+
         PLCVarContainer::getInstance().addVar(bitVar);
     }
 
     for(int i=0;i<PLCParams::ireg_cnt;i++) {
         PLCVar regVar("IR" + QString::number(i+1), "Регистры");
-        if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
         regVar.setReadable(true);
         regVar.setWriteable(true);
         regVar.setValue(static_cast<unsigned short>(0));
         regVar.setSystem(true);
+        if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+        if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
         PLCVarContainer::getInstance().addVar(regVar);
     }
 
@@ -1444,65 +1492,77 @@ void MainWindow::plcChanged(const QString &plcName)
         for(int node=0;node<8;node++) {
             for(int i=0;i<28;i++) {
                 PLCVar bitVar("CLBIT" + QString::number(node*28+i+17), "NODE"+QString::number(node),"Биты кластера");
-                if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
                 bitVar.setReadable(true);
                 bitVar.setWriteable(true);
                 bitVar.setValue(false);
                 bitVar.setSystem(true);
+                if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+                if(initValues.find(bitVar.getName())!=initValues.end()) bitVar.setValueAsString(initValues[bitVar.getName()]);
+
                 PLCVarContainer::getInstance().addVar(bitVar);
             }
         }
 
         for(int i=0;i<64;i++) {
             PLCVar regVar("CLREG" + QString::number(i+17), "Регистры кластера");
-            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
             regVar.setReadable(true);
             regVar.setWriteable(true);
             regVar.setValue(static_cast<unsigned short>(0));
             regVar.setSystem(true);
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(regVar);
         }
 
         for(int i=0;i<16;i++) {
             PLCVar bitVar("NBIT" + QString::number(i+241), "TX","Сетевые биты");
-            if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
             bitVar.setReadable(true);
             bitVar.setWriteable(true);
             bitVar.setValue(false);
             bitVar.setSystem(true);
+            if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+            if(initValues.find(bitVar.getName())!=initValues.end()) bitVar.setValueAsString(initValues[bitVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(bitVar);
         }
 
         for(int clust=0;clust<8;clust++) {
             for(int i=0;i<16;i++) {
                 PLCVar bitVar("NBIT" + QString::number(clust*16+i+257), "CLUSTER"+QString::number(clust),"Сетевые биты");
-                if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
                 bitVar.setReadable(true);
                 bitVar.setWriteable(false);
                 bitVar.setValue(false);
                 bitVar.setSystem(true);
+                if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+                if(initValues.find(bitVar.getName())!=initValues.end()) bitVar.setValueAsString(initValues[bitVar.getName()]);
+
                 PLCVarContainer::getInstance().addVar(bitVar);
             }
         }
 
         for(int i=0;i<16;i++) {
             PLCVar regVar("NREG" + QString::number(i+81), "TX","Сетевые регистры");
-            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
             regVar.setReadable(true);
             regVar.setWriteable(true);
             regVar.setValue(static_cast<unsigned short>(0));
             regVar.setSystem(true);
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(regVar);
         }
 
         for(int clust=0;clust<8;clust++) {
             for(int i=0;i<16;i++) {
                 PLCVar regVar("NREG" + QString::number(clust*16+i+97), "CLUSTER"+QString::number(clust),"Сетевые регистры");
-                if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
                 regVar.setReadable(true);
                 regVar.setWriteable(false);
                 regVar.setValue(static_cast<unsigned short>(0));
                 regVar.setSystem(true);
+                if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+                if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
                 PLCVarContainer::getInstance().addVar(regVar);
             }
         }
@@ -1514,10 +1574,6 @@ void MainWindow::plcChanged(const QString &plcName)
                                         "Cluster 4 online","Cluster 5 online","Cluster 6 online","Cluster 7 online"};
         for(std::size_t i=0;i<23;i++) {
             PLCVar regVar("SS" + QString::number(i+1), "Системные переменные");
-            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
-            else {
-                if(i<comments.size()) regVar.setComment(comments.at(i));
-            }
             regVar.setReadable(true);
             regVar.setWriteable(false);
             if(i==10 || i==11) {
@@ -1526,6 +1582,12 @@ void MainWindow::plcChanged(const QString &plcName)
                 regVar.setValue(static_cast<unsigned short>(0));
             }
             regVar.setSystem(true);
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            else {
+                if(i<comments.size()) regVar.setComment(comments.at(i));
+            }
+            if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(regVar);
         }
     }
@@ -1533,21 +1595,25 @@ void MainWindow::plcChanged(const QString &plcName)
     if(plcName!="MKU") {
         for(int i=0;i<16;i++) {
             PLCVar bitVar("SC_BIT" + QString::number(i+1), "Биты","Скада");
-            if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
             bitVar.setReadable(true);
             bitVar.setWriteable(true);
             bitVar.setValue(false);
             bitVar.setSystem(true);
+            if(sysVarsComments.find(bitVar.getName())!=sysVarsComments.end()) bitVar.setComment(sysVarsComments[bitVar.getName()]);
+            if(initValues.find(bitVar.getName())!=initValues.end()) bitVar.setValueAsString(initValues[bitVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(bitVar);
         }
 
         for(int i=0;i<16;i++) {
             PLCVar regVar("SC_REG" + QString::number(i+1), "Регистры","Скада");
-            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
             regVar.setReadable(true);
             regVar.setWriteable(true);
             regVar.setValue(static_cast<unsigned short>(0));
             regVar.setSystem(true);
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(regVar);
         }
     }
@@ -1555,21 +1621,25 @@ void MainWindow::plcChanged(const QString &plcName)
     if(PLCUtils::isPLCSupportModbusMaster(plcName)) {
         for(int i=0;i<64;i++) {
             PLCVar regVar("MODB" + QString::number(i+1), "регистры", "Modbus master");
-            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
             regVar.setReadable(true);
             regVar.setWriteable(true);
             regVar.setValue(static_cast<unsigned short>(0));
             regVar.setSystem(true);
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(regVar);
         }
 
         for(int i=1;i<=254;i++) {
             PLCVar regVar("MODB_ERR" + QString::number(i), "ошибки", "Modbus master");
-            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
             regVar.setReadable(true);
             regVar.setWriteable(false);
             regVar.setValue(static_cast<unsigned short>(0));
             regVar.setSystem(true);
+            if(sysVarsComments.find(regVar.getName())!=sysVarsComments.end()) regVar.setComment(sysVarsComments[regVar.getName()]);
+            if(initValues.find(regVar.getName())!=initValues.end()) regVar.setValueAsString(initValues[regVar.getName()]);
+
             PLCVarContainer::getInstance().addVar(regVar);
         }
     }
@@ -1579,6 +1649,9 @@ void MainWindow::plcChanged(const QString &plcName)
     workTimeVar.setWriteable(true);
     workTimeVar.setValue(static_cast<unsigned short>(0));
     workTimeVar.setSystem(true);
+    if(sysVarsComments.find(workTimeVar.getName())!=sysVarsComments.end()) workTimeVar.setComment(sysVarsComments[workTimeVar.getName()]);
+    if(initValues.find(workTimeVar.getName())!=initValues.end()) workTimeVar.setValueAsString(initValues[workTimeVar.getName()]);
+
     PLCVarContainer::getInstance().addVar(workTimeVar);
 
     if(PLCUtils::isPLCSupportEth(plcName)) {

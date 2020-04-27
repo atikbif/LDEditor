@@ -22,6 +22,16 @@ DialogEditNotSystemVar::~DialogEditNotSystemVar()
     delete ui;
 }
 
+QString DialogEditNotSystemVar::getInitValue() const
+{
+    return ui->lineEditInitValue->text();
+}
+
+void DialogEditNotSystemVar::setInitValue(const QString &value) const
+{
+    ui->lineEditInitValue->setText(value);
+}
+
 void DialogEditNotSystemVar::on_lineEditVarName_textChanged(const QString &arg1)
 {
     if(arg1.contains(QRegExp("[А-Яа-я]"))) {

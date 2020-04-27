@@ -4,6 +4,7 @@
 #include <QString>
 #include <variant>
 #include <vector>
+#include <QDebug>
 
 class PLCVar
 {
@@ -52,6 +53,43 @@ public:
     unsigned long getLongValue() const {if(auto pval = std::get_if<unsigned long>(&value)) return *pval;else return 0;}
     double getDoubleValue() const {if(auto pval = std::get_if<double>(&value)) return *pval;else return 0;}
     bool getBoolvalue() const {if(auto pval = std::get_if<bool>(&value)) return *pval;else return false;}
+    QString getValueAsString() const
+    {
+        QString res;
+        if(auto pval = std::get_if<unsigned short>(&value)) return QString::number(*pval);
+        if(auto pval = std::get_if<unsigned long>(&value)) return QString::number(*pval);
+        if(auto pval = std::get_if<double>(&value)) return QString::number(*pval);
+        if(auto pval = std::get_if<bool>(&value)) {
+            if(*pval) return "1";else return "0";
+        }
+        return QString();
+    }
+    bool setValueAsString(const QString &inp)
+    {
+        bool check = false;
+        if(std::holds_alternative<unsigned short>(value)) {
+            ushort v = inp.toUShort(&check);
+            if(check) value = v;
+        }else if(std::holds_alternative<unsigned long>(value)) {
+            ulong v = inp.toULong(&check);
+            if(check) value = v;
+        }else if(std::holds_alternative<double>(value)) {
+            double v = inp.toDouble(&check);
+            if(check) value = v;
+        }
+        else if(std::holds_alternative<QString>(value)) {
+            value = inp;
+        }else if(std::holds_alternative<bool>(value)) {
+             int v = inp.toInt(&check);
+             if(check) {
+                 if(v) value = true;else value=false;
+             }else {
+                 if(inp.toLower().contains("true")) {value = true;check=true;}
+                 else if(inp.toLower().contains("false")) {value = false;check=true;}
+             }
+        }
+        return check;
+    }
 };
 
 #endif // PLCVAR_H

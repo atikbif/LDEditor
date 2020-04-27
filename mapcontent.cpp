@@ -216,7 +216,6 @@ bool MapContent::addVar(const PLCVar &var)
             if(num>=minNum && num<=maxNum) {
                 ClusterGlobalBit bit;
                 bit.name = var.getComment();
-                qDebug() << "BIT" << bit.name;
                 bit.bitNum = num;
                 bit.nodeNum = 8; // FE Node num
                 bit.channelNum = num;
@@ -238,7 +237,7 @@ bool MapContent::addVar(const PLCVar &var)
                 reg.regNum = num;
                 reg.nodeNum = 8;
                 reg.channelNum = num-16;
-                reg.initialValue = 0;
+                reg.initialValue = var.getIntValue();
                 auto it = std::find(clustGlIntegers.begin(),clustGlIntegers.end(),reg);
                 if(it==clustGlIntegers.end()) {
                     addClusterGlobalInteger(reg);
@@ -252,7 +251,6 @@ bool MapContent::addVar(const PLCVar &var)
             const int txMinNum = 241;
             const int txMaxNum = 256;
             if(num>=txMinNum && num<=txMaxNum && clusterNum>=0 && clusterNum<=7) {
-                qDebug() << "TX" << num << num+16+clusterNum*16;
                 num+=16+clusterNum*16;
             }
             if(num>=minNum && num<=maxNum) {

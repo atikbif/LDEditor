@@ -102,6 +102,21 @@ void Compiler::makeProgFile(const std::vector<QString> &vars, const std::vector<
         for(const QString &var:vars) out << var + "\n";
         out << "\n";
 
+        out << "void init_vars() {\n";
+        auto parGroups = PLCVarContainer::getInstance().getParentGroups();
+        for(const QString &parGroup:parGroups) {
+            std::vector<QString> groups = PLCVarContainer::getInstance().getVarGroups(parGroup);
+            for(const QString &gr:groups) {
+                for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr,parGroup)) {
+                    if(var.getValueAsString()!="0" && !var.getValueAsString().isEmpty()) {
+                        out << "\t" << var.getName() << "=" << var.getValueAsString() << ";\n";
+                    }
+                }
+            }
+        }
+        out << "}\n";
+        out << "\n";
+
         out << "void inc_timers(){\n";
         for(const QString &s:funcBody) out << "\t" << s << "\n";
         out << "}\n";

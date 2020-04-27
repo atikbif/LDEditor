@@ -49,6 +49,7 @@ SOURCES += \
     Dialogs/dialogplcconfig.cpp \
     Dialogs/dialogsearchvar.cpp \
     Dialogs/dialogsensorconfig.cpp \
+    Dialogs/dialogvarinitlist.cpp \
     Elements/counterelement.cpp \
     Loader/ethconfigreader.cpp \
     Loader/ethconfigreaderthread.cpp \
@@ -140,6 +141,7 @@ HEADERS += \
     Dialogs/dialogplcconfig.h \
     Dialogs/dialogsearchvar.h \
     Dialogs/dialogsensorconfig.h \
+    Dialogs/dialogvarinitlist.h \
     Elements/counterelement.h \
     Loader/ethconfigreader.h \
     Loader/ethconfigreaderthread.h \
@@ -232,6 +234,7 @@ FORMS += \
     Dialogs/dialogplcconfig.ui \
     Dialogs/dialogsearchvar.ui \
     Dialogs/dialogsensorconfig.ui \
+    Dialogs/dialogvarinitlist.ui \
     Modbus/dialogaddmodbusvar.ui \
     Modbus/dialogconfigmodbuscanal.ui \
     Modbus/dialogeditmodbusvar.ui \

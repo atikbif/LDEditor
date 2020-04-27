@@ -90,5 +90,6 @@
         <file>images/update_names.png</file>
         <file>images/map.png</file>
         <file>images/appl_config.png</file>
+        <file>images/list.png</file>
     </qresource>
 </RCC>

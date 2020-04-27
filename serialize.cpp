@@ -159,7 +159,7 @@ static std::map<QString,std::function<LDElement*(const LDElementProperties&)>> l
 };
 
 void savePLCVarContainer(QDataStream &stream) {
-    stream << QString("Var container v2");
+    stream << QString("Var container v3");
     std::vector<QString> groups = PLCVarContainer::getInstance().getNotSystemVarGroups();
     auto groupCnt = static_cast<int>(groups.size());
     stream << groupCnt;
@@ -174,6 +174,7 @@ void savePLCVarContainer(QDataStream &stream) {
             stream << var.getName();
             stream << var.getComment();
             stream << var.getType();
+            stream << var.getValueAsString();
         }
     }
     stream << QString("system vars");
@@ -197,6 +198,7 @@ void savePLCVarContainer(QDataStream &stream) {
                 stream << QString("var");
                 stream << var.getName();
                 stream << var.getComment();
+                stream << var.getValueAsString();
             }
         }
     }
@@ -366,6 +368,96 @@ static void readPLCVarContainerV2(QDataStream &stream) {
     PLCVarContainer::getInstance().saveState();
 }
 
+static void readPLCVarContainerV3(QDataStream &stream) {
+    QString tmpStr;
+
+    int groupCnt = 0;
+    stream >> groupCnt;
+    for(int groupNum=0;groupNum<groupCnt;groupNum++) {
+        stream >> tmpStr;
+        if(tmpStr=="group") {
+
+            QString groupName;
+            stream >> groupName;
+            int varCnt = 0;
+            stream >> varCnt;
+            for(int i=0;i<varCnt;i++) {
+                stream >> tmpStr;
+                if(tmpStr=="var") {
+
+                    QString varName;
+                    QString varComment;
+                    QString varType;
+                    QString varValue;
+                    stream >> varName;
+                    stream >> varComment;
+                    stream >> varType;
+                    stream >> varValue;
+
+                    PLCVar v(varName,groupName);
+                    v.setComment(varComment);
+                    if(varType=="unsigned short") {v.setValue(static_cast<unsigned short>(0));}
+                    else if(varType=="unsigned long") {v.setValue(static_cast<unsigned long>(0));}
+                    else if(varType=="double") {v.setValue(0.0);}
+                    else if(varType=="bool") {v.setValue(false);}
+                    v.setReadable(true);
+                    v.setWriteable(true);
+                    v.setValueAsString(varValue);
+                    PLCVarContainer::getInstance().addVar(v);
+                }
+            }
+        }
+    }
+
+    // системные группы
+    QString codeword;
+    stream >> codeword;
+    if(codeword=="system vars") {
+        int parentGroupCnt;
+        stream >> parentGroupCnt;
+        for(int parGroupNum=0;parGroupNum<parentGroupCnt;parGroupNum++) {
+            stream >> tmpStr;
+            if(tmpStr=="parent group") {
+                QString parGroupName;
+                stream >> parGroupName;
+                stream >> groupCnt;
+                for(int groupNum=0;groupNum<groupCnt;groupNum++) {
+                    stream >> tmpStr;
+                    if(tmpStr=="group") {
+                        QString groupName;
+                        stream >> groupName;
+                        int varCnt = 0;
+                        stream >> varCnt;
+                        for(int i=0;i<varCnt;i++) {
+                            stream >> tmpStr;
+                            if(tmpStr=="var") {
+                                QString varName;
+                                QString varComment;
+                                QString varValue;
+                                stream >> varName;
+                                stream >> varComment;
+                                stream >> varValue;
+                                auto var = PLCVarContainer::getInstance().getVarByGroupAndName(groupName,varName,parGroupName);
+                                if(!var) {
+                                    var = PLCVarContainer::getInstance().getVarByName(varName);
+                                    if(var) {
+                                        PLCVarContainer::getInstance().updateComment(var->getGroup(),var->getName(),varComment,var->getParentGroup());
+                                        PLCVarContainer::getInstance().updateInitValue(var->getGroup(),var->getName(),varValue,var->getParentGroup());
+                                    }
+                                }else {
+                                    PLCVarContainer::getInstance().updateComment(groupName,varName,varComment,parGroupName);
+                                    PLCVarContainer::getInstance().updateInitValue(var->getGroup(),var->getName(),varValue,var->getParentGroup());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    PLCVarContainer::getInstance().saveState();
+}
+
 void readPLCVarContainer(QDataStream &stream) {
     QString tmpStr;
 
@@ -380,6 +472,8 @@ void readPLCVarContainer(QDataStream &stream) {
         readPLCVarContainerV1(stream);
     }else if(tmpStr=="Var container v2") {
         readPLCVarContainerV2(stream);
+    }else if(tmpStr=="Var container v3") {
+        readPLCVarContainerV3(stream);
     }
 }
 

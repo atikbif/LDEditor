@@ -17,6 +17,8 @@ public:
     explicit DialogEditSystemVar(const QString &varComment, QWidget *parent = nullptr);
     ~DialogEditSystemVar();
     QString getComment() const {return varComment;}
+    void setInitValue(const QString &value);
+    QString getInitValue() const;
 
 private slots:
     void on_lineEditComment_textChanged(const QString &arg1);

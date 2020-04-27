@@ -14,6 +14,16 @@ DialogEditSystemVar::~DialogEditSystemVar()
     delete ui;
 }
 
+void DialogEditSystemVar::setInitValue(const QString &value)
+{
+    ui->lineEditInitValue->setText(value);
+}
+
+QString DialogEditSystemVar::getInitValue() const
+{
+    return ui->lineEditInitValue->text();
+}
+
 void DialogEditSystemVar::on_lineEditComment_textChanged(const QString &arg1)
 {
     varComment=arg1;

@@ -41,7 +41,7 @@ void DialogVarConfig::drawVarTree(const QString &grName, const QString &varName,
 {
     std::vector<QTreeWidgetItem*> topLevelItems;
     ui->treeWidget->clear();
-    ui->treeWidget->setHeaderLabels({"имя","тип","комментарий"});
+    ui->treeWidget->setHeaderLabels({"сист. имя","тип","имя пользов.","нач.значение"});
     QTreeWidgetItem *curItem = nullptr;
     std::vector<QString> parGroups = PLCVarContainer::getInstance().getParentGroups();
     for(const QString &parGroup:parGroups) {
@@ -54,9 +54,9 @@ void DialogVarConfig::drawVarTree(const QString &grName, const QString &varName,
             QTreeWidgetItem *grItem = new QTreeWidgetItem(QStringList{gr});
 
             for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr,parGroup)) {
-                QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment()});
+                QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment(),var.getValueAsString()});
                 grItem->addChild(varItem);
-                if(grName==gr && varName==var.getName()) curItem = varItem;
+                if(grName==gr && varName==var.getName() && parGroup==var.getParentGroup()) curItem = varItem;
             }
             if(parGrItem) {
                 if(grItem->childCount()) parGrItem->addChild(grItem);
@@ -72,6 +72,7 @@ void DialogVarConfig::drawVarTree(const QString &grName, const QString &varName,
     ui->treeWidget->resizeColumnToContents(0);
     ui->treeWidget->resizeColumnToContents(1);
     ui->treeWidget->resizeColumnToContents(2);
+    ui->treeWidget->resizeColumnToContents(3);
     ui->treeWidget->setMinimumWidth(ui->treeWidget->columnWidth(0)+ui->treeWidget->columnWidth(1)+ui->treeWidget->columnWidth(2));
     if(curItem) {
         ui->treeWidget->setCurrentItem(curItem);
@@ -128,6 +129,7 @@ void DialogVarConfig::on_pushButtonEditVar_clicked()
             std::optional<PLCVar> var = PLCVarContainer::getInstance().getVarByGroupAndName(group,varName);
             if(var) {
                 DialogEditNotSystemVar *dialog = new DialogEditNotSystemVar(varName,var->getType(),var->getComment());
+                dialog->setInitValue(var->getValueAsString());
                 if(dialog->exec()==QDialog::Accepted) {
                     QString newVarName = dialog->getVarName();
                     PLCVar updVar(newVarName,group);
@@ -139,6 +141,7 @@ void DialogVarConfig::on_pushButtonEditVar_clicked()
                     else if(vType=="bool") updVar.setValue(false);
                     updVar.setReadable(true);
                     updVar.setWriteable(true);
+                    updVar.setValueAsString(dialog->getInitValue());
                     if(!varName.isEmpty()) {
                         PLCVarContainer::getInstance().deleteVar(group,varName);
                         PLCVarContainer::getInstance().addVar(updVar);
@@ -152,10 +155,11 @@ void DialogVarConfig::on_pushButtonEditVar_clicked()
             std::optional<PLCVar> var = PLCVarContainer::getInstance().getVarByGroupAndName(group,varName,parGroup);
             if(var) {
                 DialogEditSystemVar *dialog = new DialogEditSystemVar(var->getComment());
+                dialog->setInitValue(var->getValueAsString());
                 if(dialog->exec()==QDialog::Accepted) {
                     QString newComment = dialog->getComment();
                     PLCUtils::updateSystemVarComment(var->getName(),var->getGroup(),newComment,parGroup);
-
+                    PLCVarContainer::getInstance().updateInitValue(var->getGroup(),var->getName(),dialog->getInitValue(),parGroup);
                     drawVarTree(var->getGroup(),var->getName(),parGroup);
                 }
                 delete dialog;

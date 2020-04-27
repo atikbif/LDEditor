@@ -19,6 +19,8 @@ public:
     QString getVarName() const {return varName;}
     QString getVarType() const {return varType;}
     QString getVarComment() const {return varComment;}
+    QString getInitValue() const;
+    void setInitValue(const QString &value) const;
 
 private slots:
     void on_lineEditVarName_textChanged(const QString &arg1);

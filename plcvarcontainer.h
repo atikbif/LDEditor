@@ -11,15 +11,19 @@ class PLCVarContainer final
     static std::vector<PLCVar> vars;
     static std::vector<PLCVar> saveVars;
     static std::map<QString,QString> sysVarsComments;
+    static std::map<QString,QString> initValues;
 
 public:
 
     static PLCVarContainer& getInstance();
     void clearSysVarsComments();
     std::map<QString,QString> getSysVarsComments() const {return sysVarsComments;}
+    void clearInitValues();
+    std::map<QString,QString> getInitValues() const {return initValues;}
     void addVar(const PLCVar &var);
     void deleteVar(const QString &group, const QString &name, QString parentGroup="");
     void updateComment(const QString &group, const QString &name,const QString &comment, QString parentGroup="");
+    void updateInitValue(const QString &group, const QString &name,const QString &value, QString parentGroup="");
     void renameGroup(const QString &group, const QString &newName, QString parentGroup="");
     void delGroup(const QString &group, QString parentGroup="");
     std::vector<QString> getVarGroups(QString parentGroup="") const;

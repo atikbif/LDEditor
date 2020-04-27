@@ -25,12 +25,14 @@ DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *par
 
         std::optional<PLCVar> cVar = PLCVarContainer::getInstance().getVarByGroupAndName(el->connectedVar.group,el->connectedVar.name,el->connectedVar.parentGroup);
         if(cVar) {
-            ui->lineEditVarName->setText(grName + ": " + varName);
+            if(parGrName.isEmpty()) ui->lineEditVarName->setText(grName + ": " + varName);
+            else ui->lineEditVarName->setText(parGrName + ": " + grName + ": " + varName);
+            ui->lineEditInitValue->setText(cVar->getValueAsString());
         }
         QTreeWidgetItem *curItem = nullptr;
         std::vector<QTreeWidgetItem*> topLevelItems;
         ui->treeWidget->clear();
-        ui->treeWidget->setHeaderLabels({"имя","тип","комментарий"});
+        ui->treeWidget->setHeaderLabels({"сист. имя","тип","имя пользов.","нач.значение"});
         std::vector<QString> parGroups = PLCVarContainer::getInstance().getParentGroups();
         QTreeWidgetItem *parGrItem = nullptr;
         for(const QString &parGroup:parGroups) {
@@ -41,7 +43,7 @@ DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *par
                     QTreeWidgetItem *grItem = new QTreeWidgetItem(QStringList{gr});
 
                     for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr,parGroup)) {
-                        QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment()});
+                        QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment(),var.getValueAsString()});
                         bool blockVar = false;
                         if(el->isOnlyRead() && !var.isReadable()) blockVar = true;
                         if(el->isOnlyWrite() && !var.isWriteable()) blockVar = true;
@@ -94,6 +96,7 @@ void DialogLDElementProperties::on_treeWidget_itemClicked(QTreeWidgetItem *item,
         if(item->parent()->parent()) parGrName = item->parent()->parent()->text(0);
         if(parGrName.isEmpty()) ui->lineEditVarName->setText(grName + ": " + varName);
         else ui->lineEditVarName->setText(parGrName + ": " + grName + ": " + varName);
+        ui->lineEditInitValue->setText(item->text(3));
 
         if(!comment.isEmpty()) ui->lineEditName->setText(comment);
         //el->connectedVar.group = grName;
@@ -112,6 +115,7 @@ void DialogLDElementProperties::on_buttonBox_accepted()
         if(v) {
             if(v->isSystem()) PLCUtils::updateSystemVarComment(varName,grName,ui->lineEditName->text(),parGrName);
             else PLCVarContainer::getInstance().updateComment(grName,varName,ui->lineEditName->text(),parGrName);
+            PLCVarContainer::getInstance().updateInitValue(grName,varName,ui->lineEditInitValue->text(),parGrName);
         }
         el->setName(ui->lineEditName->text());
         el->setComment(ui->lineEditComment->text());

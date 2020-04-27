@@ -102,7 +102,6 @@ QString PLCUtils::getDOName(int doNum)
 
 void PLCUtils::updateSystemVarComment(const QString &vName, const QString &vGroup, const QString &vComment, const QString &parentGroup)
 {
-    qDebug() << "VAR Update" << parentGroup << vGroup << vName << vComment;
     PLCVarContainer::getInstance().updateComment(vGroup, vName, vComment, parentGroup);
     QRegExp aiExp("AI\\d+");
     if(parentGroup=="Аналоговые входы" && vGroup=="состояние" && aiExp.exactMatch(vName)) {

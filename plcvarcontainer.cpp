@@ -5,7 +5,7 @@
 std::vector<PLCVar> PLCVarContainer::vars;
 std::vector<PLCVar> PLCVarContainer::saveVars;
 std::map<QString,QString> PLCVarContainer::sysVarsComments;
-
+std::map<QString,QString> PLCVarContainer::initValues;
 
 PLCVarContainer &PLCVarContainer::getInstance()
 {
@@ -18,10 +18,16 @@ void PLCVarContainer::clearSysVarsComments()
     sysVarsComments.clear();
 }
 
+void PLCVarContainer::clearInitValues()
+{
+    initValues.clear();
+}
+
 void PLCVarContainer::addVar(const PLCVar &var)
 {
     vars.push_back(var);
     if(var.isSystem()) sysVarsComments[var.getName()] = var.getComment();
+    initValues[var.getName()] = var.getValueAsString();
 }
 
 void PLCVarContainer::deleteVar(const QString &group, const QString &name, QString parentGroup)
@@ -47,6 +53,17 @@ void PLCVarContainer::updateComment(const QString &group, const QString &name, c
         }
         it->setComment(comment);
         //qDebug() << "UPDATE OK";
+    }
+}
+
+void PLCVarContainer::updateInitValue(const QString &group, const QString &name, const QString &value, QString parentGroup)
+{
+    auto it = std::find_if(vars.begin(),vars.end(),[group,name,parentGroup](const PLCVar &var){
+        return (var.getName()==name && var.getGroup()==group && var.getParentGroup()==parentGroup);
+    });
+    if(it!=vars.end()) {
+        it->setValueAsString(value);
+        initValues[it->getName()] = it->getValueAsString();
     }
 }
 
