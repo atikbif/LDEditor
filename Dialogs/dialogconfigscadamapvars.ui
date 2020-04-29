@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogConfigScadaMapVars</class>
+ <widget class="QDialog" name="DialogConfigScadaMapVars">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1142</width>
+    <height>468</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Настройка карты телеметрии</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab_1">
+      <attribute name="title">
+       <string>Дискр. входы</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetDI">
+         <property name="textElideMode">
+          <enum>Qt::ElideLeft</enum>
+         </property>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>FALSE метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>TRUE метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Дискр. вых</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetDO">
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Аналог. входы</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetAI">
+         <property name="alternatingRowColors">
+          <bool>false</bool>
+         </property>
+         <attribute name="horizontalHeaderCascadingSectionResizes">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Тип</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Класт. биты</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetClustBits">
+         <column>
+          <property name="text">
+           <string>Узел</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>FALSE метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>TRUE метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Класт. регистры</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetClustRegs">
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Нач. значение</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_6">
+      <attribute name="title">
+       <string>Сетевые биты</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetNetBits">
+         <column>
+          <property name="text">
+           <string>Группа</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>FALSE метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>TRUE метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_7">
+      <attribute name="title">
+       <string>Сетевые регистры</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetNetRegs">
+         <column>
+          <property name="text">
+           <string>Кластер</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Нач. значение</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_8">
+      <attribute name="title">
+       <string>Телеметрия биты</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_9">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetTelemBits">
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_9">
+      <attribute name="title">
+       <string>Телеметрия регистры</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_10">
+       <item row="0" column="0">
+        <widget class="QTableWidget" name="tableWidgetTelemRegs">
+         <column>
+          <property name="text">
+           <string>Имя</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Метка</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Нач. значение</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Скада</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>DialogConfigScadaMapVars</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>DialogConfigScadaMapVars</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

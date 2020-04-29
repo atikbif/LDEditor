@@ -17,12 +17,15 @@ DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *par
     varName = el->connectedVar.name;
     parGrName = el->connectedVar.parentGroup;
 
+
+
     ui->lineEditComment->setText(el->getComment());
     if(!el->isNeedConnect()) {
         ui->groupBoxVarConnect->setVisible(false);
         setFixedHeight(minimumSizeHint().height());
     }else {
-
+        bool bool_flag = el->getType().contains(" contact");
+        bool analog_flag = el->getType()=="variable";
         std::optional<PLCVar> cVar = PLCVarContainer::getInstance().getVarByGroupAndName(el->connectedVar.group,el->connectedVar.name,el->connectedVar.parentGroup);
         if(cVar) {
             if(parGrName.isEmpty()) ui->lineEditVarName->setText(grName + ": " + varName);
@@ -45,6 +48,8 @@ DialogLDElementProperties::DialogLDElementProperties(LDElement *el, QWidget *par
                     for(const auto & var:PLCVarContainer::getInstance().getVarsByGroup(gr,parGroup)) {
                         QTreeWidgetItem *varItem = new QTreeWidgetItem(QStringList{var.getName(),var.getType(),var.getComment(),var.getValueAsString()});
                         bool blockVar = false;
+                        if(bool_flag && var.getType()!="bool") blockVar = true;
+                        if(analog_flag && var.getType()=="bool") blockVar = true;
                         if(el->isOnlyRead() && !var.isReadable()) blockVar = true;
                         if(el->isOnlyWrite() && !var.isWriteable()) blockVar = true;
                         if(!blockVar) {

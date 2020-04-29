@@ -42,6 +42,7 @@ include(./QXlsx/QXlsx.pri)
 SOURCES += \
     Dialogs/dialogadcconfig.cpp \
     Dialogs/dialogapplicationconfig.cpp \
+    Dialogs/dialogconfigscadamapvars.cpp \
     Dialogs/dialogcycleconfig.cpp \
     Dialogs/dialogdiconfig.cpp \
     Dialogs/dialogdoconfig.cpp \
@@ -134,6 +135,7 @@ SOURCES += \
 HEADERS += \
     Dialogs/dialogadcconfig.h \
     Dialogs/dialogapplicationconfig.h \
+    Dialogs/dialogconfigscadamapvars.h \
     Dialogs/dialogcycleconfig.h \
     Dialogs/dialogdiconfig.h \
     Dialogs/dialogdoconfig.h \
@@ -227,6 +229,7 @@ HEADERS += \
 FORMS += \
     Dialogs/dialogadcconfig.ui \
     Dialogs/dialogapplicationconfig.ui \
+    Dialogs/dialogconfigscadamapvars.ui \
     Dialogs/dialogcycleconfig.ui \
     Dialogs/dialogdiconfig.ui \
     Dialogs/dialogdoconfig.ui \

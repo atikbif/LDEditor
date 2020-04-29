@@ -83,6 +83,7 @@
 #include <QDateTime>
 #include <dialogapplicationconfig.h>
 #include "dialogvarinitlist.h"
+#include "dialogconfigscadamapvars.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -551,6 +552,12 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     createMapAction = cmdMenu->addAction(QIcon(":/images/map.png"),"Создать карту памяти",[this](){
+
+        auto *dialog = new DialogConfigScadaMapVars(plcConfig, this);
+        if(dialog->exec()==QDialog::Accepted) {
+
+        }
+
         MapContent content;
         content.setAppName(plcConfig.getAppName());
         content.setClusterNum(plcConfig.getClusterNum());
