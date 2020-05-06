@@ -12,6 +12,7 @@ class PLCConfig
     std::vector<int> sensor_type;
     std::vector<AINSensor> adcSensors;
     QByteArray settings;
+    QByteArray scadaMap;
     QString name;
     quint16 appCN=0;
     quint16 appCRC = 0;
@@ -56,6 +57,9 @@ public:
     void setAppTime(const QString &value);
     quint16 getAppCRC() const;
     void setAppCRC(const quint16 &value);
+    void clearScadaMap();
+    QByteArray getScadaMap() const;
+    void setScadaMap(const QByteArray &value);
 };
 
 #endif // PLCCONFIG_H

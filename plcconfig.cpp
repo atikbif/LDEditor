@@ -64,6 +64,21 @@ void PLCConfig::setAppCRC(const quint16 &value)
     appCRC = value;
 }
 
+void PLCConfig::clearScadaMap()
+{
+    scadaMap.clear();
+}
+
+QByteArray PLCConfig::getScadaMap() const
+{
+    return scadaMap;
+}
+
+void PLCConfig::setScadaMap(const QByteArray &value)
+{
+    scadaMap = value;
+}
+
 PLCConfig::PLCConfig(const QString &name, int input_cnt, int ai_cnt):name(name)
 {
     for(int i=0;i<input_cnt;i++) input_type.push_back(false);
@@ -118,7 +133,8 @@ QByteArray PLCConfig::toBytes() const
 {
     QByteArray result;
     QDataStream out(&result,QIODevice::WriteOnly);
-    int version = 4;
+    out.setVersion(QDataStream::Qt_5_13);
+    int version = 5;
     out << version;
     out << name;
     out << appName;
@@ -141,6 +157,7 @@ QByteArray PLCConfig::toBytes() const
         out << sensor.getSensorType();
     }
     out << settings;
+    out << scadaMap;
     return result;
 }
 
@@ -199,6 +216,7 @@ int PLCConfig::getSensorTypeCode(int adcNum) const
 void PLCConfig::fromBytes(QByteArray &value)
 {
     QDataStream in(&value,QIODevice::ReadOnly);
+    in.setVersion(QDataStream::Qt_5_13);
     int version = 0;
     in >> version;
     in >> name;
@@ -236,6 +254,7 @@ void PLCConfig::fromBytes(QByteArray &value)
     }
     settings.clear();
     adcSensors.clear();
+    scadaMap.clear();
     if(version>=3) {
         int cnt = 0;
         in >> cnt;
@@ -261,6 +280,9 @@ void PLCConfig::fromBytes(QByteArray &value)
     }
     if(version>=2) {
         in >> settings;
+    }
+    if(version>=5) {
+        in >> scadaMap;
     }
 }
 

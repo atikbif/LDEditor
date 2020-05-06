@@ -49,7 +49,6 @@ void PLCVarContainer::updateComment(const QString &group, const QString &name, c
     if(it!=vars.end()) {
         if(it->isSystem()) {
             sysVarsComments[it->getName()] = comment;
-            qDebug() << "SYS COMMENTS UPDATE" << it->getName() << comment;
         }
         it->setComment(comment);
         //qDebug() << "UPDATE OK";

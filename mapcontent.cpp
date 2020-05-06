@@ -197,7 +197,7 @@ MapContent::MapContent()
 
 }
 
-bool MapContent::addVar(const PLCVar &var)
+bool MapContent::addVar(const PLCVar &var, const std::map<QString, QString> properties)
 {
     QString name = var.getName();
     if(var.isSystem() && !name.isEmpty()) {
@@ -219,8 +219,10 @@ bool MapContent::addVar(const PLCVar &var)
                 bit.bitNum = num;
                 bit.nodeNum = 8; // FE Node num
                 bit.channelNum = num;
-                bit.trueName = "ON";
-                bit.falseName = "OFF";
+                if(properties.find("TRUE")!=properties.cend()) bit.trueName = properties.at("TRUE");
+                else bit.trueName = "ON";
+                if(properties.find("FALSE")!=properties.cend()) bit.falseName = properties.at("FALSE");
+                else bit.falseName = "OFF";
                 auto it = std::find(clustGlBits.begin(),clustGlBits.end(),bit);
                 if(it==clustGlBits.end()) {
                     addClusterGlobalBit(bit);
@@ -259,8 +261,10 @@ bool MapContent::addVar(const PLCVar &var)
                 bit.bitNum = num;
                 bit.nodeNum = 9;
                 bit.channelNum = num-txMinNum+1;
-                bit.trueName = "ON";
-                bit.falseName = "OFF";
+                if(properties.find("TRUE")!=properties.cend()) bit.trueName = properties.at("TRUE");
+                else bit.trueName = "ON";
+                if(properties.find("FALSE")!=properties.cend()) bit.falseName = properties.at("FALSE");
+                else bit.falseName = "OFF";
                 bit.clusterNum = (num-minNum)/16;
                 auto it = std::find(netGlBits.begin(),netGlBits.end(),bit);
                 if(it==netGlBits.end()) {
@@ -336,8 +340,10 @@ bool MapContent::addVar(const PLCVar &var)
                 inp.inputNum = num;
                 inp.nodeNum = nodeNum;
                 inp.channelNum = num;
-                inp.trueName = "CLOSED";
-                inp.falseName = "OPEN";
+                if(properties.find("TRUE")!=properties.cend()) inp.trueName = properties.at("TRUE");
+                else inp.trueName = "CLOSED";
+                if(properties.find("FALSE")!=properties.cend()) inp.falseName = properties.at("FALSE");
+                else inp.falseName = "OPEN";
 
                 auto it = std::find(digInputs.begin(),digInputs.end(),inp);
                 if(it==digInputs.end()) {

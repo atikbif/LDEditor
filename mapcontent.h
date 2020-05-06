@@ -4,6 +4,8 @@
 #include <QString>
 #include <vector>
 #include <plcvar.h>
+#include <map>
+#include <QDataStream>
 
 class MapContent
 {
@@ -24,6 +26,13 @@ public:
                 return this->bitNum < bit.bitNum;
             }
             return false;
+        }
+        QByteArray toBytes() const {
+            QByteArray res;
+            QDataStream out(&res, QIODevice::WriteOnly);
+            out.setVersion(QDataStream::Qt_5_13);
+
+            return res;
         }
     };
 
@@ -195,7 +204,7 @@ private:
     std::vector<DigitalOutput> digOuts;
 public:
     MapContent();
-    bool addVar(const PLCVar &var);
+    bool addVar(const PLCVar &var, const std::map<QString,QString> properties={});
     QString getAppName() const;
     void setAppName(const QString &value);
     QString getAppVersion() const;
@@ -235,5 +244,6 @@ public:
     QString getAppTime() const;
     void setAppTime(const QString &value);
 };
+
 
 #endif // MAPCONTENT_H
